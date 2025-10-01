@@ -38,7 +38,7 @@ jobs:
           cd $DOCKER_FOLDER && docker build . --file Dockerfile -t $TAG --build-arg "NODE_ENV=${{ inputs.environment }}"
 
     - name: Run docker compose
-      uses: isbang/compose-action@v2.3.0
+      uses: isbang/compose-action@v2.4.0
       with:
         compose-file: "${{ inputs.docker_folder }}/docker-compose.yaml"
 
