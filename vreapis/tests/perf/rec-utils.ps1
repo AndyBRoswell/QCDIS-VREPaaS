@@ -228,7 +228,7 @@ $loop_body = {
         $cooked_entry | Export-Csv -Append $cooked_log_file
     }
 
-    Start-Sleep($interval)
+#    Start-Sleep($interval)
 }
 
 # main
