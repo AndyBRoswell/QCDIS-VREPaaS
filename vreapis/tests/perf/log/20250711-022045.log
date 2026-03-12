@@ -1,0 +1,697 @@
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6599
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.055   0.002   1.013 
+Execution duration of function extract :
+   user  system elapsed 
+  0.054   0.002   0.056 
+Execution duration of function extract :
+   user  system elapsed 
+  0.011   0.000   0.010 
+Execution duration of function parse :
+   user  system elapsed 
+  0.025   0.002   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.035   0.002   1.762 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.001   1.307 
+Execution duration of function create :
+   user  system elapsed 
+  0.015   0.004   5.733 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.268 
+Execution duration of function create :
+   user  system elapsed 
+  0.028   0.001   5.296 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.426 
+Execution duration of function create :
+   user  system elapsed 
+  0.028   0.002   5.382 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.001   1.382 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.004   5.364 
+Execution duration of function extract :
+   user  system elapsed 
+  0.028   0.000   1.272 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.002   5.298 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.298 
+Execution duration of function create :
+   user  system elapsed 
+  0.028   0.002   5.340 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.000   1.363 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.197 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.385 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.350 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6465
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.065   0.006   0.859 
+Execution duration of function extract :
+   user  system elapsed 
+  0.054   0.000   0.055 
+Execution duration of function extract :
+   user  system elapsed 
+  0.008   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.009   0.001   0.035 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.318 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.398 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.004   5.421 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.002   1.226 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.002   5.304 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.315 
+Execution duration of function create :
+   user  system elapsed 
+  0.017   0.002   5.280 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.000   1.344 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.002   5.145 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.188 
+Execution duration of function create :
+   user  system elapsed 
+  0.022   0.002   5.329 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.000   1.240 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.254 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.002   1.357 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.005   5.447 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.303 
+Execution duration of function create :
+   user  system elapsed 
+  0.022   0.003   5.352 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:5660
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.056   0.005   0.558 
+Execution duration of function extract :
+   user  system elapsed 
+  0.055   0.000   0.056 
+Execution duration of function extract :
+   user  system elapsed 
+  0.008   0.001   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.028   0.001   0.061 
+Execution duration of function extract :
+   user  system elapsed 
+  0.032   0.003   1.205 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.002   1.304 
+Execution duration of function create :
+   user  system elapsed 
+  0.030   0.001   5.398 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.190 
+Execution duration of function create :
+   user  system elapsed 
+  0.032   0.000   5.278 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.002   1.250 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.001   5.275 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.291 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.001   5.305 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.002   1.267 
+Execution duration of function create :
+   user  system elapsed 
+  0.014   0.004   5.249 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.000   1.263 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.002   5.478 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.001   1.302 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.007   5.350 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.211 
+Execution duration of function create :
+   user  system elapsed 
+  0.022   0.001   5.242 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6359
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.061   0.005   0.706 
+Execution duration of function extract :
+   user  system elapsed 
+  0.053   0.000   0.052 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.008 
+Execution duration of function parse :
+   user  system elapsed 
+  0.073   0.003   0.075 
+Execution duration of function extract :
+   user  system elapsed 
+  0.030   0.002   1.324 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.295 
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.005   5.337 
+Execution duration of function extract :
+   user  system elapsed 
+  0.029   0.000   1.249 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.004   5.363 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.273 
+Execution duration of function create :
+   user  system elapsed 
+  0.024   0.005   5.251 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.241 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.002   5.233 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.235 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.004   5.338 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.000   1.153 
+Execution duration of function create :
+   user  system elapsed 
+  0.015   0.005   5.410 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.298 
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.005   5.250 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.001   1.235 
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.002   5.296 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:4822
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.068   0.006   0.561 
+Execution duration of function extract :
+   user  system elapsed 
+  0.052   0.000   0.052 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.001   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.024   0.003   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.027   0.000   1.270 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.235 
+Execution duration of function create :
+   user  system elapsed 
+  0.014   0.005   5.330 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.179 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.002   5.224 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.000   1.351 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.003   5.150 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.004   1.225 
+Execution duration of function create :
+   user  system elapsed 
+  0.021   0.006   5.177 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.220 
+Execution duration of function create :
+   user  system elapsed 
+  0.028   0.002   5.216 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.268 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.214 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.305 
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.004   5.444 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.000   1.263 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.004   5.497 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6877
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.062   0.008   0.850 
+Execution duration of function extract :
+   user  system elapsed 
+  0.055   0.001   0.056 
+Execution duration of function extract :
+   user  system elapsed 
+  0.008   0.001   0.008 
+Execution duration of function parse :
+   user  system elapsed 
+  0.025   0.003   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.033   0.003   1.311 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.325 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.004   5.167 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.180 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.004   5.657 
+Execution duration of function extract :
+   user  system elapsed 
+  0.029   0.001   1.316 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.005   5.349 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.205 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.315 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.002   1.171 
+Execution duration of function create :
+   user  system elapsed 
+  0.018   0.002   5.251 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.284 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.006   5.207 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.319 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.005   5.250 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.233 
+Execution duration of function create :
+   user  system elapsed 
+  0.029   0.003   5.436 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6947
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.062   0.003   0.547 
+Execution duration of function extract :
+   user  system elapsed 
+  0.055   0.000   0.055 
+Execution duration of function extract :
+   user  system elapsed 
+  0.010   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.025   0.001   0.056 
+Execution duration of function extract :
+   user  system elapsed 
+  0.046   0.002   1.354 
+Execution duration of function extract :
+   user  system elapsed 
+  0.018   0.003   1.258 
+Execution duration of function create :
+   user  system elapsed 
+  0.018   0.001   5.255 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.390 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.001   5.167 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.000   1.242 
+Execution duration of function create :
+   user  system elapsed 
+  0.028   0.004   5.328 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.247 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.001   5.219 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.244 
+Execution duration of function create :
+   user  system elapsed 
+  0.029   0.001   5.100 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.002   1.227 
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.003   5.433 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.309 
+Execution duration of function create :
+   user  system elapsed 
+  0.015   0.004   5.674 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.337 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.004   5.433 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:7554
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.063   0.005   0.847 
+Execution duration of function extract :
+   user  system elapsed 
+  0.054   0.000   0.054 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.068   0.004   0.071 
+Execution duration of function extract :
+   user  system elapsed 
+  0.030   0.003   1.295 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.211 
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.005   5.389 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.000   1.320 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.003   5.325 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.227 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.171 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.001   1.255 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.003   5.591 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.002   1.321 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.002   5.302 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.003   1.293 
+Execution duration of function create :
+   user  system elapsed 
+  0.024   0.003   5.288 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.280 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.006   5.990 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.000   1.318 
+Execution duration of function create :
+   user  system elapsed 
+  0.023   0.004   5.531 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:4186
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.064   0.004   0.997 
+Execution duration of function extract :
+   user  system elapsed 
+  0.064   0.000   0.065 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.010   0.000   0.035 
+Execution duration of function extract :
+   user  system elapsed 
+  0.031   0.000   1.249 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.249 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.005   5.421 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.265 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.005   5.262 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.002   1.241 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.004   5.386 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.000   1.206 
+Execution duration of function create :
+   user  system elapsed 
+  0.025   0.002   5.206 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.000   1.249 
+Execution duration of function create :
+   user  system elapsed 
+  0.024   0.002   5.245 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.002   1.219 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.253 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.312 
+Execution duration of function create :
+   user  system elapsed 
+  0.014   0.002   5.370 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.231 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.002   5.326 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6141
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.057   0.004   0.869 
+Execution duration of function extract :
+   user  system elapsed 
+  0.059   0.001   0.060 
+Execution duration of function extract :
+   user  system elapsed 
+  0.011   0.000   0.010 
+Execution duration of function parse :
+   user  system elapsed 
+  0.025   0.002   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.033   0.000   1.252 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.321 
+Execution duration of function create :
+   user  system elapsed 
+  0.019   0.001   5.453 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.255 
+Execution duration of function create :
+   user  system elapsed 
+  0.018   0.002   5.485 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.306 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.005   5.427 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.002   1.255 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.305 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.268 
+Execution duration of function create :
+   user  system elapsed 
+  0.020   0.002   5.413 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.231 
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.002   5.493 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.000   1.286 
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.003   5.163 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.002   1.241 
+Execution duration of function create :
+   user  system elapsed 
+  0.018   0.001   5.249 

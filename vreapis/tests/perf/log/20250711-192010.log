@@ -1,0 +1,247 @@
+> component.containerizer:::main()
+
+Listening on http://127.0.0.1:4934
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.051   0.005   1.072 
+Execution duration of function extract :
+   user  system elapsed 
+  0.049   0.001   0.050 
+Execution duration of function extract :
+   user  system elapsed 
+  0.012   0.001   0.012 
+Execution duration of function parse :
+   user  system elapsed 
+  0.018   0.003   0.055 
+Execution duration of function extract :
+   user  system elapsed 
+  0.027   0.004   1.624 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.166 
+
+Restarting R session...
+
+Error: Error occurred during transmission
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:7195
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.063   0.004   0.609 
+Execution duration of function extract :
+   user  system elapsed 
+  0.056   0.000   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.001   0.010 
+Execution duration of function parse :
+   user  system elapsed 
+  0.027   0.002   0.060 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.001   1.240 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.002   1.219 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6056
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.062   0.003   0.481 
+Execution duration of function extract :
+   user  system elapsed 
+   0.06    0.00    0.06 
+Execution duration of function extract :
+   user  system elapsed 
+  0.012   0.000   0.011 
+Execution duration of function parse :
+   user  system elapsed 
+  0.008   0.001   0.053 
+Execution duration of function extract :
+   user  system elapsed 
+  0.028   0.002   1.253 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.339 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:7763
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.069   0.005   0.466 
+Execution duration of function extract :
+   user  system elapsed 
+  0.057   0.000   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.011   0.000   0.011 
+Execution duration of function parse :
+   user  system elapsed 
+  0.010   0.000   0.034 
+Execution duration of function extract :
+   user  system elapsed 
+  0.027   0.002   1.232 
+Execution duration of function extract :
+   user  system elapsed 
+  0.018   0.002   1.188 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6415
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.063   0.002   0.612 
+Execution duration of function extract :
+   user  system elapsed 
+  0.054   0.000   0.054 
+Execution duration of function extract :
+   user  system elapsed 
+   0.01    0.00    0.01 
+Execution duration of function parse :
+   user  system elapsed 
+  0.026   0.002   0.061 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.005   1.243 
+Execution duration of function extract :
+   user  system elapsed 
+  0.018   0.001   1.247 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:5937
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.051   0.003   0.113 
+Execution duration of function extract :
+   user  system elapsed 
+  0.053   0.000   0.053 
+Execution duration of function extract :
+   user  system elapsed 
+   0.01    0.00    0.01 
+Execution duration of function parse :
+   user  system elapsed 
+  0.007   0.001   0.053 
+Execution duration of function extract :
+   user  system elapsed 
+  0.030   0.002   1.261 
+Execution duration of function extract :
+   user  system elapsed 
+  0.018   0.003   1.179 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:4596
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.047   0.002   0.099 
+Execution duration of function extract :
+   user  system elapsed 
+  0.056   0.000   0.056 
+Execution duration of function extract :
+   user  system elapsed 
+  0.011   0.001   0.012 
+Execution duration of function parse :
+   user  system elapsed 
+  0.028   0.002   0.080 
+Execution duration of function extract :
+   user  system elapsed 
+  0.030   0.003   1.312 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.000   1.278 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:5335
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.050   0.005   0.111 
+Execution duration of function extract :
+   user  system elapsed 
+  0.056   0.001   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.010   0.000   0.011 
+Execution duration of function parse :
+   user  system elapsed 
+  0.025   0.004   0.080 
+Execution duration of function extract :
+   user  system elapsed 
+  0.031   0.004   1.271 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.187 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:5013
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.050   0.006   0.123 
+Execution duration of function extract :
+   user  system elapsed 
+  0.056   0.000   0.056 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.029   0.003   0.082 
+Execution duration of function extract :
+   user  system elapsed 
+  0.028   0.001   1.279 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.285 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6634
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.049   0.006   0.116 
+Execution duration of function extract :
+   user  system elapsed 
+  0.060   0.000   0.059 
+Execution duration of function extract :
+   user  system elapsed 
+  0.010   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.011   0.000   0.037 
+Execution duration of function extract :
+   user  system elapsed 
+  0.027   0.000   1.270 
+Execution duration of function extract :
+   user  system elapsed 
+  0.017   0.003   1.263 

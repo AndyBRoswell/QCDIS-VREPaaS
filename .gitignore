@@ -144,6 +144,7 @@ GitHub.sublime-settings
 # Logs
 logs
 *.log
+!vreapis/tests/perf/log/*.log
 npm-debug.log*
 
 # Runtime data

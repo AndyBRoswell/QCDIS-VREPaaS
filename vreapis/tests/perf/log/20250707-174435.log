@@ -1,0 +1,666 @@
+> component.containerizer:::main()
+
+Listening on http://127.0.0.1:3955
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.066   0.006   0.658 
+Execution duration of function extract :
+   user  system elapsed 
+  0.052   0.005   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.010   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.023   0.002   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.033   0.004   1.630 
+[1] "For y-x :"
+$wf_id
+[1] "d3851b47-9af8-48b3-a796-b9226e4f6a4e"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.030   0.005   6.093 
+Execution duration of function extract :
+   user  system elapsed 
+  0.031   0.002   1.320 
+[1] "For plot :"
+$wf_id
+[1] "cd4c2bf5-378d-4991-9745-a1b03ff1e38f"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.033   0.006   5.825 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.003   1.215 
+[1] "For print-x :"
+$wf_id
+[1] "43fa560c-f804-432c-988d-538ac67927c4"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.032   0.005   5.468 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:7923
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.071   0.004   0.880 
+Execution duration of function extract :
+   user  system elapsed 
+  0.054   0.000   0.054 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.023   0.003   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.031   0.003   1.257 
+[1] "For y-x :"
+$wf_id
+[1] "f32c2a66-6430-4789-800c-9d5121701a1b"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.033   0.005   5.421 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.003   1.226 
+[1] "For plot :"
+$wf_id
+[1] "1c62aaba-65b1-4b21-a2a6-4d7b03a442b5"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.019   0.006   5.592 
+Execution duration of function extract :
+   user  system elapsed 
+  0.027   0.001   1.126 
+[1] "For print-x :"
+$wf_id
+[1] "b9a33f3e-3b40-41bd-b5fb-9f4f5e84d74c"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.033   0.003   5.405 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:4637
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.058   0.002   0.543 
+Execution duration of function extract :
+   user  system elapsed 
+  0.057   0.000   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.008 
+Execution duration of function parse :
+   user  system elapsed 
+  0.009   0.001   0.035 
+Execution duration of function extract :
+   user  system elapsed 
+  0.037   0.002   1.165 
+[1] "For y-x :"
+$wf_id
+[1] "d519b25c-e795-4eba-bfc9-57038ba453bf"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.036   0.003   5.492 
+Execution duration of function extract :
+   user  system elapsed 
+  0.029   0.002   1.238 
+[1] "For plot :"
+$wf_id
+[1] "a91e0db6-7bdf-469c-8b08-ad795c4a7c6d"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.036   0.002   5.368 
+Execution duration of function extract :
+   user  system elapsed 
+  0.026   0.000   1.234 
+[1] "For print-x :"
+$wf_id
+[1] "182d6fc0-a7e2-403b-a137-52afcc8831d6"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.033   0.004   5.541 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:5446
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.061   0.003   0.556 
+Execution duration of function extract :
+   user  system elapsed 
+  0.051   0.000   0.052 
+Execution duration of function extract :
+   user  system elapsed 
+  0.011   0.001   0.011 
+Execution duration of function parse :
+   user  system elapsed 
+  0.025   0.001   0.076 
+Execution duration of function extract :
+   user  system elapsed 
+  0.039   0.001   1.156 
+[1] "For y-x :"
+$wf_id
+[1] "08441bf8-b4a6-4c19-b1a0-3978d68871d9"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.035   0.003   5.496 
+Execution duration of function extract :
+   user  system elapsed 
+  0.031   0.000   1.334 
+[1] "For plot :"
+$wf_id
+[1] "4be96c9a-757e-4efe-806e-2c2a369d3eeb"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.033   0.004   5.500 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.131 
+[1] "For print-x :"
+$wf_id
+[1] "a629d2f1-3c52-458e-bfdb-e2811dead902"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.020   0.003   5.638 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:7590
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.061   0.006   0.574 
+Execution duration of function extract :
+   user  system elapsed 
+  0.058   0.000   0.059 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.010   0.000   0.036 
+Execution duration of function extract :
+   user  system elapsed 
+  0.036   0.002   1.196 
+[1] "For y-x :"
+$wf_id
+[1] "11e1c05c-7c4f-425c-ac69-4c8055954c37"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.034   0.007   5.553 
+Execution duration of function extract :
+   user  system elapsed 
+  0.031   0.002   1.340 
+[1] "For plot :"
+$wf_id
+[1] "c774aae4-605c-4d8b-933a-0f33edea7a41"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.018   0.004   5.587 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.002   1.155 
+[1] "For print-x :"
+$wf_id
+[1] "36cd5bba-cfa4-4209-8621-be6cb7873035"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.027   0.005   5.515 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:7641
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.060   0.005   0.577 
+Execution duration of function extract :
+   user  system elapsed 
+  0.067   0.001   0.064 
+Execution duration of function extract :
+   user  system elapsed 
+   0.01    0.00    0.01 
+Execution duration of function parse :
+   user  system elapsed 
+  0.010   0.001   0.036 
+Execution duration of function extract :
+   user  system elapsed 
+  0.039   0.000   1.308 
+[1] "For y-x :"
+$wf_id
+[1] "a6d652cb-6bec-4dc5-afa7-12d63f48ec39"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.002   5.789 
+Execution duration of function extract :
+   user  system elapsed 
+  0.040   0.000   1.324 
+[1] "For plot :"
+$wf_id
+[1] "1ad97f07-4bca-4bef-9a36-77cf2003e777"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.001   5.609 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.002   1.290 
+[1] "For print-x :"
+$wf_id
+[1] "0d853920-4cb7-46a7-b887-d2850476e4f4"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.015   0.006   5.479 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:3861
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.059   0.005   0.946 
+Execution duration of function extract :
+   user  system elapsed 
+  0.059   0.000   0.058 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.001   0.010 
+Execution duration of function parse :
+   user  system elapsed 
+  0.023   0.003   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.039   0.001   1.148 
+[1] "For y-x :"
+$wf_id
+[1] "a83dd013-93c9-4330-a23c-fbc38441f7d4"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.023   0.001   5.439 
+Execution duration of function extract :
+   user  system elapsed 
+  0.028   0.000   1.322 
+[1] "For plot :"
+$wf_id
+[1] "e2b5593e-bb2e-49a6-89d3-e763cbc38258"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.036   0.002   5.413 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.003   1.188 
+[1] "For print-x :"
+$wf_id
+[1] "25f30915-c00c-4b6c-847d-43be3e8ed721"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.026   0.006   5.465 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:4609
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.065   0.004   0.577 
+Execution duration of function extract :
+   user  system elapsed 
+  0.061   0.000   0.060 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.025   0.001   0.057 
+Execution duration of function extract :
+   user  system elapsed 
+  0.031   0.002   1.225 
+[1] "For y-x :"
+$wf_id
+[1] "479d9beb-8754-481a-9288-b387f2009346"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.033   0.006   5.660 
+Execution duration of function extract :
+   user  system elapsed 
+  0.029   0.000   1.299 
+[1] "For plot :"
+$wf_id
+[1] "4b066429-61c0-49c9-83f6-bae77f503598"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.018   0.002   5.777 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.001   1.186 
+[1] "For print-x :"
+$wf_id
+[1] "a8b580f9-7b79-4d96-a7dd-79db2765e5be"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.028   0.008   5.558 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:6160
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.067   0.007   0.564 
+Execution duration of function extract :
+   user  system elapsed 
+  0.062   0.000   0.063 
+Execution duration of function extract :
+   user  system elapsed 
+  0.009   0.000   0.009 
+Execution duration of function parse :
+   user  system elapsed 
+  0.026   0.001   0.075 
+Execution duration of function extract :
+   user  system elapsed 
+  0.040   0.000   1.182 
+[1] "For y-x :"
+$wf_id
+[1] "e47e16ed-8425-4c25-9ea5-8e8306be377e"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.033   0.007   5.585 
+Execution duration of function extract :
+   user  system elapsed 
+  0.027   0.002   1.270 
+[1] "For plot :"
+$wf_id
+[1] "fff61ee8-8f65-4753-bcb4-42976f4b4d89"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.016   0.004   5.363 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.002   1.115 
+[1] "For print-x :"
+$wf_id
+[1] "5da92ec2-308c-4f32-bc63-6235c06cc1fd"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.034   0.005   5.351 
+
+Restarting R session...
+
+> component.containerizer:::main()
+Loading required package: shiny
+
+Listening on http://127.0.0.1:3827
+Execution duration of function function ()  {     request <- httr2::request(stringr::str_interp("${API_ENDPOINT}/${CONTAINERIZER_PREFIX}/baseimagetags"))     request <- httr2::req_headers(request, Authorization = stringr::str_interp("Token ${NAAVRE_API_TOKEN}"))     tryCatch({         response <- httr2::req_perform(request)         base_image_list <- httr2::resp_body_json(response)         updateSelectInput(session, "base_image_selector", choices = names(base_image_list),              selected = "r")     }, error = function(e) {         print(e)     }) } :
+   user  system elapsed 
+  0.062   0.005   0.557 
+Execution duration of function extract :
+   user  system elapsed 
+  0.054   0.000   0.055 
+Execution duration of function extract :
+   user  system elapsed 
+  0.010   0.001   0.011 
+Execution duration of function parse :
+   user  system elapsed 
+  0.010   0.000   0.054 
+Execution duration of function extract :
+   user  system elapsed 
+  0.038   0.001   1.177 
+[1] "For y-x :"
+$wf_id
+[1] "5f50b5c8-3b6d-46e3-9fa3-e77df277e43c"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "a522e57"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.019   0.008   5.467 
+Execution duration of function extract :
+   user  system elapsed 
+  0.030   0.000   1.358 
+[1] "For plot :"
+$wf_id
+[1] "064299e8-6e6b-408e-8e23-9e24294f7334"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "b544ab1"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.031   0.003   5.351 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.001   1.137 
+[1] "For print-x :"
+$wf_id
+[1] "8ce2ae07-a912-407d-aa7d-2d0fd503ca11"
+
+$dispatched_github_workflow
+[1] TRUE
+
+$image_version
+[1] "1bb3748"
+
+Execution duration of function create :
+   user  system elapsed 
+  0.022   0.003   5.429 
