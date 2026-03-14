@@ -8,8 +8,7 @@ test.beforeEach(async ({ page }) => {
   const file_browser_icon = main_sidebar.locator(`[data-id="filebrowser"]`);
   await file_browser_icon.click();
   const file_browser = page.getByRole('region', { name: 'File Browser Section' });
-  const home_dir_icon = file_browser.locator(`[data-icon="ui-components:folder"]`).first().locator('xpath=*'); // locatethe only child
-  await page.waitForTimeout(5_000);
+  const home_dir_icon = file_browser.locator(`[data-icon="ui-components:folder"]`).first().locator('xpath=*'); // locate the only child with click event handler
   await home_dir_icon.click();
 })
 
