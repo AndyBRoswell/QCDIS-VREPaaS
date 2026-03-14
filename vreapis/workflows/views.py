@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from services.argo import ArgoWorkflow
+from services.k8s_secret_creator import K8sSecretCreator
 from virtual_labs.models import VirtualLab
 from vreapis.views import GetSerializerMixin
 
@@ -127,3 +128,14 @@ class WorkflowViewSet(GetSerializerMixin,
                 status=500)
 
         return Response(new_workflow.data)
+
+    @action(detail=False, methods=['POST'], name='Create a workflow secret')
+    def create_secret(self, request, *args, **kwargs):
+        try:
+            return Response(K8sSecretCreator().create_secret(request.data))
+        except Exception as e:
+            return Response(
+                {
+                    'message': 'Could not create secret',
+                    },
+                status=500)

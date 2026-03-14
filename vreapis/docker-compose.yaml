@@ -18,6 +18,8 @@ services:
       - ALLOWED_HOST=*
       - ARGO_NAMESPACE=
       - ARGO_URL=
+      - K8S_SECRET_CREATOR_URL=
+      - K8S_SECRET_CREATOR_TOKEN=
       - BASE_PATH=/vre-api-test
       - CALL_BACK_URL=
       - CORS_ALLOWED_ORIGIN_REGEXES=

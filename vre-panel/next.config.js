@@ -2,9 +2,7 @@ console.log(process.env.NODE_ENV);
 
 module.exports = {
   reactStrictMode: true,
-  experimental: {
-    outputStandalone: true
-  },
+  output: "standalone",
   basePath: process.env.FRONTEND_BASE_PATH,
   publicRuntimeConfig: {
     basePath: process.env.FRONTEND_BASE_PATH,

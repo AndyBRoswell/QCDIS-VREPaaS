@@ -31,7 +31,7 @@ const VLabInstances: React.FC<Props> = ({vlab, slug}) => {
       return
     }
 
-    const username = session.data.user.name
+    const username = session.data.user?.name
 
     const requestOptions: RequestInit = {
       method: "POST",

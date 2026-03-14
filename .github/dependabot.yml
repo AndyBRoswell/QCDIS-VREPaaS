@@ -4,6 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "[actions] "
 
   - package-ecosystem: "pip"
     directory: "vreapis"
@@ -11,41 +13,36 @@ updates:
       interval: "monthly"
     commit-message:
       prefix: "[pip] "
+    groups:
+      vreapis-pip:
+        patterns:
+          - '*'
 
   - package-ecosystem: "npm"
     directory: "vre-panel"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "[npm] "
+    groups:
+      vre-panel-npm:
+        patterns:
+          - '*'
 
   - package-ecosystem: "docker"
-    directory: "vreapis"
+    directories:
+      - tilt/vre-panel
+      - tilt/vreapis
+      - vre-panel
+      - vreapis
     schedule:
       interval: "monthly"
     commit-message:
       prefix: "[docker] "
-
-
-  - package-ecosystem: "docker"
-    directory: "vre-panel"
-    schedule:
-      interval: "monthly"
-    commit-message:
-      prefix: "[docker] "
-
-
-  - package-ecosystem: "docker"
-    directory: "tilt/vre-panel"
-    schedule:
-      interval: "monthly"
-    commit-message:
-      # Prefix all commit messages with "[docker] " (no colon, but a trailing whitespace)
-      prefix: "[docker] "
-
-
-  - package-ecosystem: "docker"
-    directory: "tilt/vreapis"
-    schedule:
-      interval: "monthly"
-    commit-message:
-      # Prefix all commit messages with "[docker] " (no colon, but a trailing whitespace)
-      prefix: "[docker] "
+    groups:
+      vreapis-docker:
+        patterns:
+          - 'python'
+      vre-panel-docker:
+        patterns:
+          - 'node'
