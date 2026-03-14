@@ -1,5 +1,6 @@
 import axios from "axios";
 import NextAuth from "next-auth"
+import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import KeycloakProvider from "next-auth/providers/keycloak"
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -64,18 +65,19 @@ export default (req : NextApiRequest, res: NextApiResponse) => {
 					token.accessTokenExpiry = account.expires_at;
 				}
 
-				const expDate = new Date(token.accessTokenExpiry * 1e3)
-				const nowDate = new Date()
-				const tokenExpired = (expDate < nowDate)
-
-				if (tokenExpired) {
-					token = await refreshAccessToken(token);
+				if (token.accessTokenExpiry) {
+					const expDate = new Date(token.accessTokenExpiry * 1e3)
+					const nowDate = new Date()
+					const tokenExpired = (expDate < nowDate)
+					if (tokenExpired) {
+						token = await refreshAccessToken(token);
+					}
 				}
 
 				return token;
 
 			},
-			async session({ session, token }) {
+			async session({ session, token }: { session: Session, token: JWT }) {
 				if (token) {
 					session.error = token.error;
 					session.accessToken = token.accessToken;

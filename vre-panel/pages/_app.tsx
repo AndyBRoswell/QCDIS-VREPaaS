@@ -6,7 +6,7 @@ import getConfig from 'next/config'
 
 import {PaasConfigProvider} from '../context/PaasConfig';
 
-export default function App({ Component, pageProps: { session, ...pageProps }} : AppProps): JSX.Element {
+export default function App({ Component, pageProps: { session, ...pageProps }} : AppProps) {
 
   const { publicRuntimeConfig } = getConfig()
   // const [interval, setInterval] = useState(0);
