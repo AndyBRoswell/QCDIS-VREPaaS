@@ -66,9 +66,9 @@ class File_Browser_Manipulator {
     return r
   }
 
-  public segmented_path(path: string): Segmented_Path { return path.split(Node_Path.sep).filter(Boolean) }
+  public static segmented_path(path: string): Segmented_Path { return path.split(Node_Path.sep).filter(Boolean) }
 
-  public identical(p: Segmented_Path, q: Segmented_Path): boolean {
+  public static identical(p: Segmented_Path, q: Segmented_Path): boolean {
     return p.length === q.length && p.every((value, index) => value === q[index])
   }
 
@@ -83,7 +83,7 @@ class File_Browser_Manipulator {
 
   public async goto(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> {
     log.info(`Dest: ${path}`)
-    const path_segments = this.segmented_path(path)
+    const path_segments = File_Browser_Manipulator.segmented_path(path)
     if (home_as_relative_root) { await this.go_home(delay['go_home'] as number) }
     const target_path: string[] = []
     for (const segment of path_segments) {
@@ -92,7 +92,7 @@ class File_Browser_Manipulator {
       target_path.push(segment)
       do {
         await this.action_with_delay(async () => await entry.dblclick())
-      } while (this.identical(this.segmented_path(await this.current_directory()), target_path) === false)
+      } while (File_Browser_Manipulator.identical(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
       log.info(`Entered ${segment}`)
     }
     log.info(`Arrived at ${path}`)
@@ -105,12 +105,18 @@ test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await file_browser_manipulator.goto(test_root, true, { 'go_home': 1_500, })
+  await file_browser_manipulator.goto(test_root, true, { 'go_home': 2_000, })
+  expect(
+    File_Browser_Manipulator.identical(
+      File_Browser_Manipulator.segmented_path(test_root),
+      File_Browser_Manipulator.segmented_path(await file_browser_manipulator.current_directory())
+    )
+  ).toBeTruthy()
 })
 
 test('sample test', async ({ page }) => {
   await expect(page).toHaveTitle(/JupyterLab/)
-  await page.waitForTimeout(5_000) // Just for debug purposes
+  // await page.waitForTimeout(5_000) // Just for debug purposes
 })
 
 // test('rmd/D1', async ({ page }) => {
