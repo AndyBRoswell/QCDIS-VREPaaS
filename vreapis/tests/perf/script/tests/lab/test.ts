@@ -10,7 +10,7 @@ type Delay_Map = {
 
 log.setLevel('info')
 
-const test_root: string = 'tmp/rmd'
+const test_root: string = 'tmp/rmd' // All the test files should be placed here
 
 class File_Browser_Manipulator {
   public action_delay = 1_000
@@ -32,11 +32,11 @@ class File_Browser_Manipulator {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.file_browser_tab = this.main_sidebar.locator(`[data-id="filebrowser"]`)
     this.file_browser_icon = this.file_browser_tab.locator(`path`) // Locate the only clickable child
-    while (await this.visible() === false) { await this.toggle() }
+    while (await this.visible() === false) { await this.toggle() } // To let File Browser Section be loaded
     this.file_browser_section = this.page.getByRole('region', { name: 'File Browser Section' }) // Locate the file browser
     this.file_list = this.file_browser_section.locator(`ul`) // Get the file list for tests
-    this.home_dir_icon = this.file_browser_section.locator(`[data-icon="ui-components:folder"]`).first().locator('path')
-    this.path_indicator = this.home_dir_icon.locator(`xpath=../../..`)
+    this.home_dir_icon = this.file_browser_section.locator(`[data-icon="ui-components:folder"]`).first().locator('path') // Home dir can be entered by clicking it
+    this.path_indicator = this.home_dir_icon.locator(`xpath=../../..`) // It shows the current path of the file browser
   }
 
   public async action_with_delay(action: () => Promise<any>, delay: Milliseconds | null = this.action_delay) {
@@ -45,14 +45,14 @@ class File_Browser_Manipulator {
     await this.page.waitForTimeout(delay)
   }
 
-  public async visible(): Promise<boolean> {
+  public async visible(): Promise<boolean> { // Check if the file browser tab is visible [i.e. selected in the main sidebar]
     log.info(`Detecting if this file browser tab is visible...`)
     let r: boolean = await this.file_browser_tab.getAttribute('aria-selected') === 'true'
     log.info(r)
     return r
   }
 
-  public async toggle() {
+  public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     log.info(`Toggling the file browser tab...`)
     await this.action_with_delay(async () => await this.file_browser_icon.click(), 250)
     log.info('File browser tab clicked')
@@ -66,13 +66,13 @@ class File_Browser_Manipulator {
     return r
   }
 
-  public static segmented_path(path: string): Segmented_Path { return path.split(Node_Path.sep).filter(Boolean) }
+  public static segmented_path(path: string): Segmented_Path { return path.split(Node_Path.sep).filter(Boolean) } // Break path string in to segments for the convenience of comparison
 
-  public static identical(p: Segmented_Path, q: Segmented_Path): boolean {
+  public static identical(p: Segmented_Path, q: Segmented_Path): boolean { // Determine if 2 paths are identical
     return p.length === q.length && p.every((value, index) => value === q[index])
   }
 
-  public async go_home(delay: Milliseconds) {
+  public async go_home(delay: Milliseconds) { // Go to the home directory
     while (await this.visible() === false) { await this.toggle() }
     log.info('Going back home...')
     do {
@@ -81,7 +81,7 @@ class File_Browser_Manipulator {
     } while (await this.current_directory() !== '/')
   }
 
-  public async goto(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> {
+  public async goto(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
     log.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
     if (home_as_relative_root) { await this.go_home(delay['go_home'] as number) }
