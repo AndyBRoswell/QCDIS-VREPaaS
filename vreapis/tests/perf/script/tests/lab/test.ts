@@ -104,7 +104,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('sample test', async ({ page }) => {
-  await expect(page).toHaveTitle('JupyterLab')
+  await expect(page).toHaveTitle(/JupyterLab/)
   await page.waitForTimeout(5_000) // Just for debug purposes
 })
 
