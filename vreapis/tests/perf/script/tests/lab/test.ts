@@ -2,7 +2,11 @@ import { test, expect, type Page, type Locator } from '@playwright/test'
 import log from 'loglevel'
 import Node_Path from 'node:path'
 
+type Milliseconds = number
 type Segmented_Path = string[]
+type Delay_Map = {
+  [key: string]: Milliseconds | Delay_Map
+}
 
 log.setLevel('info')
 
@@ -35,15 +39,10 @@ class File_Browser_Manipulator {
     this.path_indicator = this.home_dir_icon.locator(`xpath=../../..`)
   }
 
-  public async action_with_delay(action: () => Promise<any>, delay: number = this.action_delay) {
+  public async action_with_delay(action: () => Promise<any>, delay: Milliseconds | null = this.action_delay) {
     await action()
+    if (delay == null) { delay = 0 }
     await this.page.waitForTimeout(delay)
-  }
-
-  public async toggle() {
-    log.info(`Toggling the file browser tab...`)
-    await this.action_with_delay(async () => await this.file_browser_icon.click(), 250)
-    log.info('File browser tab clicked')
   }
 
   public async visible(): Promise<boolean> {
@@ -51,6 +50,12 @@ class File_Browser_Manipulator {
     let r: boolean = await this.file_browser_tab.getAttribute('aria-selected') === 'true'
     log.info(r)
     return r
+  }
+
+  public async toggle() {
+    log.info(`Toggling the file browser tab...`)
+    await this.action_with_delay(async () => await this.file_browser_icon.click(), 250)
+    log.info('File browser tab clicked')
   }
 
   public async current_directory(): Promise<string> {
@@ -67,30 +72,30 @@ class File_Browser_Manipulator {
     return p.length === q.length && p.every((value, index) => value === q[index])
   }
 
-  public async go_home() {
+  public async go_home(delay: Milliseconds) {
     while (await this.visible() === false) { await this.toggle() }
     log.info('Going back home...')
     do {
-      await this.action_with_delay(async () => await this.home_dir_icon.click())
+      await this.action_with_delay(async () => await this.home_dir_icon.click(), delay)
       log.info('Home dir icon clicked')
     } while (await this.current_directory() !== '/')
   }
 
-  public async goto(path: string, home_as_relative_root: boolean = false): Promise<void> {
-    log.info(`Dest: ${ path }`)
+  public async goto(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> {
+    log.info(`Dest: ${path}`)
     const path_segments = this.segmented_path(path)
-    if (home_as_relative_root) { await this.go_home() }
+    if (home_as_relative_root) { await this.go_home(delay['go_home'] as number) }
     const target_path: string[] = []
     for (const segment of path_segments) {
-      log.info(`Entering ${ segment }...`)
-      const entry = file_browser_manipulator.file_list.locator(`[title^="Name: ${ segment }"]`)
+      log.info(`Entering ${segment}...`)
+      const entry = file_browser_manipulator.file_list.locator(`[title^="Name: ${segment}"]`)
       target_path.push(segment)
       do {
         await this.action_with_delay(async () => await entry.dblclick())
       } while (this.identical(this.segmented_path(await this.current_directory()), target_path) === false)
-      log.info(`Entered ${ segment }`)
+      log.info(`Entered ${segment}`)
     }
-    log.info(`Arrived at ${ path }`)
+    log.info(`Arrived at ${path}`)
   }
 }
 
@@ -100,7 +105,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await file_browser_manipulator.goto(test_root, true)
+  await file_browser_manipulator.goto(test_root, true, { 'go_home': 1_500, })
 })
 
 test('sample test', async ({ page }) => {
