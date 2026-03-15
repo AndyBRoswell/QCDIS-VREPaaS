@@ -3,6 +3,8 @@ import log from 'loglevel'
 
 log.setLevel('info')
 
+const test_root: string = 'tmp/rmd'
+
 class File_Browser_Manipulator {
   public page: Page
   public main_sidebar!: Locator
@@ -27,6 +29,7 @@ class File_Browser_Manipulator {
   }
 
   public async toggle() {
+    log.info(`Toggling the file browser tab...`)
     await this.file_browser_icon.click()
     log.info('File browser tab clicked')
   }
@@ -40,13 +43,23 @@ class File_Browser_Manipulator {
 
   public async go_home() {
     while (await this.visible() === false) { await this.toggle() }
+    log.info('Going back home...')
     await this.home_dir_icon.click()
     log.info('Home dir icon clicked')
   }
 
-  // public async goto(oath: string) {
-  //   const test_file_root_entry = file_browser_manipulator.file_list.locator('[title^="Name: "]')
-  // }
+  public async goto(path: string, home_as_relative_root: boolean = false): Promise<void> {
+    log.info(`Dest: ${path}`)
+    const path_segments = path.split('/') // `/` as default path segment separator [work on Windows, Linux and macOS]
+    if (home_as_relative_root) { await this.go_home() }
+    for (const segment of path_segments) {
+      log.info(`Entering ${segment}...`)
+      const entry = file_browser_manipulator.file_list.locator(`[title^="Name: ${segment}"]`)
+      await entry.dblclick()
+      log.info(`Entered ${segment}`)
+    }
+    log.info(`Arrived at ${path}`)
+  }
 }
 
 var file_browser_manipulator: File_Browser_Manipulator
@@ -56,7 +69,7 @@ test.beforeEach(async ({ page }) => {
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
   // await page.waitForTimeout(2_000) // Just for debug purposes
-  await file_browser_manipulator.go_home()
+  await file_browser_manipulator.goto(test_root, true)
 })
 
 test('sample test', async ({ page }) => {
