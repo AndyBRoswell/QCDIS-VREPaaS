@@ -83,7 +83,7 @@ class File_Browser_Manipulator {
     } while (await this.current_directory() !== '/')
   }
 
-  public async goto(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
+  public async open(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
     log.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
     if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
@@ -108,7 +108,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await file_browser_manipulator.goto(test_root, true, { 'go_home': 2_000, })
+  await file_browser_manipulator.open(test_root, true, { 'go_home': 2_000, })
   expect(
     File_Browser_Manipulator.identical(
       File_Browser_Manipulator.segmented_path(test_root),
@@ -137,13 +137,18 @@ class Text_Editor_Manipulator {
     this.main = this.page.getByRole('main')
   }
 
-  public async open() {
+  public async open(pathname: string) {
+    await this.file_browser_manipulator.open(pathname)
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
 
   }
 }
 
+var text_editor_manipulator: Text_Editor_Manipulator
+
 // test('D1', async ({ page }) => {
+//   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
+//   await text_editor_manipulator.open('D1.ipynb')
 //
 // })
