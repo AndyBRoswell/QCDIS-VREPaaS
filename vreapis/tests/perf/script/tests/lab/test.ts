@@ -12,13 +12,15 @@ log.setLevel('info')
 
 const test_root: string = 'tmp/rmd' // All the test files should be placed here
 
+const repetition_count = 10
+
 class File_Browser_Manipulator {
-  public action_delay = 1_000
+  public action_delay: Milliseconds = 1_000
 
   public page: Page
   public main_sidebar!: Locator
   public file_browser_tab!: Locator
-  public file_browser_icon!: Locator
+  public file_browser_tab_icon!: Locator
   public file_browser_section!: Locator
   public home_dir_icon!: Locator
   public path_indicator!: Locator
@@ -31,7 +33,7 @@ class File_Browser_Manipulator {
   public async init() {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.file_browser_tab = this.main_sidebar.locator(`[data-id="filebrowser"]`)
-    this.file_browser_icon = this.file_browser_tab.locator(`path`) // Locate the only clickable child
+    this.file_browser_tab_icon = this.file_browser_tab.locator(`path`) // Locate the only clickable child
     while (await this.visible() === false) { await this.toggle() } // To let File Browser Section be loaded
     this.file_browser_section = this.page.getByRole('region', { name: 'File Browser Section' }) // Locate the file browser
     this.file_list = this.file_browser_section.locator(`ul`) // Get the file list for tests
@@ -54,7 +56,7 @@ class File_Browser_Manipulator {
 
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     log.info(`Toggling the file browser tab...`)
-    await this.action_with_delay(async () => await this.file_browser_icon.click(), 250)
+    await this.action_with_delay(async () => await this.file_browser_tab_icon.click(), 250)
     log.info('File browser tab clicked')
   }
 
@@ -84,6 +86,7 @@ class File_Browser_Manipulator {
   public async goto(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
     log.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
+    if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
     if (home_as_relative_root) { await this.go_home(delay['go_home'] as number) }
     const target_path: string[] = []
     for (const segment of path_segments) {
@@ -119,6 +122,25 @@ test('sample test', async ({ page }) => {
   // await page.waitForTimeout(5_000) // Just for debug purposes
 })
 
-// test('rmd/D1', async ({ page }) => {
+class Text_Editor_Manipulator {
+  public action_delay: Milliseconds = 500
+
+  public page!: Page
+  public main!: Locator
+  public tab_panel!: Locator
+  public notebook_content_region!: Locator
+
+  public constructor(page: Page) {
+    this.page = page
+  }
+
+  public async init() { // Only call after an ipynb test file is open and focused
+    this.main = this.page.getByRole('main')
+    this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
+    this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
+  }
+}
+
+// test('D1', async ({ page }) => {
 //
 // })
