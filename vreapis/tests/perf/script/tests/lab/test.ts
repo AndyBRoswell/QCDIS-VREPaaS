@@ -127,17 +127,20 @@ class Text_Editor_Manipulator {
 
   public page!: Page
   public main!: Locator
+  public file_browser_manipulator!: File_Browser_Manipulator
   public tab_panel!: Locator
   public notebook_content_region!: Locator
 
-  public constructor(page: Page) {
+  public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
     this.page = page
+    this.file_browser_manipulator = file_browser_manipulator
+    this.main = this.page.getByRole('main')
   }
 
-  public async init() { // Only call after an ipynb test file is open and focused
-    this.main = this.page.getByRole('main')
+  public async open() {
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
+
   }
 }
 
