@@ -8,14 +8,7 @@ type Segmented_Pathname = string[]
 type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
 type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
 
-// log.setLevel('info')
-
-const test_root: string = 'tmp/rmd' // All the test files should be placed here
-
-const repetition_count = 10
-
 class File_Browser_Manipulator {
-  private static class_logger = log.getLogger(File_Browser_Manipulator.name)
   private static logger: { [key: string]: Logger } = {}
 
   public action_delay: Milliseconds = 1_000
@@ -32,7 +25,6 @@ class File_Browser_Manipulator {
   static {
     const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
     for (const member of instance_members) { File_Browser_Manipulator.logger[member] = log.getLogger(member) }
-    // console.log(File_Browser_Manipulator.logger)
     File_Browser_Manipulator.logger[File_Browser_Manipulator.prototype.open.name]!.setLevel('info')
   }
 
@@ -122,20 +114,6 @@ class File_Browser_Manipulator {
   }
 }
 
-var file_browser_manipulator: File_Browser_Manipulator
-
-test.beforeEach(async ({ page }) => {
-  await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
-  file_browser_manipulator = new File_Browser_Manipulator(page)
-  await file_browser_manipulator.init()
-  await file_browser_manipulator.open(test_root, true, { 'go_home': 2_000, })
-  expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
-})
-
-test('sample test', async ({ page }) => {
-  await expect(page).toHaveTitle(/JupyterLab/)
-  // await page.waitForTimeout(5_000) // Just for debug purposes
-})
 
 class Text_Editor_Manipulator {
   public action_delay: Milliseconds = 500
@@ -180,6 +158,27 @@ class Text_Editor_Manipulator {
     }
   }
 }
+
+// log.setLevel('info')
+
+const test_root: string = 'tmp/rmd' // All the test files should be placed here
+
+const repetition_count = 10
+
+var file_browser_manipulator: File_Browser_Manipulator
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
+  file_browser_manipulator = new File_Browser_Manipulator(page)
+  await file_browser_manipulator.init()
+  await file_browser_manipulator.open(test_root, true, { 'go_home': 2_000, })
+  expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
+})
+
+test('sample test', async ({ page }) => {
+  await expect(page).toHaveTitle(/JupyterLab/)
+  // await page.waitForTimeout(5_000) // Just for debug purposes
+})
 
 var text_editor_manipulator: Text_Editor_Manipulator
 
