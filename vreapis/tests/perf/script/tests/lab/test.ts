@@ -8,6 +8,16 @@ type Segmented_Pathname = string[]
 type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
 type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
 
+const original_log_method_factory = log.methodFactory
+log.methodFactory = (log_method_name, log_level, logger_name) => {
+  const raw = original_log_method_factory(log_method_name, log_level, logger_name)
+  return (...args) => {
+    const time_point = new Date().toISOString()
+    const severity = log_method_name === 'error' ? 'ERROR' : log_method_name === 'warn' ? 'Warning' : log_method_name
+    raw(`[${time_point}] [${severity}] [${String(logger_name)}]`, ...args)
+  }
+}
+
 class File_Browser_Manipulator {
   private static logger: { [key: string]: Logger } = {}
 
@@ -24,7 +34,7 @@ class File_Browser_Manipulator {
 
   static {
     const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
-    for (const member of instance_members) { File_Browser_Manipulator.logger[member] = log.getLogger(member) }
+    for (const member of instance_members) { File_Browser_Manipulator.logger[member] = log.getLogger(`${File_Browser_Manipulator.name}.${member}`) }
     File_Browser_Manipulator.logger[File_Browser_Manipulator.prototype.open.name]!.setLevel('info')
   }
 
@@ -113,7 +123,6 @@ class File_Browser_Manipulator {
     File_Browser_Manipulator.logger[this.open.name]!.info(`Arrived at ${path}`)
   }
 }
-
 
 class Text_Editor_Manipulator {
   public action_delay: Milliseconds = 500
