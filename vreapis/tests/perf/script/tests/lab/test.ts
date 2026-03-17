@@ -89,9 +89,15 @@ class File_Browser_Manipulator {
     if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
     if (home_as_relative_root) { await this.go_home(delay['go_home'] as number) }
     const target_path: string[] = []
-    for (const segment of path_segments) {
+    for (const [ index, segment ] of path_segments.entries()) {
       log.info(`Entering ${segment}...`)
       const entry = file_browser_manipulator.file_list.locator(`[title^="Name: ${segment}"]`)
+      if (index < path_segments.length - 1) {
+        if (await entry.getAttribute('data-isdir') === 'false') { throw new Error(`Non-leaf file system node ${segment} is not a directory`) }
+      } else {
+        await this.action_with_delay(async () => await entry.dblclick())
+        break
+      }
       target_path.push(segment)
       do {
         await this.action_with_delay(async () => await entry.dblclick())
