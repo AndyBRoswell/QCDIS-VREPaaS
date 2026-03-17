@@ -136,6 +136,7 @@ class Text_Editor_Manipulator {
   public tab_list!: Locator // Reference changes once all tabs are closed and the new launcher is automatically present again
   public tab_panel!: Locator // Reference changes if the same file is closed and open again
   public notebook_content_region!: Locator
+  public cells_under_test!: Locator[]
 
   public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
     this.page = page
@@ -160,7 +161,13 @@ class Text_Editor_Manipulator {
     } while (File_Browser_Manipulator.identical_Pathname(pathname, (await this.current_file()).path) === false)
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
-
+    const re = /^#.*# [0-9A-Fa-f]{16,}( \[rpt \d+])?$/m // Currently, every cell under test is marked with 1st-line comments with a suffix with 16-digit hex and for nth repetition explicitly stated
+    const cells = await this.notebook_content_region.locator('> *').all()
+    this.cells_under_test = []
+    for (const cell of cells) {
+      const content = await cell.innerText()
+      if (content.match(re)) { this.cells_under_test.push(cell) }
+    }
   }
 }
 
