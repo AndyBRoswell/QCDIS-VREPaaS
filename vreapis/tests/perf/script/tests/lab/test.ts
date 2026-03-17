@@ -119,12 +119,7 @@ test.beforeEach(async ({ page }) => {
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true, { 'go_home': 2_000, })
-  expect(
-    File_Browser_Manipulator.identical_Segmented_Pathname(
-      File_Browser_Manipulator.segmented_path(test_root),
-      File_Browser_Manipulator.segmented_path(await file_browser_manipulator.current_directory())
-    )
-  ).toBeTruthy()
+  expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
 })
 
 test('sample test', async ({ page }) => {
