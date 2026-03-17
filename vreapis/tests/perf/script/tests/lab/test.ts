@@ -3,10 +3,10 @@ import log from 'loglevel'
 import Node_Path from 'node:path'
 
 type Milliseconds = number
-type Segmented_Path = string[]
-type Delay_Map = {
-  [key: string]: Milliseconds | Delay_Map
-}
+type Pathname = string
+type Segmented_Pathname = string[]
+type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
+type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
 
 log.setLevel('info')
 
@@ -68,9 +68,13 @@ class File_Browser_Manipulator {
     return r
   }
 
-  public static segmented_path(path: string): Segmented_Path { return path.split(Node_Path.sep).filter(Boolean) } // Break path string in to segments for the convenience of comparison
+  public static segmented_path(path: Pathname): Segmented_Pathname { return path.split(Node_Path.sep).filter(Boolean) } // Break path string in to segments for the convenience of comparison. Blank segments are ignored so inputs like `a///b` are handled correctly
 
-  public static identical(p: Segmented_Path, q: Segmented_Path): boolean { // Determine if 2 paths are identical
+  public static identical_Pathname(p: Pathname, q: Pathname): boolean {
+    return this.identical_Segmented_Pathname(this.segmented_path(p), this.segmented_path(q))
+  }
+
+  public static identical_Segmented_Pathname(p: Segmented_Pathname, q: Segmented_Pathname): boolean { // Determine if 2 paths are identical
     return p.length === q.length && p.every((value, index) => value === q[index])
   }
 
@@ -83,7 +87,7 @@ class File_Browser_Manipulator {
     } while (await this.current_directory() !== '/')
   }
 
-  public async open(path: string, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
+  public async open(path: Pathname, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
     log.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
     if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
@@ -101,7 +105,7 @@ class File_Browser_Manipulator {
       target_path.push(segment)
       do {
         await this.action_with_delay(async () => await entry.dblclick())
-      } while (File_Browser_Manipulator.identical(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
+      } while (File_Browser_Manipulator.identical_Segmented_Pathname(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
       log.info(`Entered ${segment}`)
     }
     log.info(`Arrived at ${path}`)
@@ -116,7 +120,7 @@ test.beforeEach(async ({ page }) => {
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true, { 'go_home': 2_000, })
   expect(
-    File_Browser_Manipulator.identical(
+    File_Browser_Manipulator.identical_Segmented_Pathname(
       File_Browser_Manipulator.segmented_path(test_root),
       File_Browser_Manipulator.segmented_path(await file_browser_manipulator.current_directory())
     )
@@ -132,9 +136,10 @@ class Text_Editor_Manipulator {
   public action_delay: Milliseconds = 500
 
   public page!: Page
-  public main!: Locator
   public file_browser_manipulator!: File_Browser_Manipulator
-  public tab_panel!: Locator
+  public main!: Locator
+  public tab_list!: Locator // Reference changes once all tabs are closed and the new launcher is automatically present again
+  public tab_panel!: Locator // Reference changes if the same file is closed and open again
   public notebook_content_region!: Locator
 
   public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
@@ -143,8 +148,21 @@ class Text_Editor_Manipulator {
     this.main = this.page.getByRole('main')
   }
 
+  public async current_file(): Promise<File_Info> { // Get the pathname corresponding to the focused tab
+    this.tab_list = this.main.getByRole('tablist')
+    const focused_tab = this.tab_list.locator('[aria-selected="true"]')
+    const title = await focused_tab.getAttribute('title') as string
+    if (!title) { return { name: '', path: ''} }
+    const re = /^Name: (.+)(\r?\n)Path: (.+)/m
+    const match = title?.match(re)
+    if (!match) { throw new Error('Could not get the file information of the current tab') }
+    return { name: match[1]!, path: match[2]! }
+  }
+
   public async open(pathname: string) {
-    await this.file_browser_manipulator.open(pathname)
+    do {
+      await this.file_browser_manipulator.open(pathname)
+    } while (File_Browser_Manipulator.identical_Pathname(pathname, (await this.current_file()).path) === false)
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
 
