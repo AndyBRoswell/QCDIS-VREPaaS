@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Locator } from '@playwright/test'
-import log from 'loglevel'
+import log, { type Logger } from 'loglevel'
 import Node_Path from 'node:path'
 
 type Milliseconds = number
@@ -8,13 +8,16 @@ type Segmented_Pathname = string[]
 type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
 type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
 
-log.setLevel('info')
+// log.setLevel('info')
 
 const test_root: string = 'tmp/rmd' // All the test files should be placed here
 
 const repetition_count = 10
 
 class File_Browser_Manipulator {
+  private static class_logger = log.getLogger(File_Browser_Manipulator.name)
+  private static logger: { [key: string]: Logger } = {}
+
   public action_delay: Milliseconds = 1_000
 
   public page: Page
@@ -25,6 +28,13 @@ class File_Browser_Manipulator {
   public home_dir_icon!: Locator
   public path_indicator!: Locator
   public file_list!: Locator
+
+  static {
+    const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
+    for (const member of instance_members) { File_Browser_Manipulator.logger[member] = log.getLogger(member) }
+    // console.log(File_Browser_Manipulator.logger)
+    File_Browser_Manipulator.logger[File_Browser_Manipulator.prototype.open.name]!.setLevel('info')
+  }
 
   public constructor(page: Page) {
     this.page = page
@@ -48,23 +58,23 @@ class File_Browser_Manipulator {
   }
 
   public async visible(): Promise<boolean> { // Check if the file browser tab is visible [i.e. selected in the main sidebar]
-    log.info(`Detecting if this file browser tab is visible...`)
+    File_Browser_Manipulator.logger[this.visible.name]!.info(`Detecting if this file browser tab is visible...`)
     let r: boolean = await this.file_browser_tab.getAttribute('aria-selected') === 'true'
-    log.info(r)
+    File_Browser_Manipulator.logger[this.visible.name]!.info(r)
     return r
   }
 
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
-    log.info(`Toggling the file browser tab...`)
+    File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
     await this.action_with_delay(async () => await this.file_browser_tab_icon.click(), 250)
-    log.info('File browser tab clicked')
+    File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
   }
 
   public async current_directory(): Promise<string> {
     while (await this.visible() === false) { await this.toggle() }
-    log.info(`Getting the current directory...`)
+    File_Browser_Manipulator.logger[this.current_directory.name]!.info(`Getting the current directory...`)
     const r: string = await this.path_indicator.textContent() as string
-    log.info(r)
+    File_Browser_Manipulator.logger[this.current_directory.name]!.info(r)
     return r
   }
 
@@ -80,21 +90,21 @@ class File_Browser_Manipulator {
 
   public async go_home(delay: Milliseconds) { // Go to the home directory
     while (await this.visible() === false) { await this.toggle() }
-    log.info('Going back home...')
+    File_Browser_Manipulator.logger[this.go_home.name]!.info('Going back home...')
     do {
       await this.action_with_delay(async () => await this.home_dir_icon.click(), delay)
-      log.info('Home dir icon clicked')
+      File_Browser_Manipulator.logger[this.go_home.name]!.info('Home dir icon clicked')
     } while (await this.current_directory() !== '/')
   }
 
   public async open(path: Pathname, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
-    log.info(`Dest: ${path}`)
+    File_Browser_Manipulator.logger[this.open.name]!.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
     if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
-    if (home_as_relative_root) { await this.go_home(delay['go_home'] as number) }
+    if (home_as_relative_root) { await this.go_home(delay[this.go_home.name] as number) }
     const target_path: string[] = []
     for (const [ index, segment ] of path_segments.entries()) {
-      log.info(`Entering ${segment}...`)
+      File_Browser_Manipulator.logger[this.open.name]!.info(`Entering ${segment}...`)
       const entry = file_browser_manipulator.file_list.locator(`[title^="Name: ${segment}"]`)
       if (index < path_segments.length - 1) {
         if (await entry.getAttribute('data-isdir') === 'false') { throw new Error(`Non-leaf file system node ${segment} is not a directory`) }
@@ -106,9 +116,9 @@ class File_Browser_Manipulator {
       do {
         await this.action_with_delay(async () => await entry.dblclick())
       } while (File_Browser_Manipulator.identical_Segmented_Pathname(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
-      log.info(`Entered ${segment}`)
+      File_Browser_Manipulator.logger[this.open.name]!.info(`Entered ${segment}`)
     }
-    log.info(`Arrived at ${path}`)
+    File_Browser_Manipulator.logger[this.open.name]!.info(`Arrived at ${path}`)
   }
 }
 
@@ -148,7 +158,7 @@ class Text_Editor_Manipulator {
     this.tab_list = this.main.getByRole('tablist')
     const focused_tab = this.tab_list.locator('[aria-selected="true"]')
     const title = await focused_tab.getAttribute('title') as string
-    if (!title) { return { name: '', path: ''} }
+    if (!title) { return { name: '', path: '' } }
     const re = /^Name: (.+)(\r?\n)Path: (.+)/m
     const match = title?.match(re)
     if (!match) { throw new Error('Could not get the file information of the current tab') }
@@ -156,12 +166,12 @@ class Text_Editor_Manipulator {
   }
 
   public async open(pathname: string) {
-    do {
+    while (File_Browser_Manipulator.identical_Pathname(pathname, (await this.current_file()).path) === false) {
       await this.file_browser_manipulator.open(pathname)
-    } while (File_Browser_Manipulator.identical_Pathname(pathname, (await this.current_file()).path) === false)
+    }
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
-    const re = /^#.*# [0-9A-Fa-f]{16,}( \[rpt \d+])?$/m // Currently, every cell under test is marked with 1st-line comments with a suffix with 16-digit hex and for nth repetition explicitly stated
+    const re = /^#(.*)# ([0-9A-Fa-f]{16,})( \[rpt \d+])?\s*$/m // Currently, every cell under test is marked with 1st-line comments with a suffix with 16-digit hex and for nth repetition explicitly stated
     const cells = await this.notebook_content_region.locator('> *').all()
     this.cells_under_test = []
     for (const cell of cells) {
@@ -175,6 +185,6 @@ var text_editor_manipulator: Text_Editor_Manipulator
 
 // test('D1', async ({ page }) => {
 //   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
-//   await text_editor_manipulator.open('D1.ipynb')
-//
+//   await text_editor_manipulator.open('D1.0.ipynb')
+//   expect(text_editor_manipulator.cells_under_test.length).toEqual(4)
 // })
