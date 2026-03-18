@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Locator } from '@playwright/test'
-import log, { type Logger } from 'loglevel'
+import log, { type Logger, type LogLevel } from 'loglevel'
 import Node_Path from 'node:path'
 
 type Milliseconds = number
@@ -35,7 +35,7 @@ class File_Browser_Manipulator {
   static {
     const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
     for (const member of instance_members) { File_Browser_Manipulator.logger[member] = log.getLogger(`${File_Browser_Manipulator.name}.${member}`) }
-    File_Browser_Manipulator.logger[File_Browser_Manipulator.prototype.open.name]!.setLevel('info')
+    // File_Browser_Manipulator.logger[File_Browser_Manipulator.prototype.open.name]!.setLevel('info')
   }
 
   public constructor(page: Page) {
@@ -125,6 +125,8 @@ class File_Browser_Manipulator {
 }
 
 class Text_Editor_Manipulator {
+  private static logger: { [key: string]: Logger } = {}
+
   public action_delay: Milliseconds = 500
 
   public page!: Page
@@ -134,6 +136,11 @@ class Text_Editor_Manipulator {
   public tab_panel!: Locator // Reference changes if the same file is closed and open again
   public notebook_content_region!: Locator
   public cells_under_test!: Locator[]
+
+  static {
+    const instance_members = Object.getOwnPropertyNames(Text_Editor_Manipulator.prototype)
+    for (const member of instance_members) { Text_Editor_Manipulator.logger[member] = log.getLogger(`${Text_Editor_Manipulator.name}.${member}`) }
+  }
 
   public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
     this.page = page
@@ -146,14 +153,14 @@ class Text_Editor_Manipulator {
     const focused_tab = this.tab_list.locator('[aria-selected="true"]')
     const title = await focused_tab.getAttribute('title') as string
     if (!title) { return { name: '', path: '' } }
-    const re = /^Name: (.+)(\r?\n)Path: (.+)/m
+    const re = /^Name: (.+)\r?\nPath: (.+)/m
     const match = title?.match(re)
     if (!match) { throw new Error('Could not get the file information of the current tab') }
     return { name: match[1]!, path: match[2]! }
   }
 
   public async open(pathname: string) {
-    while (File_Browser_Manipulator.identical_Pathname(pathname, (await this.current_file()).path) === false) {
+    while (File_Browser_Manipulator.identical_Pathname(`${test_root}/${pathname}`, (await this.current_file()).path) === false) {
       await this.file_browser_manipulator.open(pathname)
     }
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
@@ -184,15 +191,15 @@ test.beforeEach(async ({ page }) => {
   expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
 })
 
-test('sample test', async ({ page }) => {
-  await expect(page).toHaveTitle(/JupyterLab/)
-  // await page.waitForTimeout(5_000) // Just for debug purposes
-})
+// test('sample test', async ({ page }) => {
+//   await expect(page).toHaveTitle(/JupyterLab/)
+//   // await page.waitForTimeout(5_000) // Just for debug purposes
+// })
 
 var text_editor_manipulator: Text_Editor_Manipulator
 
-// test('D1', async ({ page }) => {
-//   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
-//   await text_editor_manipulator.open('D1.0.ipynb')
-//   expect(text_editor_manipulator.cells_under_test.length).toEqual(4)
-// })
+test('D1', async ({ page }) => {
+  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
+  await text_editor_manipulator.open('D1.0.ipynb')
+  expect(text_editor_manipulator.cells_under_test.length).toEqual(4)
+})
