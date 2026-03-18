@@ -4,7 +4,9 @@ import Node_Path from 'node:path'
 
 type Milliseconds = number
 type Pathname = string
-type Segmented_Pathname = string[]
+type Segmented_Pathname = Pathname[]
+type TypeScript_Identifier = string
+type Logger_Map = { [key: TypeScript_Identifier]: Logger }
 type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
 type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
 
@@ -19,11 +21,11 @@ log.methodFactory = (log_method_name, log_level, logger_name) => {
 }
 
 class File_Browser_Manipulator {
-  private static logger: { [key: string]: Logger } = {}
+  private static logger: Logger_Map = {}
 
   public action_delay: Milliseconds = 1_000
 
-  public page: Page
+  public page!: Page
   public main_sidebar!: Locator
   public file_browser_tab!: Locator
   public file_browser_tab_icon!: Locator
@@ -124,18 +126,40 @@ class File_Browser_Manipulator {
   }
 }
 
+class Running_Session_Manipulator {
+  private static logger: Logger_Map = {}
+
+  public action_delay: Milliseconds = 500
+
+  public page!: Page
+
+  static {
+
+  }
+
+  public constructor(page: Page) {
+
+  }
+
+  public async shut_down_all_kernels() {
+
+  }
+}
+
 class Text_Editor_Manipulator {
-  private static logger: { [key: string]: Logger } = {}
+  private static logger: Logger_Map = {}
 
   public action_delay: Milliseconds = 500
 
   public page!: Page
   public file_browser_manipulator!: File_Browser_Manipulator
+  public running_session_manipulator!: Running_Session_Manipulator
   public main!: Locator
   public tab_list!: Locator // Reference changes once all tabs are closed and the new launcher is automatically present again
+  public associated_file: string = ''
   public tab_panel!: Locator // Reference changes if the same file is closed and open again
   public notebook_content_region!: Locator
-  public cells_under_test!: Locator[]
+  public cells_under_test: Locator[] = []
 
   static {
     const instance_members = Object.getOwnPropertyNames(Text_Editor_Manipulator.prototype)
@@ -160,9 +184,11 @@ class Text_Editor_Manipulator {
   }
 
   public async open(pathname: string) {
-    while (File_Browser_Manipulator.identical_Pathname(`${test_root}/${pathname}`, (await this.current_file()).path) === false) {
+    const canonical_pathname = `${test_root}/${pathname}`
+    while (File_Browser_Manipulator.identical_Pathname(canonical_pathname, (await this.current_file()).path) === false) {
       await this.file_browser_manipulator.open(pathname)
     }
+    this.associated_file = canonical_pathname
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
     const re = /^#(.*)# ([0-9A-Fa-f]{16,})( \[rpt \d+])?\s*$/m // Currently, every cell under test is marked with 1st-line comments with a suffix with 16-digit hex and for nth repetition explicitly stated
@@ -172,6 +198,30 @@ class Text_Editor_Manipulator {
       const content = await cell.innerText()
       if (content.match(re)) { this.cells_under_test.push(cell) }
     }
+  }
+
+  public async close() {
+
+  }
+}
+
+class Cell_Containerizer_Manipulator {
+  private static logger: Logger_Map = {}
+
+  public action_delay: Milliseconds = 1_000
+
+  public page!: Page
+
+  static {
+
+  }
+
+  public constructor(page: Page) {
+
+  }
+
+  public async init() {
+
   }
 }
 
