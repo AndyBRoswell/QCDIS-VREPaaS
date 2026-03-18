@@ -9,6 +9,15 @@ type TypeScript_Identifier = string
 type Logger_Map = { [key: TypeScript_Identifier]: Logger }
 type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
 type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
+type Supported_Variable_Types = "Integer" | "Float" | "String" | "List"
+type Cell_Containerizer_Manipulation_Arguments = {
+  [key: string]: string | { [key: string]: string }
+} & {
+  inputs?: { [key: string]: Supported_Variable_Types },
+  outputs?: { [key: string]: Supported_Variable_Types },
+  parameters?: { [key: string]: Supported_Variable_Types },
+  dependencies: string[]
+}
 
 const original_log_method_factory = log.methodFactory
 log.methodFactory = (log_method_name, log_level, logger_name) => {
@@ -184,7 +193,7 @@ class Text_Editor_Manipulator {
   }
 
   public async open(pathname: string) {
-    const canonical_pathname = `${test_root}/${pathname}`
+    const canonical_pathname = `${await this.file_browser_manipulator.current_directory()}/${pathname}`
     while (File_Browser_Manipulator.identical_Pathname(canonical_pathname, (await this.current_file()).path) === false) {
       await this.file_browser_manipulator.open(pathname)
     }
@@ -237,7 +246,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await file_browser_manipulator.open(test_root, true, { 'go_home': 2_000, })
+  await file_browser_manipulator.open(test_root, true, { 'go_home': 2_500, })
   expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
 })
 
