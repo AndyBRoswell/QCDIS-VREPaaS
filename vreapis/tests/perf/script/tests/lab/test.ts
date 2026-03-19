@@ -1,6 +1,7 @@
 import { test, expect, type Page, type Locator } from '@playwright/test'
 import log, { type Logger, type LogLevel } from 'loglevel'
 import Node_Path from 'node:path'
+import { setTimeout } from "node:timers/promises";
 
 type Milliseconds = number
 type Pathname = string
@@ -29,10 +30,14 @@ log.methodFactory = (log_method_name, log_level, logger_name) => {
   }
 }
 
+async function action_with_delay(action: () => Promise<any>, delay: Milliseconds | null = 1_000) {
+  await action()
+  if (delay == null) { delay = 0 }
+  await setTimeout(delay)
+}
+
 class File_Browser_Manipulator {
   private static logger: Logger_Map = {}
-
-  public action_delay: Milliseconds = 1_000
 
   public page!: Page
   public main_sidebar!: Locator
@@ -46,7 +51,6 @@ class File_Browser_Manipulator {
   static {
     const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
     for (const member of instance_members) { File_Browser_Manipulator.logger[member] = log.getLogger(`${File_Browser_Manipulator.name}.${member}`) }
-    // File_Browser_Manipulator.logger[File_Browser_Manipulator.prototype.open.name]!.setLevel('info')
   }
 
   public constructor(page: Page) {
@@ -56,18 +60,12 @@ class File_Browser_Manipulator {
   public async init() {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.file_browser_tab = this.main_sidebar.locator(`[data-id="filebrowser"]`)
-    this.file_browser_tab_icon = this.file_browser_tab.locator(`path`) // Locate the only clickable child
-    while (await this.visible() === false) { await this.toggle() } // To let File Browser Section be loaded
+    this.file_browser_tab_icon = this.file_browser_tab.locator('path') // Locate the only clickable child
+    while (await this.visible() === false) { await this.toggle() } // To let File Browser Section be loaded [otherwise the tests will be stuck and finally timeout]
     this.file_browser_section = this.page.getByRole('region', { name: 'File Browser Section' }) // Locate the file browser
     this.file_list = this.file_browser_section.locator(`ul`) // Get the file list for tests
     this.home_dir_icon = this.file_browser_section.locator(`[data-icon="ui-components:folder"]`).first().locator('path') // Home dir can be entered by clicking it
     this.path_indicator = this.home_dir_icon.locator(`xpath=../../..`) // It shows the current path of the file browser
-  }
-
-  public async action_with_delay(action: () => Promise<any>, delay: Milliseconds | null = this.action_delay) {
-    await action()
-    if (delay == null) { delay = 0 }
-    await this.page.waitForTimeout(delay)
   }
 
   public async visible(): Promise<boolean> { // Check if the file browser tab is visible [i.e. selected in the main sidebar]
@@ -79,7 +77,7 @@ class File_Browser_Manipulator {
 
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
-    await this.action_with_delay(async () => await this.file_browser_tab_icon.click(), 250)
+    await action_with_delay(async () => await this.file_browser_tab_icon.click(), 250)
     File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
   }
 
@@ -105,7 +103,7 @@ class File_Browser_Manipulator {
     while (await this.visible() === false) { await this.toggle() }
     File_Browser_Manipulator.logger[this.go_home.name]!.info('Going back home...')
     do {
-      await this.action_with_delay(async () => await this.home_dir_icon.click(), delay)
+      await action_with_delay(async () => await this.home_dir_icon.click(), delay)
       File_Browser_Manipulator.logger[this.go_home.name]!.info('Home dir icon clicked')
     } while (await this.current_directory() !== '/')
   }
@@ -122,12 +120,12 @@ class File_Browser_Manipulator {
       if (index < path_segments.length - 1) {
         if (await entry.getAttribute('data-isdir') === 'false') { throw new Error(`Non-leaf file system node ${segment} is not a directory`) }
       } else {
-        await this.action_with_delay(async () => await entry.dblclick())
+        await action_with_delay(async () => await entry.dblclick())
         break
       }
       target_path.push(segment)
       do {
-        await this.action_with_delay(async () => await entry.dblclick())
+        await action_with_delay(async () => await entry.dblclick())
       } while (File_Browser_Manipulator.identical_Segmented_Pathname(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entered ${segment}`)
     }
@@ -138,15 +136,29 @@ class File_Browser_Manipulator {
 class Running_Session_Manipulator {
   private static logger: Logger_Map = {}
 
-  public action_delay: Milliseconds = 500
-
   public page!: Page
+  public main_sidebar!: Locator
+  public running_sessions_tab!: Locator
+  public running_sessions_tab_icon!: Locator
+  public running_sessions_section!: Locator
 
   static {
-
+    const instance_members = Object.getOwnPropertyNames(Running_Session_Manipulator.prototype)
+    for (const member of instance_members) { Running_Session_Manipulator.logger[member] = log.getLogger(`${Running_Session_Manipulator.name}.${member}`) }
   }
 
   public constructor(page: Page) {
+    this.page = page
+  }
+
+  public async init() {
+    this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
+    this.running_sessions_tab = this.main_sidebar.locator(`[data-id="jp-running-sessions"]`)
+    this.running_sessions_tab_icon = this.running_sessions_tab.locator('path')
+
+  }
+
+  public async close_all_tabs() {
 
   }
 
@@ -157,8 +169,6 @@ class Running_Session_Manipulator {
 
 class Text_Editor_Manipulator {
   private static logger: Logger_Map = {}
-
-  public action_delay: Milliseconds = 500
 
   public page!: Page
   public file_browser_manipulator!: File_Browser_Manipulator
@@ -186,7 +196,7 @@ class Text_Editor_Manipulator {
     const focused_tab = this.tab_list.locator('[aria-selected="true"]')
     const title = await focused_tab.getAttribute('title') as string
     if (!title) { return { name: '', path: '' } }
-    const re = /^Name: (.+)\r?\nPath: (.+)/m
+    const re = /^Name: (.+)\r?\nPath: (.+)/m // Will multilingual support be needed here in the future?
     const match = title?.match(re)
     if (!match) { throw new Error('Could not get the file information of the current tab') }
     return { name: match[1]!, path: match[2]! }
@@ -217,9 +227,8 @@ class Text_Editor_Manipulator {
 class Cell_Containerizer_Manipulator {
   private static logger: Logger_Map = {}
 
-  public action_delay: Milliseconds = 1_000
-
   public page!: Page
+  public main_sidebar!: Locator
 
   static {
 
@@ -252,7 +261,6 @@ test.beforeEach(async ({ page }) => {
 
 // test('sample test', async ({ page }) => {
 //   await expect(page).toHaveTitle(/JupyterLab/)
-//   // await page.waitForTimeout(5_000) // Just for debug purposes
 // })
 
 var text_editor_manipulator: Text_Editor_Manipulator
