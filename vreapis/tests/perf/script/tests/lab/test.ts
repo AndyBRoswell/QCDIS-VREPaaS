@@ -20,7 +20,7 @@ type Cell_Containerizer_Manipulation_Arguments = {
   dependencies: string[]
 }
 
-const enum default_action_delay {
+const enum preset_action_delay {
   extra_short = 250,
   short = 500,
   medium = 1000,
@@ -79,7 +79,7 @@ class File_Browser_Manipulator {
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
     await this.file_browser_tab_icon.click()
-    await setTimeout(250)
+    await setTimeout(preset_action_delay.extra_short)
     File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
   }
 
@@ -101,7 +101,7 @@ class File_Browser_Manipulator {
     return p.length === q.length && p.every((value, index) => value === q[index])
   }
 
-  public async go_home(delay: Milliseconds) { // Go to the home directory
+  public async go_home(delay: Milliseconds = preset_action_delay.medium) { // Go to the home directory
     while (await this.visible() === false) { await this.toggle() }
     File_Browser_Manipulator.logger[this.go_home.name]!.info('Going back home...')
     do {
@@ -111,11 +111,11 @@ class File_Browser_Manipulator {
     } while (await this.current_directory() !== '/')
   }
 
-  public async open(path: Pathname, home_as_relative_root: boolean = false, delay: Delay_Map = {}): Promise<void> { // Go to the designated directory
+  public async open(path: Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
     File_Browser_Manipulator.logger[this.open.name]!.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
     if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
-    if (home_as_relative_root) { await this.go_home(delay[this.go_home.name] as number) }
+    if (home_as_relative_root) { await this.go_home() }
     const target_path: string[] = []
     for (const [ index, segment ] of path_segments.entries()) {
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entering ${segment}...`)
@@ -124,13 +124,13 @@ class File_Browser_Manipulator {
         if (await entry.getAttribute('data-isdir') === 'false') { throw new Error(`Non-leaf file system node ${segment} is not a directory`) }
       } else {
         await entry.dblclick()
-        await setTimeout(default_action_delay.medium)
+        await setTimeout(preset_action_delay.medium)
         break
       }
       target_path.push(segment)
       do {
         await entry.dblclick()
-        await setTimeout(default_action_delay.medium)
+        await setTimeout(preset_action_delay.medium)
 
       } while (File_Browser_Manipulator.identical_Segmented_Pathname(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entered ${segment}`)
@@ -173,7 +173,7 @@ class Running_Session_Manipulator {
 
   public async toggle() {
     await this.running_sessions_tab_icon.click()
-
+    await setTimeout(preset_action_delay.extra_short)
   }
 
   public async close_all_tabs() {
@@ -273,7 +273,8 @@ test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await file_browser_manipulator.open(test_root, true, { 'go_home': 2_500, })
+  await setTimeout(preset_action_delay.long)
+  await file_browser_manipulator.open(test_root, true)
   expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
 })
 
