@@ -20,6 +20,8 @@ type Cell_Containerizer_Manipulation_Arguments = {
   dependencies: string[]
 }
 
+const default_action_delay: Milliseconds = 1_000
+
 const original_log_method_factory = log.methodFactory
 log.methodFactory = (log_method_name, log_level, logger_name) => {
   const raw = original_log_method_factory(log_method_name, log_level, logger_name)
@@ -30,11 +32,11 @@ log.methodFactory = (log_method_name, log_level, logger_name) => {
   }
 }
 
-async function action_with_delay(action: () => Promise<any>, delay: Milliseconds | null = 1_000) {
-  await action()
-  if (delay == null) { delay = 0 }
-  await setTimeout(delay)
-}
+// async function action_with_delay(action: () => Promise<any>, delay: Milliseconds | null = 1_000) {
+//   await action()
+//   if (delay == null) { delay = 0 }
+//   await setTimeout(delay)
+// }
 
 class File_Browser_Manipulator {
   private static logger: Logger_Map = {}
@@ -77,7 +79,9 @@ class File_Browser_Manipulator {
 
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
-    await action_with_delay(async () => await this.file_browser_tab_icon.click(), 250)
+    // await action_with_delay(async () => await this.file_browser_tab_icon.click(), 250)
+    await this.file_browser_tab_icon.click()
+    await setTimeout(250)
     File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
   }
 
@@ -103,7 +107,9 @@ class File_Browser_Manipulator {
     while (await this.visible() === false) { await this.toggle() }
     File_Browser_Manipulator.logger[this.go_home.name]!.info('Going back home...')
     do {
-      await action_with_delay(async () => await this.home_dir_icon.click(), delay)
+      // await action_with_delay(async () => await this.home_dir_icon.click(), delay)
+      await this.home_dir_icon.click()
+      await setTimeout(delay)
       File_Browser_Manipulator.logger[this.go_home.name]!.info('Home dir icon clicked')
     } while (await this.current_directory() !== '/')
   }
@@ -120,12 +126,17 @@ class File_Browser_Manipulator {
       if (index < path_segments.length - 1) {
         if (await entry.getAttribute('data-isdir') === 'false') { throw new Error(`Non-leaf file system node ${segment} is not a directory`) }
       } else {
-        await action_with_delay(async () => await entry.dblclick())
+        // await action_with_delay(async () => await entry.dblclick())
+        await entry.dblclick()
+        await setTimeout(default_action_delay)
         break
       }
       target_path.push(segment)
       do {
-        await action_with_delay(async () => await entry.dblclick())
+        // await action_with_delay(async () => await entry.dblclick())
+        await entry.dblclick()
+        await setTimeout(default_action_delay)
+
       } while (File_Browser_Manipulator.identical_Segmented_Pathname(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entered ${segment}`)
     }
