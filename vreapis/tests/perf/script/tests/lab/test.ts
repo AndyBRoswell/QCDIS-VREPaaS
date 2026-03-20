@@ -277,6 +277,8 @@ class Cell_Containerizer_Manipulator {
 
   public page!: Page
   public main_sidebar!: Locator
+  public Cell_Containerizer_tab!: Locator
+  public Cell_Containerizer!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(Cell_Containerizer_Manipulator.prototype)
@@ -289,6 +291,15 @@ class Cell_Containerizer_Manipulator {
 
   public async init() {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
+    this.Cell_Containerizer_tab = this.main_sidebar.locator('[data-id="lifewatch/panel]"')
+
+  }
+
+  public async visible(): Promise<boolean> {
+
+  }
+
+  public async toggle() {
 
   }
 }
