@@ -1,5 +1,5 @@
-import { test, expect, type Page, type Locator } from '@playwright/test'
-import log, { type Logger, type LogLevel } from 'loglevel'
+import { expect, type Locator, type Page, test } from '@playwright/test'
+import log, { type Logger } from 'loglevel'
 import Node_Path from 'node:path'
 import { setTimeout } from "node:timers/promises";
 
@@ -79,7 +79,7 @@ class File_Browser_Manipulator {
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
     await this.file_browser_tab_icon.click()
-    await setTimeout(preset_action_delay.extra_short)
+    await setTimeout(preset_action_delay.short)
     File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
   }
 
@@ -147,6 +147,8 @@ class Running_Session_Manipulator {
   public running_sessions_tab!: Locator
   public running_sessions_tab_icon!: Locator
   public running_sessions_section!: Locator
+  public Close_All_button!: Locator
+  public Shut_Down_All_button!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(Running_Session_Manipulator.prototype)
@@ -163,25 +165,47 @@ class Running_Session_Manipulator {
     this.running_sessions_tab_icon = this.running_sessions_tab.locator('path')
     while (await this.visible() === false) { await this.toggle() } // To let Running Sessions Section be loaded [otherwise the tests will be stuck and finally timeout]
     this.running_sessions_section = this.page.getByRole('region', { name: 'Running Sessions section' })
-
+    const buttons = this.running_sessions_section.getByRole('button')
+    this.Close_All_button = buttons.filter({ hasText: 'Close All' })
+    this.Shut_Down_All_button = buttons.filter({ hasText: 'Shut Down All' })
   }
 
   public async visible(): Promise<boolean> {
-    let r: boolean = await this.running_sessions_tab.getAttribute('aria-selected') === 'true'
-    return r
+    return await this.running_sessions_tab.getAttribute('aria-selected') === 'true'
   }
 
   public async toggle() {
     await this.running_sessions_tab_icon.click()
-    await setTimeout(preset_action_delay.extra_short)
   }
 
   public async close_all_tabs() {
-
+    while (await this.visible() === false) {
+      await this.toggle()
+      await setTimeout(preset_action_delay.short)
+    }
+    const disabled = await this.Close_All_button.getAttribute('disabled')
+    if (disabled !== null) {
+      await this.Close_All_button.click()
+      await setTimeout(preset_action_delay.short)
+      const dialog = this.page.locator('body > div').filter({ hasText: 'Close All?' })
+      const confirm_button = dialog.getByRole('button').filter({ hasText: 'Close All' })
+      await confirm_button.click()
+    }
   }
 
   public async shut_down_all_kernels() {
-
+    while (await this.visible() === false) {
+      await this.toggle()
+      await setTimeout(preset_action_delay.short)
+    }
+    const disabled = await this.Shut_Down_All_button.getAttribute('disabled')
+    if (disabled !== null) {
+      await this.Shut_Down_All_button.click()
+      await setTimeout(preset_action_delay.short)
+      const dialog = this.page.locator('body > div').filter({ hasText: 'Shut Down All?' })
+      const confirm_button = dialog.getByRole('button').filter({ hasText: 'Shuw Down All' })
+      await confirm_button.click()
+    }
   }
 }
 
@@ -203,9 +227,10 @@ class Text_Editor_Manipulator {
     for (const member of instance_members) { Text_Editor_Manipulator.logger[member] = log.getLogger(`${Text_Editor_Manipulator.name}.${member}`) }
   }
 
-  public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
+  public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator, running_session_manipulator: Running_Session_Manipulator) {
     this.page = page
     this.file_browser_manipulator = file_browser_manipulator
+    this.running_session_manipulator = running_session_manipulator
     this.main = this.page.getByRole('main')
   }
 
@@ -237,8 +262,10 @@ class Text_Editor_Manipulator {
     }
   }
 
-  public async close() {
-
+  public async close_all() {
+    await this.running_session_manipulator.close_all_tabs()
+    await setTimeout(preset_action_delay.short, 1000)
+    await this.running_session_manipulator.shut_down_all_kernels()
   }
 }
 
@@ -268,9 +295,12 @@ const test_root: string = 'tmp/rmd' // All the test files should be placed here
 const repetition_count = 10
 
 var file_browser_manipulator: File_Browser_Manipulator
+var running_session_manipulator: Running_Session_Manipulator
 
 test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
+  running_session_manipulator = new Running_Session_Manipulator(page)
+  // await running_session_manipulator.init()
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
   await setTimeout(preset_action_delay.long)
@@ -285,7 +315,8 @@ test.beforeEach(async ({ page }) => {
 var text_editor_manipulator: Text_Editor_Manipulator
 
 test('D1', async ({ page }) => {
-  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
+  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
   expect(text_editor_manipulator.cells_under_test.length).toEqual(4)
+  // await text_editor_manipulator.close_all()
 })
