@@ -279,6 +279,11 @@ class Cell_Containerizer_Manipulator {
   public main_sidebar!: Locator
   public Cell_Containerizer_tab!: Locator
   public Cell_Containerizer!: Locator
+  public Inputs_div!: Locator
+  public Outputs_div!: Locator
+  public Parameters_div!: Locator
+  public Dependencies_div!: Locator
+  public Base_Image_div!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(Cell_Containerizer_Manipulator.prototype)
@@ -292,14 +297,23 @@ class Cell_Containerizer_Manipulator {
   public async init() {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.Cell_Containerizer_tab = this.main_sidebar.locator('[data-id="lifewatch/panel]"')
-
+    while (await this.visible() === false) { await this.toggle() } // To let Cell Containerizer Panel be loaded [otherwise the tests will be stuck and finally timeout]
+    this.Cell_Containerizer = this.page.locator("#lifewatch/panel")
   }
 
   public async visible(): Promise<boolean> {
-
+    return await this.Cell_Containerizer_tab.getAttribute('aria-selected') === 'true'
   }
 
   public async toggle() {
+    await this.Cell_Containerizer_tab.click()
+  }
+
+  public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
+
+  }
+
+  public async create() {
 
   }
 }
