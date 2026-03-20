@@ -80,7 +80,6 @@ class File_Browser_Manipulator {
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
     await this.file_browser_tab_icon.click()
-    // await setTimeout(preset_action_delay.short)
     File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
   }
 
@@ -146,7 +145,6 @@ class Running_Session_Manipulator {
   public page!: Page
   public main_sidebar!: Locator
   public running_sessions_tab!: Locator
-  public running_sessions_tab_icon!: Locator
   public running_sessions_section!: Locator
   public Open_Tabs_div!: Locator
   public Kernels_div!: Locator
@@ -165,7 +163,6 @@ class Running_Session_Manipulator {
   public async init() {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.running_sessions_tab = this.main_sidebar.locator(`[data-id="jp-running-sessions"]`)
-    this.running_sessions_tab_icon = this.running_sessions_tab.locator('path')
     while (await this.visible() === false) { await this.toggle() } // To let Running Sessions Section be loaded [otherwise the tests will be stuck and finally timeout]
     this.running_sessions_section = this.page.getByRole('region', { name: 'Running Sessions section' })
     const divs = this.running_sessions_section.locator('> div')
