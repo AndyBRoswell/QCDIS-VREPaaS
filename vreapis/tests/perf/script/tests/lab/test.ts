@@ -63,7 +63,8 @@ class File_Browser_Manipulator {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.file_browser_tab = this.main_sidebar.locator(`[data-id="filebrowser"]`)
     this.file_browser_tab_icon = this.file_browser_tab.locator('path') // Locate the only clickable child. I don't know why I must click the <path> here while I don't need this for manipulations of running sessions tab, and doing that don't give any response and make the tests stuck.
-    while (await this.visible() === false) { await this.toggle() } // To let File Browser Section be loaded [otherwise the tests will be stuck and finally timeout]
+    // while (await this.visible() === false) { await this.toggle() } // To let File Browser Section be loaded [otherwise the tests will be stuck and finally timeout]
+    await this.toggle() // To let File Browser Section be loaded [otherwise the tests will be stuck and finally timeout]
     this.file_browser_section = this.page.getByRole('region', { name: 'File Browser Section' }) // Locate the file browser
     this.file_list = this.file_browser_section.locator(`ul`) // Get the file list for tests
     this.home_dir_icon = this.file_browser_section.locator(`[data-icon="ui-components:folder"]`).first().locator('path') // Home dir can be entered by clicking it
@@ -78,13 +79,17 @@ class File_Browser_Manipulator {
   }
 
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
-    File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
-    await this.file_browser_tab_icon.click()
-    File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
+    while (await this.visible() === false) { // If the file browser tab is already visible, do nothing [otherwise the tests will be stuck and finally timeout]
+      File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
+      await this.file_browser_tab_icon.click()
+      await setTimeout(preset_action_delay.short)
+      File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
+    }
   }
 
   public async current_directory(): Promise<string> {
-    while (await this.visible() === false) { await this.toggle() }
+    // while (await this.visible() === false) { await this.toggle() }
+    await this.toggle()
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(`Getting the current directory...`)
     const r: string = await this.path_indicator.textContent() as string
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(r)
@@ -102,7 +107,8 @@ class File_Browser_Manipulator {
   }
 
   public async go_home(delay: Milliseconds = preset_action_delay.medium) { // Go to the home directory
-    while (await this.visible() === false) { await this.toggle() }
+    // while (await this.visible() === false) { await this.toggle() }
+    await this.toggle()
     File_Browser_Manipulator.logger[this.go_home.name]!.info('Going back home...')
     do {
       await this.home_dir_icon.click()
@@ -114,7 +120,8 @@ class File_Browser_Manipulator {
   public async open(path: Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
     File_Browser_Manipulator.logger[this.open.name]!.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
-    if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
+    // if (await this.visible() === false) { await this.file_browser_tab_icon.click() }
+    await this.toggle()
     if (home_as_relative_root) { await this.go_home() }
     const target_path: string[] = []
     for (const [ index, segment ] of path_segments.entries()) {
@@ -177,15 +184,19 @@ class Running_Session_Manipulator {
   }
 
   public async toggle() {
-    Running_Session_Manipulator.logger[this.toggle.name]!.info(`Toggling the running sessions tab...`)
-    await this.running_sessions_tab.click()
+    while (await this.visible() === false) {
+      // Running_Session_Manipulator.logger[this.toggle.name]!.info(`Toggling the running sessions tab...`)
+      await this.running_sessions_tab.click()
+      await setTimeout(preset_action_delay.short)
+    }
   }
 
   public async close_all_tabs() {
-    while (await this.visible() === false) {
-      await this.toggle()
-      await setTimeout(preset_action_delay.medium)
-    }
+    // while (await this.visible() === false) {
+    //   await this.toggle()
+    //   await setTimeout(preset_action_delay.medium)
+    // }
+    await this.toggle()
     const disabled = await this.Close_All_button.getAttribute('disabled')
     if (disabled === null) {
       await this.Close_All_button.click()
@@ -197,10 +208,11 @@ class Running_Session_Manipulator {
   }
 
   public async shut_down_all_kernels() {
-    while (await this.visible() === false) {
-      await this.toggle()
-      await setTimeout(preset_action_delay.medium)
-    }
+    // while (await this.visible() === false) {
+    //   await this.toggle()
+    //   await setTimeout(preset_action_delay.medium)
+    // }
+    await this.toggle()
     const disabled = await this.Shut_Down_All_button.getAttribute('disabled')
     if (disabled === null) {
       await this.Shut_Down_All_button.click()
@@ -223,6 +235,7 @@ class Text_Editor_Manipulator {
   public associated_file: string = ''
   public tab_panel!: Locator // Reference changes if the same file is closed and open again
   public notebook_content_region!: Locator
+  public cells: Locator[] = []
   public cells_under_test: Locator[] = []
 
   static {
@@ -257,12 +270,16 @@ class Text_Editor_Manipulator {
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
     const re = /^#(.*)# ([0-9A-Fa-f]{16,})( \[rpt \d+])?\s*$/m // Currently, every cell under test is marked with 1st-line comments with a suffix with 16-digit hex and for nth repetition explicitly stated
-    const cells = await this.notebook_content_region.locator('> *').all()
+    this.cells = await this.notebook_content_region.locator('> *').all()
     this.cells_under_test = []
-    for (const cell of cells) {
+    for (const cell of this.cells) {
       const content = await cell.innerText()
       if (content.match(re)) { this.cells_under_test.push(cell) }
     }
+  }
+
+  public async select() {
+
   }
 
   public async close_all() {
@@ -310,7 +327,7 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
-
+    while (await this.visible() === false) { await this.toggle() }
   }
 
   public async create() {
