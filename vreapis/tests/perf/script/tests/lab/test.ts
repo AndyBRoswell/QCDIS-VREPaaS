@@ -308,6 +308,7 @@ class Cell_Containerizer_Manipulator {
     this.Cell_Containerizer_tab = this.main_sidebar.locator('[data-id="lifewatch/panel"]')
     await this.toggle() // To let Cell Containerizer Panel be loaded [otherwise the tests will be stuck and finally timeout]
     this.Cell_Containerizer = this.page.locator("#lifewatch/panel")
+    this.Create_button = this.Cell_Containerizer.getByRole('button')
   }
 
   public async visible(): Promise<boolean> {
@@ -322,7 +323,8 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
-    while (await this.visible() === false) { await this.toggle() }
+    await this.toggle()
+
   }
 
   public async create() {
