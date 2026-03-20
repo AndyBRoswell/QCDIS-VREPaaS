@@ -2,6 +2,7 @@ import { expect, type Locator, type Page, test } from '@playwright/test'
 import log, { type Logger } from 'loglevel'
 import Node_Path from 'node:path'
 import { setTimeout } from "node:timers/promises";
+import { text } from "node:stream/consumers";
 
 type Milliseconds = number
 type Pathname = string
@@ -223,8 +224,8 @@ class Text_Editor_Manipulator {
   public associated_file: string = ''
   public tab_panel!: Locator // Reference changes if the same file is closed and open again
   public notebook_content_region!: Locator
-  public cells: Locator[] = []
-  public cells_under_test: Locator[] = []
+  public cell: Locator[] = []
+  public code_cell: Locator[] = []
 
   static {
     const instance_members = Object.getOwnPropertyNames(Text_Editor_Manipulator.prototype)
@@ -257,17 +258,17 @@ class Text_Editor_Manipulator {
     this.associated_file = canonical_pathname
     this.tab_panel = this.main.getByRole('tabpanel') // See https://playwright.dev/docs/api/class-page#page-get-by-role-option-include-hidden
     this.notebook_content_region = this.tab_panel.getByRole('region', { name: 'notebook content' })
-    const re = /^#(.*)# ([0-9A-Fa-f]{16,})( \[rpt \d+])?\s*$/m // Currently, every cell under test is marked with 1st-line comments with a suffix with 16-digit hex and for nth repetition explicitly stated
-    this.cells = await this.notebook_content_region.locator('> *').all()
-    this.cells_under_test = []
-    for (const cell of this.cells) {
+    const re = /^#(.*)# ([0-9A-Fa-f]{16,})( \[rpt \d+])?\s*$/m // Currently, every cell under test is marked with 1st-line comments with a suffix with a mandatory 16-digit hex and for nth repetition explicitly stated [optional]
+    this.cell = await this.notebook_content_region.locator('> *').all()
+    this.code_cell = []
+    for (const cell of this.cell) {
       const content = await cell.innerText()
-      if (content.match(re)) { this.cells_under_test.push(cell) }
+      if (content.match(re)) { this.code_cell.push(cell) }
     }
   }
 
-  public async select() {
-
+  public async select_code_cell(index: number) {
+    await this.code_cell[index]!.click()
   }
 
   public async close_all() {
@@ -355,7 +356,7 @@ var text_editor_manipulator: Text_Editor_Manipulator
 test('D1', async ({ page }) => {
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
-  expect(text_editor_manipulator.cells_under_test.length).toEqual(4)
+  expect(text_editor_manipulator.code_cell.length).toEqual(4)
   const args_set: Cell_Containerizer_Manipulation_Arguments[] = [
     {
       outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
@@ -378,8 +379,9 @@ test('D1', async ({ page }) => {
       base_image: 'r',
     },
   ]
-  for (const args in args_set) {
-
+  for (const [ index, args ] of args_set.entries()) {
+    await text_editor_manipulator.select_code_cell(index)
+    await setTimeout(preset_action_delay.medium)
   }
   await text_editor_manipulator.close_all()
   await setTimeout(preset_action_delay.medium)
