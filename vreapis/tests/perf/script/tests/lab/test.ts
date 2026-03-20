@@ -323,7 +323,10 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async toggle() {
-    await this.Cell_Containerizer_tab.click()
+    while (await this.visible() === false) {
+      await this.Cell_Containerizer_tab.click()
+      await setTimeout(preset_action_delay.short)
+    }
   }
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
@@ -365,6 +368,9 @@ test('D1', async ({ page }) => {
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
   expect(text_editor_manipulator.cells_under_test.length).toEqual(4)
+  const args: Cell_Containerizer_Manipulation_Arguments[] = [
+
+  ]
   await text_editor_manipulator.close_all()
   await setTimeout(preset_action_delay.medium)
 })
