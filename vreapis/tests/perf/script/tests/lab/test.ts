@@ -25,6 +25,7 @@ const enum preset_action_delay {
   short = 500,
   medium = 1000,
   long = 2000,
+  extra_long = 4000,
 }
 
 const original_log_method_factory = log.methodFactory
@@ -79,7 +80,7 @@ class File_Browser_Manipulator {
   public async toggle() { // Switch to the file browser tab by clicking its icon in the main sidebar
     File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
     await this.file_browser_tab_icon.click()
-    await setTimeout(preset_action_delay.short)
+    // await setTimeout(preset_action_delay.short)
     File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
   }
 
@@ -147,6 +148,8 @@ class Running_Session_Manipulator {
   public running_sessions_tab!: Locator
   public running_sessions_tab_icon!: Locator
   public running_sessions_section!: Locator
+  public Open_Tabs_div!: Locator
+  public Kernels_div!: Locator
   public Close_All_button!: Locator
   public Shut_Down_All_button!: Locator
 
@@ -165,9 +168,11 @@ class Running_Session_Manipulator {
     this.running_sessions_tab_icon = this.running_sessions_tab.locator('path')
     while (await this.visible() === false) { await this.toggle() } // To let Running Sessions Section be loaded [otherwise the tests will be stuck and finally timeout]
     this.running_sessions_section = this.page.getByRole('region', { name: 'Running Sessions section' })
-    const buttons = this.running_sessions_section.getByRole('button')
-    this.Close_All_button = buttons.filter({ hasText: 'Close All' })
-    this.Shut_Down_All_button = buttons.filter({ hasText: 'Shut Down All' })
+    const divs = this.running_sessions_section.locator('> div')
+    this.Open_Tabs_div = divs.filter({ hasText: 'Open Tabs' })
+    this.Kernels_div = divs.filter({ hasText: 'Kernels' })
+    this.Close_All_button = this.Open_Tabs_div.getByRole('button', { name: 'Close All' })
+    this.Shut_Down_All_button = this.Kernels_div.getByRole('button', { name: 'Shut Down All' })
   }
 
   public async visible(): Promise<boolean> {
@@ -175,18 +180,19 @@ class Running_Session_Manipulator {
   }
 
   public async toggle() {
-    await this.running_sessions_tab_icon.click()
+    Running_Session_Manipulator.logger[this.toggle.name]!.info(`Toggling the running sessions tab...`)
+    await this.running_sessions_tab.click()
   }
 
   public async close_all_tabs() {
     while (await this.visible() === false) {
       await this.toggle()
-      await setTimeout(preset_action_delay.short)
+      await setTimeout(preset_action_delay.medium)
     }
     const disabled = await this.Close_All_button.getAttribute('disabled')
-    if (disabled !== null) {
+    if (disabled === null) {
       await this.Close_All_button.click()
-      await setTimeout(preset_action_delay.short)
+      await setTimeout(preset_action_delay.medium)
       const dialog = this.page.locator('body > div').filter({ hasText: 'Close All?' })
       const confirm_button = dialog.getByRole('button').filter({ hasText: 'Close All' })
       await confirm_button.click()
@@ -196,14 +202,14 @@ class Running_Session_Manipulator {
   public async shut_down_all_kernels() {
     while (await this.visible() === false) {
       await this.toggle()
-      await setTimeout(preset_action_delay.short)
+      await setTimeout(preset_action_delay.medium)
     }
     const disabled = await this.Shut_Down_All_button.getAttribute('disabled')
-    if (disabled !== null) {
+    if (disabled === null) {
       await this.Shut_Down_All_button.click()
-      await setTimeout(preset_action_delay.short)
+      await setTimeout(preset_action_delay.medium)
       const dialog = this.page.locator('body > div').filter({ hasText: 'Shut Down All?' })
-      const confirm_button = dialog.getByRole('button').filter({ hasText: 'Shuw Down All' })
+      const confirm_button = dialog.getByRole('button').filter({ hasText: 'Shut Down All' })
       await confirm_button.click()
     }
   }
@@ -264,7 +270,7 @@ class Text_Editor_Manipulator {
 
   public async close_all() {
     await this.running_session_manipulator.close_all_tabs()
-    await setTimeout(preset_action_delay.short, 1000)
+    await setTimeout(preset_action_delay.medium)
     await this.running_session_manipulator.shut_down_all_kernels()
   }
 }
@@ -300,7 +306,7 @@ var running_session_manipulator: Running_Session_Manipulator
 test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
   running_session_manipulator = new Running_Session_Manipulator(page)
-  // await running_session_manipulator.init()
+  await running_session_manipulator.init()
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
   await setTimeout(preset_action_delay.long)
@@ -318,5 +324,6 @@ test('D1', async ({ page }) => {
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
   expect(text_editor_manipulator.cells_under_test.length).toEqual(4)
-  // await text_editor_manipulator.close_all()
+  await text_editor_manipulator.close_all()
+  await setTimeout(preset_action_delay.medium)
 })
