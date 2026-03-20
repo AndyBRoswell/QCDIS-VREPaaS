@@ -219,6 +219,7 @@ class Text_Editor_Manipulator {
   public page!: Page
   public file_browser_manipulator!: File_Browser_Manipulator
   public running_session_manipulator!: Running_Session_Manipulator
+  public cell_containerizer_manipulator!: Cell_Containerizer_Manipulator
   public main!: Locator
   public tab_list!: Locator // Reference changes once all tabs are closed and the new launcher is automatically present again
   public associated_file: string = ''
@@ -232,10 +233,11 @@ class Text_Editor_Manipulator {
     for (const member of instance_members) { Text_Editor_Manipulator.logger[member] = log.getLogger(`${Text_Editor_Manipulator.name}.${member}`) }
   }
 
-  public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator, running_session_manipulator: Running_Session_Manipulator) {
+  public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator, running_session_manipulator: Running_Session_Manipulator, cell_containerizer_manipulator: Cell_Containerizer_Manipulator) {
     this.page = page
     this.file_browser_manipulator = file_browser_manipulator
     this.running_session_manipulator = running_session_manipulator
+    this.cell_containerizer_manipulator = cell_containerizer_manipulator
     this.main = this.page.getByRole('main')
   }
 
@@ -290,6 +292,7 @@ class Cell_Containerizer_Manipulator {
   public Parameters_div!: Locator
   public Dependencies_div!: Locator
   public Base_Image_div!: Locator
+  public Create_button!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(Cell_Containerizer_Manipulator.prototype)
@@ -302,8 +305,8 @@ class Cell_Containerizer_Manipulator {
 
   public async init() {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
-    this.Cell_Containerizer_tab = this.main_sidebar.locator('[data-id="lifewatch/panel]"')
-    while (await this.visible() === false) { await this.toggle() } // To let Cell Containerizer Panel be loaded [otherwise the tests will be stuck and finally timeout]
+    this.Cell_Containerizer_tab = this.main_sidebar.locator('[data-id="lifewatch/panel"]')
+    await this.toggle() // To let Cell Containerizer Panel be loaded [otherwise the tests will be stuck and finally timeout]
     this.Cell_Containerizer = this.page.locator("#lifewatch/panel")
   }
 
@@ -351,10 +354,12 @@ test.beforeEach(async ({ page }) => {
 //   await expect(page).toHaveTitle(/JupyterLab/)
 // })
 
+var cell_containerizer_manipulator: Cell_Containerizer_Manipulator
 var text_editor_manipulator: Text_Editor_Manipulator
 
 test('D1', async ({ page }) => {
-  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator)
+  cell_containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
+  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, cell_containerizer_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
   expect(text_editor_manipulator.code_cell.length).toEqual(4)
   const args_set: Cell_Containerizer_Manipulation_Arguments[] = [
@@ -379,6 +384,7 @@ test('D1', async ({ page }) => {
       base_image: 'r',
     },
   ]
+  await cell_containerizer_manipulator.init()
   for (const [ index, args ] of args_set.entries()) {
     await text_editor_manipulator.select_code_cell(index)
     await setTimeout(preset_action_delay.medium)
