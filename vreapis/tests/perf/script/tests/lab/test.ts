@@ -62,7 +62,7 @@ class File_Browser_Manipulator {
   public async init() {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.file_browser_tab = this.main_sidebar.locator(`[data-id="filebrowser"]`)
-    this.file_browser_tab_icon = this.file_browser_tab.locator('path') // Locate the only clickable child
+    this.file_browser_tab_icon = this.file_browser_tab.locator('path') // Locate the only clickable child. I don't know why I must click the <path> here while I don't need this for manipulations of running sessions tab
     while (await this.visible() === false) { await this.toggle() } // To let File Browser Section be loaded [otherwise the tests will be stuck and finally timeout]
     this.file_browser_section = this.page.getByRole('region', { name: 'File Browser Section' }) // Locate the file browser
     this.file_list = this.file_browser_section.locator(`ul`) // Get the file list for tests
@@ -279,14 +279,16 @@ class Cell_Containerizer_Manipulator {
   public main_sidebar!: Locator
 
   static {
-
+    const instance_members = Object.getOwnPropertyNames(Cell_Containerizer_Manipulator.prototype)
+    for (const member of instance_members) { Cell_Containerizer_Manipulator.logger[member] = log.getLogger(`${Cell_Containerizer_Manipulator.name}.${member}`) }
   }
 
   public constructor(page: Page) {
-
+    this.page = page
   }
 
   public async init() {
+    this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
 
   }
 }
