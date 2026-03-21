@@ -11,7 +11,7 @@ type TypeScript_Identifier = string
 type Logger_Map = { [key: TypeScript_Identifier]: Logger }
 type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
 type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
-type Supported_Variable_Types = "Integer" | "Float" | "String" | "List"
+type Supported_Variable_Types = "Integer" | "Float" | "String" | "List" | 'int' | 'float' | 'string' | 'list'
 type Cell_Containerizer_Manipulation_Arguments = {
   [key: string]: string | { [key: string]: string }
 } & {
@@ -283,6 +283,8 @@ class Text_Editor_Manipulator {
 class Cell_Containerizer_Manipulator {
   private static logger: Logger_Map = {}
 
+  public static categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
+
   public page!: Page
   public main_sidebar!: Locator
   public Cell_Containerizer_tab!: Locator
@@ -332,10 +334,23 @@ class Cell_Containerizer_Manipulator {
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
     await this.toggle()
-    if ('inputs' in args) {
-      this.Inputs_div = this.Cell_Containerizer.locator('div').filter({ has: this.Cell_Containerizer.locator(':scope > *', { hasText: /Inputs/ }) })
-      for (const [ identifier, type ] of Object.entries(args.inputs!)) {
-
+    for (const category of Cell_Containerizer_Manipulator.categories_to_fill) {
+      if (category in args) {
+        this.Inputs_div = this.Cell_Containerizer.locator('div').filter({ has: this.Cell_Containerizer.locator(':scope > *', { hasText: /Inputs/ }) })
+        for (const [ identifier, type ] of Object.entries(args[category]!)) {
+          const rows = await this.Inputs_div.getByRole('row').all()
+          for (const row of rows) {
+            const var_name = row.getByRole('cell').first()
+            const type_combo = row.locator('input')
+            await type_combo.click()
+            await setTimeout(preset_action_delay.extra_short)
+            const dropdown_div = this.page.locator('body > div[role="presentation"]')
+            const dropdown_menu = dropdown_div.getByRole('listbox')
+            const target_item = dropdown_menu.getByText(type, { exact: true })
+            await target_item.click()
+            await setTimeout(preset_action_delay.extra_short)
+          }
+        }
       }
     }
   }
@@ -406,7 +421,8 @@ test('D1', async ({ page }) => {
   for (const [ index, args ] of args_set.entries()) {
     await text_editor_manipulator.select_code_cell(index)
     await cell_containerizer_manipulator.wait_until_completion_of_analysis()
-    // await setTimeout(preset_action_delay.medium)
+    await cell_containerizer_manipulator.fill(args)
+    await setTimeout(preset_action_delay.medium)
   }
   await text_editor_manipulator.close_all()
   await setTimeout(preset_action_delay.medium)
