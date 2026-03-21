@@ -287,6 +287,7 @@ class Cell_Containerizer_Manipulator {
   public main_sidebar!: Locator
   public Cell_Containerizer_tab!: Locator
   public Cell_Containerizer!: Locator
+  public selection_area!: Locator
   public Inputs_div!: Locator
   public Outputs_div!: Locator
   public Parameters_div!: Locator
@@ -320,6 +321,10 @@ class Cell_Containerizer_Manipulator {
       await this.Cell_Containerizer_tab.click()
       await setTimeout(preset_action_delay.short)
     }
+  }
+
+  public wait_until_completion_of_analysis() {
+
   }
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
