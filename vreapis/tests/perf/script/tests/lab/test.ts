@@ -308,7 +308,7 @@ class Cell_Containerizer_Manipulator {
     this.main_sidebar = this.page.getByRole('complementary', { name: 'main sidebar' })
     this.Cell_Containerizer_tab = this.main_sidebar.locator('[data-id="lifewatch/panel"]')
     await this.toggle() // To let Cell Containerizer Panel be loaded [otherwise the tests will be stuck and finally timeout]
-    this.Cell_Containerizer = this.page.locator("#lifewatch/panel")
+    this.Cell_Containerizer = this.page.locator(String.raw`#lifewatch\/panel`)
     this.Create_button = this.Cell_Containerizer.getByRole('button')
   }
 
@@ -323,8 +323,10 @@ class Cell_Containerizer_Manipulator {
     }
   }
 
-  public wait_until_completion_of_analysis() {
-
+  public async wait_until_completion_of_analysis() {
+    const analyzing_message = this.Cell_Containerizer.getByText(/Analyzing notebook/).first()
+    await analyzing_message.waitFor({ state: 'visible' })
+    await analyzing_message.waitFor({ state: 'detached' })
   }
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
@@ -392,9 +394,12 @@ test('D1', async ({ page }) => {
     },
   ]
   await cell_containerizer_manipulator.init()
+  await text_editor_manipulator.select_code_cell(1)
+  await cell_containerizer_manipulator.wait_until_completion_of_analysis()
   for (const [ index, args ] of args_set.entries()) {
     await text_editor_manipulator.select_code_cell(index)
-    await setTimeout(preset_action_delay.medium)
+    await cell_containerizer_manipulator.wait_until_completion_of_analysis()
+    // await setTimeout(preset_action_delay.medium)
   }
   await text_editor_manipulator.close_all()
   await setTimeout(preset_action_delay.medium)
