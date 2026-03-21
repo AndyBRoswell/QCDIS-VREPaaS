@@ -324,6 +324,7 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async wait_until_completion_of_analysis() {
+    await this.toggle()
     const analyzing_message = this.Cell_Containerizer.getByText(/Analyzing notebook/).first()
     await analyzing_message.waitFor({ state: 'visible' })
     await analyzing_message.waitFor({ state: 'detached' })
@@ -331,10 +332,16 @@ class Cell_Containerizer_Manipulator {
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
     await this.toggle()
+    if ('inputs' in args) {
+      this.Inputs_div = this.Cell_Containerizer.locator('div').filter({ has: this.Cell_Containerizer.locator(':scope > *', { hasText: /Inputs/ }) })
+      for (const [ identifier, type ] of Object.entries(args.inputs!)) {
 
+      }
+    }
   }
 
   public async create() {
+    await this.toggle()
 
   }
 }
