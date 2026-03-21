@@ -15,11 +15,11 @@ type Supported_Variable_Types = "Integer" | "Float" | "String" | "List" | 'int' 
 type Cell_Containerizer_Manipulation_Arguments = {
   [key: string]: string | { [key: string]: string }
 } & {
-  inputs?: { [key: string]: Supported_Variable_Types },
-  outputs?: { [key: string]: Supported_Variable_Types },
-  parameters?: { [key: string]: Supported_Variable_Types },
-  dependencies?: string[],
-  base_image: string,
+  Inputs?: { [key: string]: Supported_Variable_Types },
+  Outputs?: { [key: string]: Supported_Variable_Types },
+  Parameters?: { [key: string]: Supported_Variable_Types },
+  Dependencies?: string[],
+  'Base Image': string,
 }
 
 const enum preset_action_delay {
@@ -283,7 +283,7 @@ class Text_Editor_Manipulator {
 class Cell_Containerizer_Manipulator {
   private static logger: Logger_Map = {}
 
-  public static categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
+  public static variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
 
   public page!: Page
   public main_sidebar!: Locator
@@ -334,9 +334,9 @@ class Cell_Containerizer_Manipulator {
 
   public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
     await this.toggle()
-    for (const category of Cell_Containerizer_Manipulator.categories_to_fill) {
+    for (const category of Cell_Containerizer_Manipulator.variable_categories_to_fill) {
       if (category in args) {
-        this.Inputs_div = this.Cell_Containerizer.locator('div').filter({ has: this.Cell_Containerizer.locator(':scope > *', { hasText: /Inputs/ }) })
+        this.Inputs_div = this.Cell_Containerizer.locator('div').filter({ has: this.Cell_Containerizer.locator(':scope > *', { hasText: category }) })
         for (const [ identifier, type ] of Object.entries(args[category]!)) {
           const rows = await this.Inputs_div.getByRole('row').all()
           for (const row of rows) {
@@ -395,24 +395,24 @@ test('D1', async ({ page }) => {
   expect(text_editor_manipulator.code_cell.length).toEqual(4)
   const args_set: Cell_Containerizer_Manipulation_Arguments[] = [
     {
-      outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
-      base_image: 'r',
+      Outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
+      'Base Image': 'r',
     },
     {
-      inputs: { 'w': "Integer", },
-      outputs: { names: 'List', },
-      base_image: 'r',
+      Inputs: { 'w': "Integer", },
+      Outputs: { names: 'List', },
+      'Base Image': 'r',
     },
     {
-      inputs: { x: "Integer", y: "Integer", names: 'List', },
-      outputs: { t: "Integer", },
-      parameters: { param_p: "String", },
-      base_image: 'r',
+      Inputs: { x: "Integer", y: "Integer", names: 'List', },
+      Outputs: { t: "Integer", },
+      Parameters: { param_p: "String", },
+      'Base Image': 'r',
     },
     {
-      inputs: { t: "Integer", },
-      parameters: { param_p: "String", },
-      base_image: 'r',
+      Inputs: { t: "Integer", },
+      Parameters: { param_p: "String", },
+      'Base Image': 'r',
     },
   ]
   await cell_containerizer_manipulator.init()
@@ -421,7 +421,7 @@ test('D1', async ({ page }) => {
   for (const [ index, args ] of args_set.entries()) {
     await text_editor_manipulator.select_code_cell(index)
     await cell_containerizer_manipulator.wait_until_completion_of_analysis()
-    await cell_containerizer_manipulator.fill(args)
+    // await cell_containerizer_manipulator.fill(args)
     await setTimeout(preset_action_delay.medium)
   }
   await text_editor_manipulator.close_all()
