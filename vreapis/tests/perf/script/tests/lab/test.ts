@@ -337,8 +337,7 @@ class Cell_Containerizer_Manipulator {
     await this.toggle()
     for (const category of Cell_Containerizer_Manipulator.variable_categories_to_fill) {
       if (category in args) {
-        // const selection_area = this.Cell_Containerizer.locator('div').filter({ has: this.Cell_Containerizer.locator(':scope > *', { hasText: category }) })
-        const selection_area = this.Cell_Containerizer.locator('div > *').filter({ hasText: category }).locator('..')
+        const selection_area = this.Cell_Containerizer.locator('div').filter({has: this.page.locator(':scope > :text-is("' + category + '")')}) // use this.page as execution context
         const target_type: Variable_Type_Map = args[category] as Variable_Type_Map
         const rows = await selection_area.locator('tr').all()
         for (const row of rows) {
@@ -413,7 +412,7 @@ test('D1', async ({ page }) => {
     },
     {
       Inputs: { t: "Integer", },
-      Parameters: { param_p: "String", },
+      Parameters: { param_a: "String", },
       'Base Image': 'r',
     },
   ]
