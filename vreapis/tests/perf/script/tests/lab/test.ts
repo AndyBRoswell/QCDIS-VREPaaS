@@ -356,7 +356,7 @@ class Cell_Containerizer_Manipulator {
     }
     const base_image_selection_area = this.Cell_Containerizer.locator('div').filter({ has: this.page.locator(':scope > :text-is("Base Image")') })
     const base_image_combo = base_image_selection_area.getByRole('combobox')
-    base_image_combo.click()
+    await base_image_combo.click()
     await setTimeout(preset_action_delay.short)
     const base_image_list = base_image_selection_area.getByRole('listbox')
     const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
@@ -427,9 +427,11 @@ test('D1', async ({ page }) => {
   await cell_containerizer_manipulator.init()
   await text_editor_manipulator.select_code_cell(1)
   await cell_containerizer_manipulator.wait_until_completion_of_analysis()
+  await setTimeout(preset_action_delay.short)
   for (const [ index, args ] of args_set.entries()) {
     await text_editor_manipulator.select_code_cell(index)
     await cell_containerizer_manipulator.wait_until_completion_of_analysis()
+    await setTimeout(preset_action_delay.short)
     await cell_containerizer_manipulator.fill(args)
     await setTimeout(preset_action_delay.medium)
   }
