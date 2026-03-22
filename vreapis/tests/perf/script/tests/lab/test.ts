@@ -312,7 +312,7 @@ class Cell_Containerizer_Manipulator {
     this.Cell_Containerizer_tab = this.main_sidebar.locator('[data-id="lifewatch/panel"]')
     await this.toggle() // To let Cell Containerizer Panel be loaded [otherwise the tests will be stuck and finally timeout]
     this.Cell_Containerizer = this.page.locator(String.raw`#lifewatch\/panel`)
-    this.Create_button = this.Cell_Containerizer.getByRole('button')
+    this.Create_button = this.Cell_Containerizer.getByRole('button', { name: 'Create', exact: true })
   }
 
   public async visible(): Promise<boolean> {
@@ -333,7 +333,7 @@ class Cell_Containerizer_Manipulator {
     await analyzing_message.waitFor({ state: 'detached' })
   }
 
-  public async fill(args: Cell_Containerizer_Manipulation_Arguments) {
+  public async fill_and_create(args: Cell_Containerizer_Manipulation_Arguments) {
     await this.toggle()
     for (const category of Cell_Containerizer_Manipulator.variable_categories_to_fill) {
       if (category in args) {
@@ -362,11 +362,11 @@ class Cell_Containerizer_Manipulator {
     const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
     await target_base_image_item.click()
     await setTimeout(preset_action_delay.short)
-  }
-
-  public async create() {
-    await this.toggle()
-
+    await this.Create_button.click()
+    const success_message = this.page.getByTestId('CheckCircleOutlineIcon')
+    await success_message.waitFor()
+    await setTimeout(preset_action_delay.short)
+    await this.Cell_Containerizer_tab.click()
   }
 }
 
@@ -432,7 +432,7 @@ test('D1', async ({ page }) => {
     await text_editor_manipulator.select_code_cell(index)
     await cell_containerizer_manipulator.wait_until_completion_of_analysis()
     await setTimeout(preset_action_delay.short)
-    await cell_containerizer_manipulator.fill(args)
+    await cell_containerizer_manipulator.fill_and_create(args)
     await setTimeout(preset_action_delay.medium)
   }
   await text_editor_manipulator.close_all()
