@@ -337,23 +337,31 @@ class Cell_Containerizer_Manipulator {
     await this.toggle()
     for (const category of Cell_Containerizer_Manipulator.variable_categories_to_fill) {
       if (category in args) {
-        const selection_area = this.Cell_Containerizer.locator('div').filter({has: this.page.locator(':scope > :text-is("' + category + '")')}) // use this.page as execution context
+        const variable_type_selection_area = this.Cell_Containerizer.locator('div').filter({has: this.page.locator(':scope > :text-is("' + category + '")')}) // use this.page as execution context
         const target_type: Variable_Type_Map = args[category] as Variable_Type_Map
-        const rows = await selection_area.locator('tr').all()
+        const rows = await variable_type_selection_area.locator('tr').all()
         for (const row of rows) {
           const header = await row.getByRole('cell').all()
           const var_name = await header[0]!.innerText()
           const type_combo = header[1]!.getByRole('button')
           await type_combo.click()
-          await setTimeout(preset_action_delay.extra_short)
+          await setTimeout(preset_action_delay.short)
           const dropdown_div = this.page.locator('body > div[role="presentation"]')
           const dropdown_menu = dropdown_div.getByRole('listbox')
           const target_item = dropdown_menu.getByText(target_type[var_name]!, { exact: true })
           await target_item.click()
-          await setTimeout(preset_action_delay.extra_short)
+          await setTimeout(preset_action_delay.short)
         }
       }
     }
+    const base_image_selection_area = this.Cell_Containerizer.locator('div').filter({ has: this.page.locator(':scope > :text-is("Base Image")') })
+    const base_image_combo = base_image_selection_area.getByRole('combobox')
+    base_image_combo.click()
+    await setTimeout(preset_action_delay.short)
+    const base_image_list = base_image_selection_area.getByRole('listbox')
+    const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
+    await target_base_image_item.click()
+    await setTimeout(preset_action_delay.short)
   }
 
   public async create() {
