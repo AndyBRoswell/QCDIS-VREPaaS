@@ -287,15 +287,10 @@ class Cell_Containerizer_Manipulator {
   public static variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
 
   public page!: Page
+  public HTML_body!: Locator
   public main_sidebar!: Locator
   public Cell_Containerizer_tab!: Locator
   public Cell_Containerizer!: Locator
-  public selection_area!: Locator
-  public Inputs_div!: Locator
-  public Outputs_div!: Locator
-  public Parameters_div!: Locator
-  public Dependencies_div!: Locator
-  public Base_Image_div!: Locator
   public Create_button!: Locator
 
   static {
@@ -305,6 +300,7 @@ class Cell_Containerizer_Manipulator {
 
   public constructor(page: Page) {
     this.page = page
+    this.HTML_body = page.locator('body')
   }
 
   public async init() {
@@ -363,10 +359,11 @@ class Cell_Containerizer_Manipulator {
     await target_base_image_item.click()
     await setTimeout(preset_action_delay.short)
     await this.Create_button.click()
-    const success_message = this.page.getByTestId('CheckCircleOutlineIcon')
-    await success_message.waitFor()
+    const success_icon = this.page.getByTestId('CheckCircleOutlineIcon')
+    await success_icon.waitFor()
     await setTimeout(preset_action_delay.short)
-    await this.Cell_Containerizer_tab.click()
+    const backdrop_wrapper = this.page.locator('body > div').filter({ has: success_icon })
+    await backdrop_wrapper.dispatchEvent('click') // I don't know why locator.click doesn't work
   }
 }
 
