@@ -1,48 +1,12 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
-import log, { type Logger } from 'loglevel'
+import log from 'loglevel'
 import Node_Path from 'node:path'
 import { setTimeout } from "node:timers/promises";
-import { text } from "node:stream/consumers";
 
-type Milliseconds = number
-type Pathname = string
-type Segmented_Pathname = Pathname[]
-type TypeScript_Identifier = string
-type Logger_Map = { [key: TypeScript_Identifier]: Logger }
-type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
-type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
-type Supported_Variable_Types = "Integer" | "Float" | "String" | "List" //| 'int' | 'float' | 'string' | 'list'
-type Variable_Type_Map = { [key: string]: string}
-type Cell_Containerizer_Manipulation_Arguments = {
-  [key: string]: string | string[] | Variable_Type_Map
-} & {
-  Inputs?: { [key: string]: Supported_Variable_Types },
-  Outputs?: { [key: string]: Supported_Variable_Types },
-  Parameters?: { [key: string]: Supported_Variable_Types },
-  Dependencies?: string[],
-  'Base Image': string,
-}
-
-const enum preset_action_delay {
-  extra_short = 250,
-  short = 500,
-  medium = 1000,
-  long = 2000,
-  extra_long = 4000,
-}
-
-const original_log_method_factory = log.methodFactory
-log.methodFactory = (log_method_name, log_level, logger_name) => {
-  const raw = original_log_method_factory(log_method_name, log_level, logger_name)
-  return (...args) => {
-    const time_point = new Date().toISOString()
-    const severity = log_method_name === 'error' ? 'ERROR' : log_method_name === 'warn' ? 'Warning' : log_method_name
-    raw(`[${time_point}] [${severity}] [${String(logger_name)}]`, ...args)
-  }
-}
+import * as Util from '../util'
 
 class File_Browser_Manipulator {
-  private static logger: Logger_Map = {}
+  private static logger: Util.Logger_Map = {}
 
   public page!: Page
   public main_sidebar!: Locator
@@ -84,7 +48,7 @@ class File_Browser_Manipulator {
     while (await this.visible() === false) { // If the file browser tab is already visible, do nothing [otherwise the tests will be stuck and finally timeout]
       File_Browser_Manipulator.logger[this.toggle.name]!.info(`Toggling the file browser tab...`)
       await this.file_browser_tab_icon.click()
-      await setTimeout(preset_action_delay.short)
+      await setTimeout(Util.preset_action_delay.short)
       File_Browser_Manipulator.logger[this.toggle.name]!.info('File browser tab clicked')
     }
   }
@@ -97,17 +61,17 @@ class File_Browser_Manipulator {
     return r
   }
 
-  public static segmented_path(path: Pathname): Segmented_Pathname { return path.split(Node_Path.sep).filter(Boolean) } // Break path string in to segments for the convenience of comparison. Blank segments are ignored so inputs like `a///b` are handled correctly
+  public static segmented_path(path: Util.Pathname): Util.Segmented_Pathname { return path.split(Node_Path.sep).filter(Boolean) } // Break path string in to segments for the convenience of comparison. Blank segments are ignored so inputs like `a///b` are handled correctly
 
-  public static identical_Pathname(p: Pathname, q: Pathname): boolean {
+  public static identical_Pathname(p: Util.Pathname, q: Util.Pathname): boolean {
     return this.identical_Segmented_Pathname(this.segmented_path(p), this.segmented_path(q))
   }
 
-  public static identical_Segmented_Pathname(p: Segmented_Pathname, q: Segmented_Pathname): boolean { // Determine if 2 paths are identical
+  public static identical_Segmented_Pathname(p: Util.Segmented_Pathname, q: Util.Segmented_Pathname): boolean { // Determine if 2 paths are identical
     return p.length === q.length && p.every((value, index) => value === q[index])
   }
 
-  public async go_home(delay: Milliseconds = preset_action_delay.medium) { // Go to the home directory
+  public async go_home(delay: Util.Milliseconds = Util.preset_action_delay.medium) { // Go to the home directory
     await this.toggle()
     File_Browser_Manipulator.logger[this.go_home.name]!.info('Going back home...')
     do {
@@ -117,7 +81,7 @@ class File_Browser_Manipulator {
     } while (await this.current_directory() !== '/')
   }
 
-  public async open(path: Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
+  public async open(path: Util.Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
     File_Browser_Manipulator.logger[this.open.name]!.info(`Dest: ${path}`)
     const path_segments = File_Browser_Manipulator.segmented_path(path)
     await this.toggle()
@@ -130,13 +94,13 @@ class File_Browser_Manipulator {
         if (await entry.getAttribute('data-isdir') === 'false') { throw new Error(`Non-leaf file system node ${segment} is not a directory`) }
       } else {
         await entry.dblclick()
-        await setTimeout(preset_action_delay.medium)
+        await setTimeout(Util.preset_action_delay.medium)
         break
       }
       target_path.push(segment)
       do {
         await entry.dblclick()
-        await setTimeout(preset_action_delay.medium)
+        await setTimeout(Util.preset_action_delay.medium)
 
       } while (File_Browser_Manipulator.identical_Segmented_Pathname(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entered ${segment}`)
@@ -146,7 +110,7 @@ class File_Browser_Manipulator {
 }
 
 class Running_Session_Manipulator {
-  private static logger: Logger_Map = {}
+  private static logger: Util.Logger_Map = {}
 
   public page!: Page
   public main_sidebar!: Locator
@@ -185,7 +149,7 @@ class Running_Session_Manipulator {
   public async toggle() {
     while (await this.visible() === false) {
       await this.running_sessions_tab.click()
-      await setTimeout(preset_action_delay.short)
+      await setTimeout(Util.preset_action_delay.short)
     }
   }
 
@@ -194,7 +158,7 @@ class Running_Session_Manipulator {
     const disabled = await this.Close_All_button.getAttribute('disabled')
     if (disabled === null) {
       await this.Close_All_button.click()
-      await setTimeout(preset_action_delay.medium)
+      await setTimeout(Util.preset_action_delay.medium)
       const dialog = this.page.locator('body > div').filter({ hasText: 'Close All?' })
       const confirm_button = dialog.getByRole('button').filter({ hasText: 'Close All' })
       await confirm_button.click()
@@ -206,7 +170,7 @@ class Running_Session_Manipulator {
     const disabled = await this.Shut_Down_All_button.getAttribute('disabled')
     if (disabled === null) {
       await this.Shut_Down_All_button.click()
-      await setTimeout(preset_action_delay.medium)
+      await setTimeout(Util.preset_action_delay.medium)
       const dialog = this.page.locator('body > div').filter({ hasText: 'Shut Down All?' })
       const confirm_button = dialog.getByRole('button').filter({ hasText: 'Shut Down All' })
       await confirm_button.click()
@@ -215,7 +179,7 @@ class Running_Session_Manipulator {
 }
 
 class Text_Editor_Manipulator {
-  private static logger: Logger_Map = {}
+  private static logger: Util.Logger_Map = {}
 
   public page!: Page
   public file_browser_manipulator!: File_Browser_Manipulator
@@ -242,7 +206,7 @@ class Text_Editor_Manipulator {
     this.main = this.page.getByRole('main')
   }
 
-  public async current_file(): Promise<File_Info> { // Get the pathname corresponding to the focused tab
+  public async current_file(): Promise<Util.File_Info> { // Get the pathname corresponding to the focused tab
     this.tab_list = this.main.getByRole('tablist')
     const focused_tab = this.tab_list.locator('[aria-selected="true"]')
     const title = await focused_tab.getAttribute('title') as string
@@ -276,13 +240,13 @@ class Text_Editor_Manipulator {
 
   public async close_all() {
     await this.running_session_manipulator.close_all_tabs()
-    await setTimeout(preset_action_delay.medium)
+    await setTimeout(Util.preset_action_delay.medium)
     await this.running_session_manipulator.shut_down_all_kernels()
   }
 }
 
 class Cell_Containerizer_Manipulator {
-  private static logger: Logger_Map = {}
+  private static logger: Util.Logger_Map = {}
 
   public static variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
 
@@ -318,7 +282,7 @@ class Cell_Containerizer_Manipulator {
   public async toggle() {
     while (await this.visible() === false) {
       await this.Cell_Containerizer_tab.click()
-      await setTimeout(preset_action_delay.short)
+      await setTimeout(Util.preset_action_delay.short)
     }
   }
 
@@ -329,39 +293,39 @@ class Cell_Containerizer_Manipulator {
     await analyzing_message.waitFor({ state: 'detached' })
   }
 
-  public async fill_and_create(args: Cell_Containerizer_Manipulation_Arguments) {
+  public async fill_and_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
     await this.toggle()
     for (const category of Cell_Containerizer_Manipulator.variable_categories_to_fill) {
       if (category in args) {
         const variable_type_selection_area = this.Cell_Containerizer.locator('div').filter({has: this.page.locator(':scope > :text-is("' + category + '")')}) // use this.page as execution context
-        const target_type: Variable_Type_Map = args[category] as Variable_Type_Map
+        const target_type: Util.Variable_Type_Map = args[category] as Util.Variable_Type_Map
         const rows = await variable_type_selection_area.locator('tr').all()
         for (const row of rows) {
           const header = await row.getByRole('cell').all()
           const var_name = await header[0]!.innerText()
           const type_combo = header[1]!.getByRole('button')
           await type_combo.click()
-          await setTimeout(preset_action_delay.short)
+          await setTimeout(Util.preset_action_delay.short)
           const dropdown_div = this.page.locator('body > div[role="presentation"]')
           const dropdown_menu = dropdown_div.getByRole('listbox')
           const target_item = dropdown_menu.getByText(target_type[var_name]!, { exact: true })
           await target_item.click()
-          await setTimeout(preset_action_delay.short)
+          await setTimeout(Util.preset_action_delay.short)
         }
       }
     }
     const base_image_selection_area = this.Cell_Containerizer.locator('div').filter({ has: this.page.locator(':scope > :text-is("Base Image")') })
     const base_image_combo = base_image_selection_area.getByRole('combobox')
     await base_image_combo.click()
-    await setTimeout(preset_action_delay.short)
+    await setTimeout(Util.preset_action_delay.short)
     const base_image_list = base_image_selection_area.getByRole('listbox')
     const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
     await target_base_image_item.click()
-    await setTimeout(preset_action_delay.short)
+    await setTimeout(Util.preset_action_delay.short)
     await this.Create_button.click()
     const success_icon = this.page.getByTestId('CheckCircleOutlineIcon')
     await success_icon.waitFor()
-    await setTimeout(preset_action_delay.short)
+    await setTimeout(Util.preset_action_delay.short)
     const backdrop_wrapper = this.page.locator('body > div').filter({ has: success_icon })
     await backdrop_wrapper.dispatchEvent('click') // I don't know why locator.click doesn't work
   }
@@ -382,7 +346,7 @@ test.beforeEach(async ({ page }) => {
   await running_session_manipulator.init()
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await setTimeout(preset_action_delay.long)
+  await setTimeout(Util.preset_action_delay.long)
   await file_browser_manipulator.open(test_root, true)
   expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
 })
@@ -399,7 +363,7 @@ test('D1', async ({ page }) => {
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, cell_containerizer_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
   expect(text_editor_manipulator.code_cell.length).toEqual(4)
-  const args_set: Cell_Containerizer_Manipulation_Arguments[] = [
+  const args_set: Util.Cell_Containerizer_Manipulation_Arguments[] = [
     {
       Outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
       'Base Image': 'r',
@@ -424,14 +388,14 @@ test('D1', async ({ page }) => {
   await cell_containerizer_manipulator.init()
   await text_editor_manipulator.select_code_cell(1)
   await cell_containerizer_manipulator.wait_until_completion_of_analysis()
-  await setTimeout(preset_action_delay.short)
+  await setTimeout(Util.preset_action_delay.short)
   for (const [ index, args ] of args_set.entries()) {
     await text_editor_manipulator.select_code_cell(index)
     await cell_containerizer_manipulator.wait_until_completion_of_analysis()
-    await setTimeout(preset_action_delay.short)
+    await setTimeout(Util.preset_action_delay.short)
     await cell_containerizer_manipulator.fill_and_create(args)
-    await setTimeout(preset_action_delay.medium)
+    await setTimeout(Util.preset_action_delay.medium)
   }
   await text_editor_manipulator.close_all()
-  await setTimeout(preset_action_delay.medium)
+  await setTimeout(Util.preset_action_delay.medium)
 })
