@@ -12,6 +12,9 @@ class File_Browser_Manipulator {
   public button_Minimize_or_Maximize_or_Restore_Tabset2!: Locator[]
   public tablist_TabSet2!: Locator
   public tab_files!: Locator
+  public tabpanel_Files!: Locator
+  public Selected_path_breadcrumb!: Locator
+  public location_element!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
@@ -34,6 +37,9 @@ class File_Browser_Manipulator {
     this.tablist_TabSet2 = this.region_TabSet2.getByRole('tablist', { name: 'TabSet2' })
     this.tab_files = this.tablist_TabSet2.locator('[role="tab"][aria-controls="rstudio_workbench_panel_files"]')
     await this.toggle()
+    this.tabpanel_Files = this.region_TabSet2.getByRole('tabpanel', { name: 'Files' })
+    this.Selected_path_breadcrumb = this.tabpanel_Files.getByLabel('Selected path breadcrumb')
+    this.location_element = this.Selected_path_breadcrumb.getByLabel('[aria-current="location"]')
   }
 
   public async visible() {
@@ -46,6 +52,8 @@ class File_Browser_Manipulator {
       await setTimeout(Util.preset_action_delay.short)
     }
   }
+
+
 }
 
 var file_browser_manipulator: File_Browser_Manipulator

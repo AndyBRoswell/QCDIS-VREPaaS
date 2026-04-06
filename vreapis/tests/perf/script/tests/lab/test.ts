@@ -4,6 +4,7 @@ import Node_Path from 'node:path'
 import { setTimeout } from "node:timers/promises";
 
 import * as Util from '../util'
+import type { Pathname } from "../util";
 
 class File_Browser_Manipulator {
   private static logger: Util.Logger_Map = {}
@@ -53,10 +54,10 @@ class File_Browser_Manipulator {
     }
   }
 
-  public async current_directory(): Promise<string> {
+  public async current_directory(): Promise<Pathname> {
     await this.toggle()
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(`Getting the current directory...`)
-    const r: string = await this.path_indicator.textContent() as string
+    const r = await this.path_indicator.textContent() as string
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(r)
     return r
   }
