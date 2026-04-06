@@ -24,21 +24,27 @@ class File_Browser_Manipulator {
 
   public async init() {
     this.region_TabSet2 = this.page.getByRole('region', { name: 'TabSet2' })
-    this.button_Minimize_or_Maximize_or_Restore_Tabset2 = await this.page.getByRole('button', { name: /(Minimize|Maximize|Restore) TabSet2/ }).all()
+    this.button_Minimize_or_Maximize_or_Restore_Tabset2 = await this.region_TabSet2.getByRole('button', { name: /(Minimize|Maximize|Restore) TabSet2/ }).all()
     for (const button of this.button_Minimize_or_Maximize_or_Restore_Tabset2) {
       if (await button.getAttribute('aria-label') === 'Maximize TabSet2') {
         await button.click() // Maximize file browser to make the UI as similar to JupyterLab [file browser + editor] as possible.
         await setTimeout(Util.preset_action_delay.medium)
       }
     }
+    this.tablist_TabSet2 = this.region_TabSet2.getByRole('tablist', { name: 'TabSet2' })
+    this.tab_files = this.tablist_TabSet2.locator('[role="tab"][aria-controls="rstudio_workbench_panel_files"]')
+    await this.toggle()
   }
 
   public async visible() {
-
+    return await this.tab_files.getAttribute('aria-selected') === 'true'
   }
 
   public async toggle() {
-
+    while (await this.visible() === false) {
+      await this.tab_files.click()
+      await setTimeout(Util.preset_action_delay.short)
+    }
   }
 }
 
@@ -58,7 +64,7 @@ test.beforeEach(async ({ page }) => {
   await setTimeout(Util.preset_action_delay.extra_long)
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await setTimeout(Util.preset_action_delay.extra_long)
+  await setTimeout(Util.preset_action_delay.medium)
 })
 
 test('sample test', async ({ page }) => {
