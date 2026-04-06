@@ -46,9 +46,19 @@ var file_browser_manipulator: File_Browser_Manipulator
 
 test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8787/')
+  await expect(page).toHaveTitle('RStudio Sign In')
+  const input_username = page.locator('input[name=username]')
+  const input_password = page.locator('input[name=password]')
+  const input_staySignedIn = page.locator('input[name=staySignedIn]')
+  const button_submit = page.locator('button[type=submit]')
+  await input_username.fill(process.env.RStudio_Server_Username!)
+  await input_password.fill(process.env.RStudio_Server_Password!)
+  await input_staySignedIn.check()
+  await button_submit.click()
+  await setTimeout(Util.preset_action_delay.extra_long)
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
-  await setTimeout(Util.preset_action_delay.long)
+  await setTimeout(Util.preset_action_delay.extra_long)
 })
 
 test('sample test', async ({ page }) => {
