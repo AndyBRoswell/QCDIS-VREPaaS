@@ -1,3 +1,4 @@
+import Node_Path from 'node:path'
 import log, { type Logger } from "loglevel";
 
 export type Milliseconds = number
@@ -34,5 +35,19 @@ log.methodFactory = (log_method_name, log_level, logger_name) => {
     const time_point = new Date().toISOString()
     const severity = log_method_name === 'error' ? 'ERROR' : log_method_name === 'warn' ? 'Warning' : log_method_name
     raw(`[${time_point}] [${severity}] [${String(logger_name)}]`, ...args)
+  }
+}
+
+export class Pathname_Operator {
+  public static segmented_Pathname(path: Pathname): Segmented_Pathname { // Break path string in to segments for the convenience of comparison. Blank segments are ignored so inputs like `a///b` are handled correctly
+    return path.split(Node_Path.sep).filter(Boolean)
+  }
+
+  public static identical_Pathname(p: Pathname, q: Pathname): boolean {
+    return this.identical_Segmented_Pathname(this.segmented_Pathname(p), this.segmented_Pathname(q))
+  }
+
+  public static identical_Segmented_Pathname(p: Segmented_Pathname, q: Segmented_Pathname): boolean { // Determine if 2 paths are identical
+    return p.length === q.length && p.every((value, index) => value === q[index])
   }
 }

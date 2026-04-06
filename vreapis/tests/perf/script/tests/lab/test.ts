@@ -1,10 +1,8 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import log from 'loglevel'
-import Node_Path from 'node:path'
 import { setTimeout } from "node:timers/promises";
 
 import * as Util from '../util'
-import type { Pathname } from "../util";
 
 class File_Browser_Manipulator {
   private static logger: Util.Logger_Map = {}
@@ -54,22 +52,12 @@ class File_Browser_Manipulator {
     }
   }
 
-  public async current_directory(): Promise<Pathname> {
+  public async current_directory(): Promise<Util.Pathname> {
     await this.toggle()
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(`Getting the current directory...`)
     const r = await this.path_indicator.textContent() as string
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(r)
     return r
-  }
-
-  public static segmented_path(path: Util.Pathname): Util.Segmented_Pathname { return path.split(Node_Path.sep).filter(Boolean) } // Break path string in to segments for the convenience of comparison. Blank segments are ignored so inputs like `a///b` are handled correctly
-
-  public static identical_Pathname(p: Util.Pathname, q: Util.Pathname): boolean {
-    return this.identical_Segmented_Pathname(this.segmented_path(p), this.segmented_path(q))
-  }
-
-  public static identical_Segmented_Pathname(p: Util.Segmented_Pathname, q: Util.Segmented_Pathname): boolean { // Determine if 2 paths are identical
-    return p.length === q.length && p.every((value, index) => value === q[index])
   }
 
   public async go_home(delay: Util.Milliseconds = Util.preset_action_delay.medium) { // Go to the home directory
@@ -84,7 +72,7 @@ class File_Browser_Manipulator {
 
   public async open(path: Util.Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
     File_Browser_Manipulator.logger[this.open.name]!.info(`Dest: ${path}`)
-    const path_segments = File_Browser_Manipulator.segmented_path(path)
+    const path_segments = Util.Pathname_Operator.segmented_Pathname(path)
     await this.toggle()
     if (home_as_relative_root) { await this.go_home() }
     const target_path: string[] = []
@@ -103,7 +91,7 @@ class File_Browser_Manipulator {
         await entry.dblclick()
         await setTimeout(Util.preset_action_delay.medium)
 
-      } while (File_Browser_Manipulator.identical_Segmented_Pathname(File_Browser_Manipulator.segmented_path(await this.current_directory()), target_path) === false)
+      } while (Util.Pathname_Operator.identical_Segmented_Pathname(Util.Pathname_Operator.segmented_Pathname(await this.current_directory()), target_path) === false)
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entered ${segment}`)
     }
     File_Browser_Manipulator.logger[this.open.name]!.info(`Arrived at ${path}`)
@@ -220,7 +208,7 @@ class Text_Editor_Manipulator {
 
   public async open(pathname: string) {
     const canonical_pathname = `${await this.file_browser_manipulator.current_directory()}/${pathname}`
-    while (File_Browser_Manipulator.identical_Pathname(canonical_pathname, (await this.current_file()).path) === false) {
+    while (Util.Pathname_Operator.identical_Pathname(canonical_pathname, (await this.current_file()).path) === false) {
       await this.file_browser_manipulator.open(pathname)
     }
     this.associated_file = canonical_pathname
@@ -349,7 +337,7 @@ test.beforeEach(async ({ page }) => {
   await file_browser_manipulator.init()
   await setTimeout(Util.preset_action_delay.long)
   await file_browser_manipulator.open(test_root, true)
-  expect(File_Browser_Manipulator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
+  expect(Util.Pathname_Operator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
 })
 
 // test('sample test', async ({ page }) => {

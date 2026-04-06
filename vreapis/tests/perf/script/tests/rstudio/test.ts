@@ -14,7 +14,7 @@ class File_Browser_Manipulator {
   public tab_files!: Locator
   public tabpanel_Files!: Locator
   public Selected_path_breadcrumb!: Locator
-  public location_element!: Locator
+  public path_indicator!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
@@ -39,7 +39,7 @@ class File_Browser_Manipulator {
     await this.toggle()
     this.tabpanel_Files = this.region_TabSet2.getByRole('tabpanel', { name: 'Files' })
     this.Selected_path_breadcrumb = this.tabpanel_Files.getByLabel('Selected path breadcrumb')
-    this.location_element = this.Selected_path_breadcrumb.getByLabel('[aria-current="location"]')
+    this.path_indicator = this.Selected_path_breadcrumb.getByLabel('[aria-current="location"]')
   }
 
   public async visible() {
@@ -51,6 +51,12 @@ class File_Browser_Manipulator {
       await this.tab_files.click()
       await setTimeout(Util.preset_action_delay.short)
     }
+  }
+
+  public async current_directory(): Promise<Util.Pathname> {
+    await this.toggle()
+    const r = await this.path_indicator.getAttribute('title') as string
+    return r
   }
 
 
