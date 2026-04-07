@@ -234,8 +234,6 @@ class Text_Editor_Manipulator {
 class Cell_Containerizer_Manipulator {
   private static logger: Util.Logger_Map = {}
 
-  // public static variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
-
   public page!: Page
   public HTML_body!: Locator
   public main_sidebar!: Locator
