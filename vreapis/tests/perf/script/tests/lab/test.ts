@@ -203,7 +203,7 @@ class Text_Editor_Manipulator {
     return { name: match[1]!, path: match[2]! }
   }
 
-  public async open(pathname: string) {
+  public async open(pathname: Util.Pathname) {
     const canonical_pathname = `${await this.file_browser_manipulator.current_directory()}/${pathname}`
     while (Util.Pathname_Operator.identical_Pathname(canonical_pathname, (await this.current_file()).path) === false) {
       await this.file_browser_manipulator.open(pathname)
