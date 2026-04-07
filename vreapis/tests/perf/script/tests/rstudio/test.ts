@@ -101,6 +101,7 @@ class Text_Editor_Manipulator {
   private static logger: Util.Logger_Map = {}
 
   public page!: Page
+  public HTML_body!: Locator
   public file_browser_manipulator!: File_Browser_Manipulator
   public region_Source!: Locator
   public tab_list!: Locator
@@ -113,23 +114,24 @@ class Text_Editor_Manipulator {
 
   public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
     this.page = page
+    this.HTML_body = page.locator('body')
     this.file_browser_manipulator = file_browser_manipulator
     this.region_Source = this.page.getByRole('region', { name: /^Source/ })
   }
 
-  public async current_file(): Promise<Util.File_Info> { // Get the pathname corresponding to the focused tab
+  public async get_current_tab(): Promise<Util.File_Info> { // Get the pathname corresponding to the focused tab
     this.tab_list = this.region_Source.getByRole('tablist')
     const tab_count = await this.tab_list.count()
     if (tab_count === 0) { return { name: '', path: '' } }
     this.current_tab = this.tab_list.locator('[aria-selected="true"]')
-    const tab_info = this.current_tab.locator('table[title]')
-    const name_element = tab_info.locator('td').filter({ hasText: /.+/ })
-    const name = await name_element.getAttribute('textContent') as string
-    const path = await tab_info.getAttribute('title') as string
+    const tab = this.current_tab.locator('table[title]')
+    const path = await tab.getAttribute('title') as string
+    const tab_text = await tab.textContent() as string
+    const name = tab_text.substring(0, tab_text.length - '*'.length) // remove the trailing `*`
     return { name: name, path: path }
   }
 
-  public async open(pathname: Util.Pathname) {
+  public async open(pathname: Util.Pathname): Promise<Util.File_Info> {
     await this.file_browser_manipulator.open(pathname)
     this.region_Source = this.page.getByRole('region', { name: /^Source/ }) // Re-locate the region after opening a file since the DOM has changed
     const maximize_button = this.region_Source.getByRole('button', { name: "Maximize Source" })
@@ -138,6 +140,16 @@ class Text_Editor_Manipulator {
       await setTimeout(Util.preset_action_delay.medium)
       this.region_Source = this.page.getByRole('region', { name: /^Source/ }) // Re-locate the region after maximizing since the DOM has changed
     }
+    return await this.get_current_tab()
+  }
+
+  public async close_all() {
+    await this.current_tab.click({ button: 'right' })
+    // const context_menu = this.HTML_body.locator('[aria-activedescendant]') // I don't know why this can't locate the menu
+    // const item_Close_All = context_menu.getByText('Close All', { exact: true })
+    const item_Close_All = this.HTML_body.getByRole('menuitem').filter({ hasText: /Close All$/})
+    await setTimeout(Util.preset_action_delay.medium)
+    await item_Close_All.click()
   }
 }
 
@@ -161,7 +173,6 @@ test.beforeEach(async ({ page }) => {
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true)
   expect(Util.Pathname_Operator.normalize(test_root), Util.Pathname_Operator.normalize(await file_browser_manipulator.current_directory())).toBeTruthy()
-  await setTimeout(Util.preset_action_delay.medium)
 })
 
 // test('sample test', async ({ page }) => {
@@ -173,5 +184,6 @@ var text_editor_manipulator: Text_Editor_Manipulator
 test('D1', async ({ page }) => {
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
   await text_editor_manipulator.open('D1.0.Rmd')
-
+  await text_editor_manipulator.close_all()
+  await setTimeout(Util.preset_action_delay.medium)
 })
