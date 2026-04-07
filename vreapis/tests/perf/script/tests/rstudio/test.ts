@@ -102,7 +102,7 @@ class Text_Editor_Manipulator {
 
   public page!: Page
   public file_browser_manipulator!: File_Browser_Manipulator
-  public main!: Locator
+  public region_Source!: Locator
   public tab_list!: Locator
   public current_tab!: Locator
 
@@ -114,11 +114,11 @@ class Text_Editor_Manipulator {
   public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
     this.page = page
     this.file_browser_manipulator = file_browser_manipulator
-    this.main = this.page.getByRole('main')
+    this.region_Source = this.page.getByRole('region', { name: /^Source/ })
   }
 
   public async current_file(): Promise<Util.File_Info> { // Get the pathname corresponding to the focused tab
-    this.tab_list = this.main.getByRole('tablist')
+    this.tab_list = this.region_Source.getByRole('tablist')
     const tab_count = await this.tab_list.count()
     if (tab_count === 0) { return { name: '', path: '' } }
     this.current_tab = this.tab_list.locator('[aria-selected="true"]')
@@ -131,6 +131,13 @@ class Text_Editor_Manipulator {
 
   public async open(pathname: Util.Pathname) {
     await this.file_browser_manipulator.open(pathname)
+    this.region_Source = this.page.getByRole('region', { name: /^Source/ }) // Re-locate the region after opening a file since the DOM has changed
+    const maximize_button = this.region_Source.getByRole('button', { name: "Maximize Source" })
+    if (await maximize_button.count() > 0) {
+      await maximize_button.click()
+      await setTimeout(Util.preset_action_delay.medium)
+      this.region_Source = this.page.getByRole('region', { name: /^Source/ }) // Re-locate the region after maximizing since the DOM has changed
+    }
   }
 }
 
@@ -165,6 +172,6 @@ var text_editor_manipulator: Text_Editor_Manipulator
 
 test('D1', async ({ page }) => {
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
-  await file_browser_manipulator.open('D1.0.Rmd')
+  await text_editor_manipulator.open('D1.0.Rmd')
 
 })
