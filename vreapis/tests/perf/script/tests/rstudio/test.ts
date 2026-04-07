@@ -37,7 +37,7 @@ class File_Browser_Manipulator {
       if (await button.getAttribute('aria-label') === 'Maximize TabSet2') {
         await button.click() // Maximize file browser to make the UI as similar to JupyterLab [file browser + editor] as possible.
         await setTimeout(Util.preset_action_delay.medium)
-        this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ })
+        this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ }) // Re-locate the region after maximizing since the DOM has changed
       }
     }
     this.tablist_TabSet2 = this.region_TabSet2.getByRole('tablist', { name: 'TabSet2' })
