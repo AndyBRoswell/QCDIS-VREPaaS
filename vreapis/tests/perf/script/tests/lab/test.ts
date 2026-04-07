@@ -339,12 +339,12 @@ test.beforeEach(async ({ page }) => {
 //   await expect(page).toHaveTitle(/JupyterLab/)
 // })
 
-var cell_containerizer_manipulator: Cell_Containerizer_Manipulator
+var Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 var text_editor_manipulator: Text_Editor_Manipulator
 
 test('D1', async ({ page }) => {
-  cell_containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
-  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, cell_containerizer_manipulator)
+  Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
+  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
   expect(text_editor_manipulator.code_cell.length).toEqual(4)
   const args_set: Util.Cell_Containerizer_Manipulation_Arguments[] = [
@@ -369,16 +369,16 @@ test('D1', async ({ page }) => {
       'Base Image': 'r',
     },
   ]
-  await cell_containerizer_manipulator.init()
+  await Cell_Containerizer_manipulator.init()
   await text_editor_manipulator.select_code_cell(1)
-  await cell_containerizer_manipulator.wait_until_completion_of_analysis()
+  await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
   await setTimeout(Util.preset_action_delay.short)
   for (const [ index, args ] of args_set.entries()) {
     await text_editor_manipulator.select_code_cell(index)
-    await cell_containerizer_manipulator.wait_until_completion_of_analysis()
+    await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
     await setTimeout(Util.preset_action_delay.short)
-    await cell_containerizer_manipulator.fill_and_create(args)
-    await setTimeout(Util.preset_action_delay.medium)
+    await Cell_Containerizer_manipulator.fill_and_create(args)
+    await setTimeout(Util.preset_action_delay.short)
   }
   await text_editor_manipulator.close_all()
   await setTimeout(Util.preset_action_delay.medium)
