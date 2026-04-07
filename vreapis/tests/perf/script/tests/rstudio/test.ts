@@ -116,6 +116,7 @@ test.beforeEach(async ({ page }) => {
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true)
+  expect(Util.Pathname_Operator.normalize(test_root), Util.Pathname_Operator.normalize(await file_browser_manipulator.current_directory())).toBeTruthy()
   await setTimeout(Util.preset_action_delay.medium)
 })
 
