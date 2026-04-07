@@ -31,12 +31,13 @@ class File_Browser_Manipulator {
   }
 
   public async init() {
-    this.region_TabSet2 = this.page.getByRole('region', { name: 'TabSet2' })
+    this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ })
     this.button_Minimize_or_Maximize_or_Restore_Tabset2 = await this.region_TabSet2.getByRole('button', { name: /(Minimize|Maximize|Restore) TabSet2/ }).all()
     for (const button of this.button_Minimize_or_Maximize_or_Restore_Tabset2) {
       if (await button.getAttribute('aria-label') === 'Maximize TabSet2') {
         await button.click() // Maximize file browser to make the UI as similar to JupyterLab [file browser + editor] as possible.
         await setTimeout(Util.preset_action_delay.medium)
+        this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ })
       }
     }
     this.tablist_TabSet2 = this.region_TabSet2.getByRole('tablist', { name: 'TabSet2' })
@@ -55,8 +56,7 @@ class File_Browser_Manipulator {
     const tables = await this.tabpanel_Files.getByRole('table').all()
     for (const table of tables) {
       const table_headers = await table.locator('th').all()
-      if (table_headers.length > 0) { this.file_list_header = table }
-      else { this.file_list = table }
+      if (table_headers.length > 0) { this.file_list_header = table } else { this.file_list = table }
     }
   }
 
@@ -97,6 +97,43 @@ class File_Browser_Manipulator {
   }
 }
 
+class Text_Editor_Manipulator {
+  private static logger: Util.Logger_Map = {}
+
+  public page!: Page
+  public file_browser_manipulator!: File_Browser_Manipulator
+  public main!: Locator
+  public tab_list!: Locator
+  public current_tab!: Locator
+
+  static {
+    const instance_members = Object.getOwnPropertyNames(Text_Editor_Manipulator.prototype)
+    for (const member of instance_members) { Text_Editor_Manipulator.logger[member] = log.getLogger(`${Text_Editor_Manipulator.name}.${member}`) }
+  }
+
+  public constructor(page: Page, file_browser_manipulator: File_Browser_Manipulator) {
+    this.page = page
+    this.file_browser_manipulator = file_browser_manipulator
+    this.main = this.page.getByRole('main')
+  }
+
+  public async current_file(): Promise<Util.File_Info> { // Get the pathname corresponding to the focused tab
+    this.tab_list = this.main.getByRole('tablist')
+    const tab_count = await this.tab_list.count()
+    if (tab_count === 0) { return { name: '', path: '' } }
+    this.current_tab = this.tab_list.locator('[aria-selected="true"]')
+    const tab_info = this.current_tab.locator('table[title]')
+    const name_element = tab_info.locator('td').filter({ hasText: /.+/ })
+    const name = await name_element.getAttribute('textContent') as string
+    const path = await tab_info.getAttribute('title') as string
+    return { name: name, path: path }
+  }
+
+  public async open(pathname: Util.Pathname) {
+    await this.file_browser_manipulator.open(pathname)
+  }
+}
+
 const test_root: Util.Pathname = 'tmp/rmd'
 
 var file_browser_manipulator: File_Browser_Manipulator
@@ -124,6 +161,10 @@ test.beforeEach(async ({ page }) => {
 //   await expect(page).toHaveTitle('RStudio Server')
 // })
 
+var text_editor_manipulator: Text_Editor_Manipulator
+
 test('D1', async ({ page }) => {
+  text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
   await file_browser_manipulator.open('D1.0.Rmd')
+
 })
