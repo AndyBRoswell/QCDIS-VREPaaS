@@ -28,6 +28,8 @@ export const enum preset_action_delay {
   extra_long = 4000,
 }
 
+export const variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
+
 const original_log_method_factory = log.methodFactory
 log.methodFactory = (log_method_name, log_level, logger_name) => {
   const raw = original_log_method_factory(log_method_name, log_level, logger_name)

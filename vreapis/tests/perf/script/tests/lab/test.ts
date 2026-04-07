@@ -234,7 +234,7 @@ class Text_Editor_Manipulator {
 class Cell_Containerizer_Manipulator {
   private static logger: Util.Logger_Map = {}
 
-  public static variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
+  // public static variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
 
   public page!: Page
   public HTML_body!: Locator
@@ -281,7 +281,7 @@ class Cell_Containerizer_Manipulator {
 
   public async fill_and_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
     await this.toggle()
-    for (const category of Cell_Containerizer_Manipulator.variable_categories_to_fill) {
+    for (const category of Util.variable_categories_to_fill) {
       if (category in args) {
         const variable_type_selection_area = this.Cell_Containerizer.locator('div').filter({ has: this.page.locator(':scope > :text-is("' + category + '")') }) // use this.page as execution context
         const target_type: Util.Variable_Type_Map = args[category] as Util.Variable_Type_Map
