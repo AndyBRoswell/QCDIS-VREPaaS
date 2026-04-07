@@ -172,7 +172,6 @@ class Text_Editor_Manipulator {
   public page!: Page
   public file_browser_manipulator!: File_Browser_Manipulator
   public running_session_manipulator!: Running_Session_Manipulator
-  public cell_containerizer_manipulator!: Cell_Containerizer_Manipulator
   public main!: Locator
   public tab_list!: Locator // Reference changes once all tabs are closed and the new launcher is automatically present again
   public associated_file: string = ''
@@ -190,7 +189,6 @@ class Text_Editor_Manipulator {
     this.page = page
     this.file_browser_manipulator = file_browser_manipulator
     this.running_session_manipulator = running_session_manipulator
-    this.cell_containerizer_manipulator = cell_containerizer_manipulator
     this.main = this.page.getByRole('main')
   }
 
