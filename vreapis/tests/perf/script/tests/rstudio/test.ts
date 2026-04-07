@@ -120,10 +120,10 @@ test.beforeEach(async ({ page }) => {
   await setTimeout(Util.preset_action_delay.medium)
 })
 
-test('sample test', async ({ page }) => {
-  await expect(page).toHaveTitle('RStudio Server')
-})
-
-// test('D1', async ({ page }) => {
-//
+// test('sample test', async ({ page }) => {
+//   await expect(page).toHaveTitle('RStudio Server')
 // })
+
+test('D1', async ({ page }) => {
+  await file_browser_manipulator.open('D1.0.Rmd')
+})
