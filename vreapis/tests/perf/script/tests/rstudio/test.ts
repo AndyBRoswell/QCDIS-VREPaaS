@@ -14,11 +14,16 @@ class File_Browser_Manipulator {
   public tab_files!: Locator
   public tabpanel_Files!: Locator
   public Selected_path_breadcrumb!: Locator
+  public home_link!: Locator
   public path_indicator!: Locator
+  public home: Util.Pathname = '~'
+  public file_list_header!: Locator
+  public file_list!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(File_Browser_Manipulator.prototype)
     for (const member of instance_members) { File_Browser_Manipulator.logger[member] = log.getLogger(`${File_Browser_Manipulator.name}.${member}`) }
+    // File_Browser_Manipulator.logger['init']!.setLevel('info')
   }
 
   public constructor(page: Page) {
@@ -38,8 +43,21 @@ class File_Browser_Manipulator {
     this.tab_files = this.tablist_TabSet2.locator('[role="tab"][aria-controls="rstudio_workbench_panel_files"]')
     await this.toggle()
     this.tabpanel_Files = this.region_TabSet2.getByRole('tabpanel', { name: 'Files' })
+    await this.tabpanel_Files.waitFor()
+    File_Browser_Manipulator.logger[this.init.name]!.info('Located this.tabpanel_Files')
     this.Selected_path_breadcrumb = this.tabpanel_Files.getByLabel('Selected path breadcrumb')
-    this.path_indicator = this.Selected_path_breadcrumb.getByLabel('[aria-current="location"]')
+    File_Browser_Manipulator.logger[this.init.name]!.info(`Selected_path_breadcrumb.textContent(): ${await this.Selected_path_breadcrumb.textContent()}`)
+    this.path_indicator = this.Selected_path_breadcrumb.locator('[aria-current="location"]')
+    File_Browser_Manipulator.logger[this.init.name]!.info(`path_indicator: ${await this.path_indicator.textContent()}`)
+    const parent_of_path_indicator = this.path_indicator.locator('xpath=../..')
+    this.home_link = parent_of_path_indicator.getByRole('link').first()
+    this.home = await this.home_link.getAttribute('title') as string
+    const tables = await this.tabpanel_Files.getByRole('table').all()
+    for (const table of tables) {
+      const table_headers = await table.locator('th').all()
+      if (table_headers.length > 0) { this.file_list_header = table }
+      else { this.file_list = table }
+    }
   }
 
   public async visible() {
@@ -59,8 +77,27 @@ class File_Browser_Manipulator {
     return r
   }
 
+  public async go_home(delay: Util.Milliseconds = Util.preset_action_delay.medium) { // Go to the home directory
+    await this.toggle()
+    do {
+      await this.home_link.click()
+      await setTimeout(delay)
+    } while (await this.current_directory() !== this.home)
+  }
 
+  public async open(path: Util.Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
+    const path_segments = Util.Pathname_Operator.segmented_Pathname(path)
+    await this.toggle()
+    if (home_as_relative_root) { await this.go_home() }
+    for (const [ index, segment ] of path_segments.entries()) {
+      const entry = this.file_list.getByText(segment, { exact: true })
+      await entry.click()
+      await setTimeout(Util.preset_action_delay.medium)
+    }
+  }
 }
+
+const test_root: Util.Pathname = 'tmp/rmd'
 
 var file_browser_manipulator: File_Browser_Manipulator
 
@@ -78,6 +115,7 @@ test.beforeEach(async ({ page }) => {
   await setTimeout(Util.preset_action_delay.extra_long)
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
+  await file_browser_manipulator.open(test_root, true)
   await setTimeout(Util.preset_action_delay.medium)
 })
 

@@ -39,6 +39,10 @@ log.methodFactory = (log_method_name, log_level, logger_name) => {
 }
 
 export class Pathname_Operator {
+  public static normalize(path: Pathname): Pathname {
+    return Node_Path.normalize(path).replace(/\/+$/, '')
+  }
+
   public static segmented_Pathname(path: Pathname): Segmented_Pathname { // Break path string in to segments for the convenience of comparison. Blank segments are ignored so inputs like `a///b` are handled correctly
     return path.split(Node_Path.sep).filter(Boolean)
   }

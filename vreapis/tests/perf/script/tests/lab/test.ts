@@ -75,22 +75,21 @@ class File_Browser_Manipulator {
     const path_segments = Util.Pathname_Operator.segmented_Pathname(path)
     await this.toggle()
     if (home_as_relative_root) { await this.go_home() }
-    const target_path: string[] = []
+    const target_path: Util.Pathname[] = []
     for (const [ index, segment ] of path_segments.entries()) {
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entering ${segment}...`)
-      const entry = file_browser_manipulator.file_list.locator(`[title^="Name: ${segment}"]`)
+      const entry = this.file_list.locator(`[title^="Name: ${segment}"]`)
       if (index < path_segments.length - 1) {
         if (await entry.getAttribute('data-isdir') === 'false') { throw new Error(`Non-leaf file system node ${segment} is not a directory`) }
       } else {
         await entry.dblclick()
         await setTimeout(Util.preset_action_delay.medium)
-        break
+        break // Opening a leaf node [i.e. file] won't change the current path shown by the file browser section, so we don't compare the current directory with the target directory here
       }
       target_path.push(segment)
       do {
         await entry.dblclick()
         await setTimeout(Util.preset_action_delay.medium)
-
       } while (Util.Pathname_Operator.identical_Segmented_Pathname(Util.Pathname_Operator.segmented_Pathname(await this.current_directory()), target_path) === false)
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entered ${segment}`)
     }
@@ -322,7 +321,7 @@ class Cell_Containerizer_Manipulator {
 
 // log.setLevel('info')
 
-const test_root: string = 'tmp/rmd' // All the test files should be placed here
+const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
 
 const repetition_count = 10
 
