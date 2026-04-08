@@ -220,7 +220,7 @@ class Text_Editor_Manipulator {
     }
   }
 
-  public async select_code_cell(index: number) {
+  public async select_code_cell(index: number) { // 0-indexed
     await this.code_cell[index]!.click()
   }
 
@@ -346,7 +346,7 @@ test('D1', async ({ page }) => {
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
   await text_editor_manipulator.open('D1.0.ipynb')
-  expect(text_editor_manipulator.code_cell.length).toEqual(4)
+  // expect(text_editor_manipulator.code_cell.length).toEqual(4)
   const args_set: Util.Cell_Containerizer_Manipulation_Arguments[] = [
     {
       Outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },

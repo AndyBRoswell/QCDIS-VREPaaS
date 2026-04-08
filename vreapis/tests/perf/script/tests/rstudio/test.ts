@@ -168,8 +168,15 @@ class Cell_Containerizer_Manipulator {
   public tabpanel_Viewer!: Locator
   public toolbar_Viewer_Tab!: Locator
   public Cell_Containerizer!: FrameLocator
-  public button_Parse!: Locator
   public doc_info_output!: Locator
+  public button_Parse!: Locator
+  public label_Select_Code_Chunk!: Locator
+  public code_chunk_selector!: Locator
+  public code_chunk_selector_wrapper!: Locator
+  public code_output!: Locator
+  public label_Base_Image!: Locator
+  public base_image_selector!: Locator
+  public base_image_selector_wrapper!: Locator
   public button_Create!: Locator
 
   static {
@@ -205,6 +212,21 @@ class Cell_Containerizer_Manipulator {
     this.tabpanel_Viewer = this.region_TabSet2.getByRole('tabpanel', { name: 'Viewer' })
     this.toolbar_Viewer_Tab = this.tabpanel_Viewer.getByRole('toolbar', { name: 'Viewer Tab' })
     this.Cell_Containerizer = this.tabpanel_Viewer.locator('iframe').contentFrame()
+    this.button_Parse = this.Cell_Containerizer.getByRole('button').filter({ hasText: /^Parse$/ })
+    this.code_output = this.Cell_Containerizer.locator('#code_output')
+    // this.label_Select_Code_Chunk = this.Cell_Containerizer.getByLabel(`Select Code Chunk`, { exact: true })
+    // const labels = await this.Cell_Containerizer.locator('label').all()
+    // expect(labels.length).toEqual(2)
+    // expect(await this.label_Select_Code_Chunk.textContent()).toEqual("Select Code Chunk")
+    // expect(await this.label_Base_Image.textContent()).toEqual("Base Image")
+    this.label_Select_Code_Chunk = this.Cell_Containerizer.locator('label', { hasText: /^Select Code Chunk$/ })
+    this.code_chunk_selector_wrapper = this.label_Select_Code_Chunk.locator('xpath=..')
+    this.code_chunk_selector = this.Cell_Containerizer.locator(String.raw`#${await this.label_Select_Code_Chunk.getAttribute('for')}`)
+    // this.label_Base_Image = this.Cell_Containerizer.getByLabel('Base Image', { exact: true })
+    this.label_Base_Image = this.Cell_Containerizer.locator('label', { hasText: /^Base Image$/ })
+    this.base_image_selector = this.Cell_Containerizer.locator(String.raw`#${await this.label_Base_Image.getAttribute('for')}`)
+    this.base_image_selector_wrapper = this.label_Base_Image.locator('xpath=..')
+    this.button_Create = this.Cell_Containerizer.getByRole('button').filter({ hasText: /^Create$/ })
   }
 
   public async visible(): Promise<boolean> {
@@ -219,7 +241,6 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async parse() {
-    this.button_Parse = this.Cell_Containerizer.getByRole('button').filter({ hasText: /^Parse$/ })
     await this.button_Parse.click()
     this.doc_info_output = this.Cell_Containerizer.locator('#doc_info_output')
     const doc_info = await this.doc_info_output.innerText()
@@ -228,16 +249,57 @@ class Cell_Containerizer_Manipulator {
     expect(match)
   }
 
-  public async select_code_cell(index: number) {
+  public async select_code_cell(index: number) { // 0-indexed
+    await this.toggle()
+    await this.code_chunk_selector.click()
+    const listbox = this.code_chunk_selector_wrapper.getByRole('listbox')
+    const option = await listbox.getByRole('option').all()
+    const target_option = option[index]!
+    await target_option.click()
+  }
 
+  public async wait_until_completion_of_analysis() {
+    await this.toggle()
+    const old_code = await this.code_output.innerText()
+    await expect(this.code_output).not.toHaveText(old_code)
   }
 
   public async fill_and_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
     await this.toggle()
-
+    for (const category of Util.variable_categories_to_fill) {
+      if (category in args) {
+        const category_heading = this.Cell_Containerizer.getByRole('heading', { name: category === 'Parameters' ? 'Params' : category }) // A typo in RStudio-ver Cell Containerizer. It should have been the same as the corresponding category `Parameters` in JupyterLab-ver Cell Containerizer
+        const variable_type_selection_area = category_heading.locator('xpath=..')
+        const target_type = args[category] as Util.Variable_Type_Map
+        for (const variable in target_type) {
+          // const var_label = variable_type_selection_area.getByLabel(variable, { exact: true })
+          const var_label = variable_type_selection_area.locator('label', { hasText: new RegExp('^' + variable + '$') }) // TODO: Use RegExp.escape if ES2025 is fully supported
+          const wrapper = var_label.locator('xpath=..')
+          const type_combo = wrapper.getByRole('combobox')
+          await type_combo.click()
+          await setTimeout(Util.preset_action_delay.short)
+          const dropdown_menu = wrapper.getByRole('listbox')
+          expect(await dropdown_menu.count()).toEqual(1)
+          const target_item = dropdown_menu.getByText(target_type[variable]!, { exact: true })
+          await target_item.click()
+          await setTimeout(Util.preset_action_delay.short)
+        }
+      }
+    }
+    await this.base_image_selector.click()
+    await setTimeout(Util.preset_action_delay.short)
+    const base_image_list = this.base_image_selector_wrapper.getByRole('listbox')
+    const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
+    await target_base_image_item.click()
+    await setTimeout(Util.preset_action_delay.short)
+    await this.button_Create.click()
+    const creation_result_output = this.Cell_Containerizer.locator('#creation_result_output')
+    const message_of_success = creation_result_output.getByText('The cell has been successfully created!', { exact: true })
+    await message_of_success.waitFor()
   }
 
   public async close() {
+    await this.toggle()
     const button = this.toolbar_Viewer_Tab.getByRole('button', { name: 'Stop application' })
     await button.click()
   }
@@ -273,12 +335,41 @@ var text_editor_manipulator: Text_Editor_Manipulator
 var Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 
 test('D1', async ({ page }) => {
+  Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
   await text_editor_manipulator.open('D1.0.Rmd')
-  Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
+  const args: Util.Cell_Containerizer_Manipulation_Arguments[] = [
+    {
+      Outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
+      'Base Image': 'r',
+    },
+    {
+      Inputs: { 'w': "Integer", },
+      Outputs: { names: 'List', },
+      'Base Image': 'r',
+    },
+    {
+      Inputs: { x: "Integer", y: "Integer", names: 'List', },
+      Outputs: { t: "Integer", },
+      Parameters: { param_p: "String", },
+      'Base Image': 'r',
+    },
+    {
+      Inputs: { t: "Integer", },
+      Parameters: { param_a: "String", },
+      'Base Image': 'r',
+    },
+  ]
   await Cell_Containerizer_manipulator.init()
   await Cell_Containerizer_manipulator.parse()
-  await setTimeout(Util.preset_action_delay.long)
+  await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
+  await Cell_Containerizer_manipulator.fill_and_create(args[0]!)
+  await setTimeout(Util.preset_action_delay.short)
+  for (let i = 1; i < args.length; ++i) {
+    await Cell_Containerizer_manipulator.select_code_cell(i)
+    await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
+    await Cell_Containerizer_manipulator.fill_and_create(args[i]!)
+  }
   await Cell_Containerizer_manipulator.close()
   await text_editor_manipulator.close_all()
   await setTimeout(Util.preset_action_delay.medium)

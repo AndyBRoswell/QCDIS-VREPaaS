@@ -8,10 +8,12 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
-    "target": "esnext",
+//    "target": "esnext",
 //    "types": [],
     // For nodejs:
     // "lib": ["esnext"],
+    "target": "ES2025",                   // Compile to ES2025 syntax
+    "lib": ["ES2025", "DOM", "DOM.Iterable"], // Include standard library definitions
      "types": ["node"],
     // and npm install -D @types/node
 
