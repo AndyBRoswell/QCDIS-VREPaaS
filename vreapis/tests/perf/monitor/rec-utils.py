@@ -7,7 +7,8 @@ import psutil
 import re
 import argparse
 import logging
-from typing import NamedTuple, Iterable
+from typing import NamedTuple
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -45,6 +46,7 @@ class Aggregated_Performance_Record(NamedTuple):
 
 
 class Process_Information(NamedTuple):
+    time: object
     pathname: str
     name: str
     user: str
@@ -63,7 +65,7 @@ argument_parser.add_argument('-d', '--database-process-filter', nargs='?', defau
 args = argument_parser.parse_args()
 
 process_information = set()
-
+timestamp = datetime.now()
 for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):
     pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
     if args.browser_process_filter:
@@ -71,12 +73,13 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
                 re.search(process_filter.chrome, pathname)
                 or re.search(process_filter.JupyterLab_backend, pathname)
                 or re.search(process_filter.RStudio_backend, pathname)
+                # TODO
                 or re.search(process_filter.vreapi, pathname)
                 or re.search(process_filter.database, pathname)
         ):
-            process_information.add(Process_Information(pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
+            process_information.add(Process_Information(timestamp, pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
             # children = proc.children(recursive=True)
             # for child in children:
-            #     process_information.add(Process_Information(pathname, child.name(), child.username(), child.pid, child.cpu_percent(), child.memory_info().rss))
+            #     process_information.add(Process_Information(timestamp, pathname, child.name(), child.username(), child.pid, child.cpu_percent(), child.memory_info().rss))
 
 logger.info(pprint.pformat(process_information))
