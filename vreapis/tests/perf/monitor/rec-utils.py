@@ -23,7 +23,6 @@ process_filter: dict[str, re.Pattern[str] | str] = {
     'JupyterLab_backend': re.compile(r'jupyter.?lab', common_re_flags),
     'RStudio_backend': re.compile(r'rstudio-server', common_re_flags),
     # 'RSession': '',  # TODO
-    # 'vreapi': re.compile(r'runserver', common_re_flags),
     'vreapi': re.compile(r'.*/bin/python\s+.*/VREPaaS/vreapis/manage.py\s+runserver', common_re_flags),
     'database': re.compile(r'postgres', common_re_flags)
 }
