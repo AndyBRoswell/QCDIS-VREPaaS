@@ -18,17 +18,14 @@ logger.addHandler(default_console_handler)
 
 common_re_flags = re.IGNORECASE
 
-
-class Process_Filter(NamedTuple):
-    chrome: re.Pattern[str] = re.compile('.*/chrom.*', common_re_flags)
-    JupyterLab_backend: re.Pattern[str] = re.compile('jupyter.?lab', common_re_flags)
-    RStudio_backend: re.Pattern[str] = re.compile('rstudio-server', common_re_flags)
-    RSession: re.Pattern[str] = ''  # TODO
-    vreapi: re.Pattern[str] = re.compile('runserver', common_re_flags)
-    database: re.Pattern[str] = re.compile('postgres', common_re_flags)
-
-
-process_filter = Process_Filter()
+process_filter: dict[str, re.Pattern[str] | str] = {
+    'chrome': re.compile(r'.*/chrom.*', common_re_flags),
+    'JupyterLab_backend': re.compile(r'jupyter.?lab', common_re_flags),
+    'RStudio_backend': re.compile(r'rstudio-server', common_re_flags),
+    # 'RSession': '',  # TODO
+    'vreapi': re.compile(r'runserver', common_re_flags),
+    'database': re.compile(r'postgres', common_re_flags)
+}
 
 
 class Simple_Performance_Index(NamedTuple):
@@ -37,6 +34,7 @@ class Simple_Performance_Index(NamedTuple):
 
 
 class Aggregated_Performance_Record(NamedTuple):
+    time: object
     chrome: Simple_Performance_Index
     JupyterLab_backend: Simple_Performance_Index
     RStudio_backend: Simple_Performance_Index
@@ -46,7 +44,6 @@ class Aggregated_Performance_Record(NamedTuple):
 
 
 class Process_Information(NamedTuple):
-    time: object
     pathname: str
     name: str
     user: str
@@ -55,31 +52,29 @@ class Process_Information(NamedTuple):
     memory_usage: int
 
 
+process_group: dict[str, list[Process_Information]] = {
+    'chrome': [],
+    'JupyterLab_backend': [],
+    'RStudio_backend': [],
+    'RSession': [],
+    'vreapi': [],
+    'database': [],
+}
+
 argument_parser = argparse.ArgumentParser()
-argument_parser.add_argument('-b', '--browser-process-filter', nargs='?', default=None, const=process_filter.chrome)
+argument_parser.add_argument('-b', '--browser-process-filter', nargs='?', default=None, const=process_filter['chrome'])
 argument_parser.add_argument('-j', '--JupyterLab-backend-process-filter', action='store_true')
 argument_parser.add_argument('-r', '--RStudio-backend-process-filter', action='store_true')
-argument_parser.add_argument('-v', '--vreapi-process-filter', nargs='?', default=None, const=process_filter.vreapi)
-argument_parser.add_argument('-d', '--database-process-filter', nargs='?', default=None, const=process_filter.database)
+argument_parser.add_argument('-v', '--vreapi-process-filter', nargs='?', default=None, const=process_filter['vreapi'])
+argument_parser.add_argument('-d', '--database-process-filter', nargs='?', default=None, const=process_filter['database'])
 
 args = argument_parser.parse_args()
 
-process_information = set()
 timestamp = datetime.now()
 for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):
     pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
-    if args.browser_process_filter:
-        if (
-                re.search(process_filter.chrome, pathname)
-                or re.search(process_filter.JupyterLab_backend, pathname)
-                or re.search(process_filter.RStudio_backend, pathname)
-                # TODO
-                or re.search(process_filter.vreapi, pathname)
-                or re.search(process_filter.database, pathname)
-        ):
-            process_information.add(Process_Information(timestamp, pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
-            # children = proc.children(recursive=True)
-            # for child in children:
-            #     process_information.add(Process_Information(timestamp, pathname, child.name(), child.username(), child.pid, child.cpu_percent(), child.memory_info().rss))
+    for field, value in process_filter.items():
+        if re.search(value, pathname):
+            process_group[field].append(Process_Information(pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
 
-logger.info(pprint.pformat(process_information))
+logger.info(pprint.pformat(process_group))
