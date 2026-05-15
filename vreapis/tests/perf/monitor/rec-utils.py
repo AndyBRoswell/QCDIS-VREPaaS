@@ -73,10 +73,6 @@ args = argument_parser.parse_args()
 
 timestamp = datetime.now()
 for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):
-    # pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
-    # for field, value in process_filter.items():
-    #     if re.search(value, pathname):
-    #         process_group[field].append(Process_Information(pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
     with proc.oneshot():
         cmdline: str = ' '.join(proc.cmdline())
         pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
