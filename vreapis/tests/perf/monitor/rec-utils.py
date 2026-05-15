@@ -23,7 +23,8 @@ process_filter: dict[str, re.Pattern[str] | str] = {
     'JupyterLab_backend': re.compile(r'jupyter.?lab', common_re_flags),
     'RStudio_backend': re.compile(r'rstudio-server', common_re_flags),
     # 'RSession': '',  # TODO
-    'vreapi': re.compile(r'runserver', common_re_flags),
+    # 'vreapi': re.compile(r'runserver', common_re_flags),
+    'vreapi': re.compile(r'.*/bin/python\s+.*/VREPaaS/vreapis/manage.py\s+runserver', common_re_flags),
     'database': re.compile(r'postgres', common_re_flags)
 }
 
@@ -72,9 +73,15 @@ args = argument_parser.parse_args()
 
 timestamp = datetime.now()
 for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):
-    pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
-    for field, value in process_filter.items():
-        if re.search(value, pathname):
-            process_group[field].append(Process_Information(pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
+    # pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
+    # for field, value in process_filter.items():
+    #     if re.search(value, pathname):
+    #         process_group[field].append(Process_Information(pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
+    with proc.oneshot():
+        cmdline: str = ' '.join(proc.cmdline())
+        pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
+        for field, value in process_filter.items():
+            if re.search(value, cmdline):
+                process_group[field].append(Process_Information(pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
 
 logger.info(pprint.pformat(process_group))
