@@ -1,13 +1,13 @@
 """
 Can run with venv of vreapis
 """
-
+import asyncio
 import pprint
 import psutil
 import re
 import argparse
 import logging
-from typing import NamedTuple
+from typing import NamedTuple, TypeAlias
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -28,31 +28,23 @@ process_filter: dict[str, re.Pattern[str] | str] = {
 }
 
 
-class Simple_Performance_Index(NamedTuple):
+class Performance_Index(NamedTuple):
     CPU_usage: float
     memory_usage: int
 
 
 class Aggregated_Performance_Sample(NamedTuple):
     time: object
-    chrome: Simple_Performance_Index
-    JupyterLab_backend: Simple_Performance_Index
-    RStudio_backend: Simple_Performance_Index
-    RSession: Simple_Performance_Index
-    vreapi: Simple_Performance_Index
-    database: Simple_Performance_Index
+    chrome: Performance_Index
+    JupyterLab_backend: Performance_Index
+    RStudio_backend: Performance_Index
+    RSession: Performance_Index
+    vreapi: Performance_Index
+    database: Performance_Index
 
+Process_Group: TypeAlias = dict[str, list[psutil.Process]]
 
-class Performance_Sample(NamedTuple):
-    pathname: str
-    name: str
-    user: str
-    PID: int
-    CPU_usage: float
-    memory_usage: int
-
-
-process_group: dict[str, list[psutil.Process]] = {
+process_group: Process_Group = {
     'chrome': [],
     'JupyterLab_backend': [],
     'RStudio_backend': [],
@@ -80,3 +72,8 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
                 process_group[field].append(proc)
 
 logger.info(pprint.pformat(process_group))
+
+samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
+
+async def monitor(process_group: Process_Group, interval: float = 0.5):
+    pass
