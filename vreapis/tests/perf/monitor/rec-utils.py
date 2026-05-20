@@ -77,9 +77,12 @@ async def sample(process_group: Process_Group, delay: float = 0.5):
         CPU_usage: float = 0
         memory_usage: int = 0
         for process in processes:
-            with process.oneshot():
-                CPU_usage += process.cpu_percent()
-                memory_usage += process.memory_info().rss
+            try:
+                with process.oneshot():
+                    CPU_usage += process.cpu_percent()
+                    memory_usage += process.memory_info().rss
+            except psutil.NoSuchProcess:
+                pass
         agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
     await samples.put(agg_sample)
     logger.debug(f'End sample {agg_sample["time"]}')
