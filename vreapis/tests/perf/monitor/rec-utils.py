@@ -9,11 +9,13 @@ import argparse
 import logging
 from typing import NamedTuple, TypeAlias
 from datetime import datetime
+import time
 
+log_level = logging.INFO
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(log_level)
 default_console_handler = logging.StreamHandler()
-default_console_handler.setLevel(logging.INFO)
+default_console_handler.setLevel(log_level)
 logger.addHandler(default_console_handler)
 
 common_re_flags = re.IGNORECASE
@@ -33,15 +35,7 @@ class Performance_Index(NamedTuple):
     memory_usage: int
 
 
-class Aggregated_Performance_Sample(NamedTuple):
-    time: object
-    chrome: Performance_Index
-    JupyterLab_backend: Performance_Index
-    RStudio_backend: Performance_Index
-    RSession: Performance_Index
-    vreapi: Performance_Index
-    database: Performance_Index
-
+Aggregated_Performance_Sample: TypeAlias = dict[str, float | Performance_Index]
 Process_Group: TypeAlias = dict[str, list[psutil.Process]]
 
 process_group: Process_Group = {
@@ -75,5 +69,44 @@ logger.info(pprint.pformat(process_group))
 
 samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
 
-async def monitor(process_group: Process_Group, interval: float = 0.5):
-    pass
+
+async def sample(process_group: Process_Group, delay: float = 0.5):
+    agg_sample: Aggregated_Performance_Sample = {'time': time.monotonic()}
+    logger.debug(f'Start sample {agg_sample["time"]}')
+    for process_group_name, processes in process_group.items():
+        CPU_usage: float = 0
+        memory_usage: int = 0
+        for process in processes:
+            with process.oneshot():
+                CPU_usage += process.cpu_percent()
+                memory_usage += process.memory_info().rss
+        agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
+    await samples.put(agg_sample)
+    logger.debug(f'End sample {agg_sample["time"]}')
+    logger.debug(f'Queue length: {samples.qsize()}')
+    await asyncio.sleep(max(0, delay - (time.monotonic() - agg_sample['time'])))
+
+
+async def monitor(process_group: Process_Group, delay: float = 0.5):
+    while True:
+        await sample(process_group, delay)
+
+
+async def process():
+    while True:
+        logger.debug('Start process')
+        agg_sample: Aggregated_Performance_Sample = await samples.get()
+        logger.info(pprint.pformat(agg_sample))
+        logger.debug('End process')
+
+
+async def main():
+    await sample(process_group, 0.5)
+    await samples.get()
+    producer = asyncio.create_task(monitor(process_group, 0.5))
+    consumer = asyncio.create_task(process())
+    await asyncio.gather(producer, consumer)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
