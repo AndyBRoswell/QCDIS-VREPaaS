@@ -33,7 +33,7 @@ class Simple_Performance_Index(NamedTuple):
     memory_usage: int
 
 
-class Aggregated_Performance_Record(NamedTuple):
+class Aggregated_Performance_Sample(NamedTuple):
     time: object
     chrome: Simple_Performance_Index
     JupyterLab_backend: Simple_Performance_Index
@@ -43,7 +43,7 @@ class Aggregated_Performance_Record(NamedTuple):
     database: Simple_Performance_Index
 
 
-class Process_Information(NamedTuple):
+class Performance_Sample(NamedTuple):
     pathname: str
     name: str
     user: str
@@ -52,7 +52,7 @@ class Process_Information(NamedTuple):
     memory_usage: int
 
 
-process_group: dict[str, list[Process_Information]] = {
+process_group: dict[str, list[psutil.Process]] = {
     'chrome': [],
     'JupyterLab_backend': [],
     'RStudio_backend': [],
@@ -77,6 +77,6 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
         pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
         for field, value in process_filter.items():
             if re.search(value, cmdline):
-                process_group[field].append(Process_Information(pathname, proc.name(), proc.username(), proc.pid, proc.cpu_percent(), proc.memory_info().rss))
+                process_group[field].append(proc)
 
 logger.info(pprint.pformat(process_group))
