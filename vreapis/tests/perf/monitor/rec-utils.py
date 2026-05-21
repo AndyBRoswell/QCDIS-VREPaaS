@@ -53,7 +53,8 @@ argument_parser.add_argument('-v', '--vreapi-process-filter', nargs='?', default
 argument_parser.add_argument('-d', '--database-process-filter', nargs='?', default=None, const=process_filter['database'])
 argument_parser.add_argument('-i', '--IPC-channel', nargs=1)
 
-args_dict = vars(argument_parser.parse_args())
+args = argument_parser.parse_args()
+args_dict = vars(args)
 logger.debug(pprint.pformat(args_dict))
 for field, value in args_dict.items():
     if field.endswith('_process_filter'):
@@ -124,11 +125,11 @@ class Control(Enum):
 async def daemon():
     match sys.platform:
         case 'linux':
-            channel = ''
+            channel = args.IPC_channel
             logger.info(f'Domain Socket: {channel}')
             with Listener(channel, family='AF_UNIX') as listener:
                 with listener.accept() as connection:
-                    pass
+                    pass  # TODO
         case _:
             raise RuntimeError(f'Unsupported operating system: {sys.platform}')
 
