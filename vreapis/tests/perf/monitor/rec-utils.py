@@ -15,6 +15,8 @@ import sys
 import os
 from multiprocessing.connection import Listener
 import tempfile
+import csv
+from pathlib import Path
 
 log_level = logging.INFO
 logger = logging.getLogger(__name__)
@@ -51,7 +53,12 @@ argument_parser.add_argument('-j', '--JupyterLab-backend-process-filter', nargs=
 argument_parser.add_argument('-r', '--RStudio-backend-process-filter', nargs='?', default=None, const=process_filter['RStudio_backend'])
 argument_parser.add_argument('-v', '--vreapi-process-filter', nargs='?', default=None, const=process_filter['vreapi'])
 argument_parser.add_argument('-d', '--database-process-filter', nargs='?', default=None, const=process_filter['database'])
-argument_parser.add_argument('-i', '--IPC-channel', nargs=1)
+mutually_exclusive_group_IPC = argument_parser.add_mutually_exclusive_group()
+mutually_exclusive_group_IPC.add_argument('-i', '--IPC-channel', nargs=1)
+mutually_exclusive_group_IPC.add_argument('-I', '--No-IPC-channel', action='store_true')
+argument_parser.add_argument('-c', '--console-output', action='store_true')
+argument_parser.add_argument('-f', '--file-output', action='store_true')
+argument_parser.add_argument('-l', '--log-filename-prefix', nargs='?', default=None, const=datetime.now().strftime('%Y%m%d-%H%M%S'))
 
 args = argument_parser.parse_args()
 args_dict = vars(args)
@@ -64,7 +71,6 @@ for field, value in args_dict.items():
             process_group[process_group_name] = []
         else:
             del process_filter[process_group_name]
-
 timestamp = datetime.now()
 for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):
     with proc.oneshot():
@@ -73,8 +79,7 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
         for field, value in process_filter.items():
             if field in process_group and re.search(value, cmdline):
                 process_group[field].append(proc)
-
-logger.info(pprint.pformat(process_group))
+logger.debug(pprint.pformat(process_group))
 
 samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
 default_sample_interval: float = 0.5
@@ -111,11 +116,53 @@ async def monitor(process_group: Process_Group, delay: float = default_sample_in
             pass
 
 
+if args.console_output:
+    fmt = "{:<16}" + " {:>23}" * 2 * len(process_group)
+    header = ['time']
+    for process_group_name in process_group:
+        header.append(f'{process_group_name}:CPU')
+        header.append(f'{process_group_name}:mem')
+if args.file_output:
+    Path('.log').mkdir(parents=True, exist_ok=True)
+    CPU_log_file = open(f'{args.log_filename_prefix}.CPU.log', 'w')
+    mem_log_file = open(f'{args.log_filename_prefix}.mem.log', 'w')
+    cooked_log_file = open(f'{args.log_filename_prefix}.cooked.log', 'w')
+    CSV_file_writer_CPU = csv.writer(CPU_log_file)
+    CSV_file_writer_mem = csv.writer(mem_log_file)
+    CSV_file_writer_cooked = csv.writer(cooked_log_file)
+
+
+async def output(agg_sample: Aggregated_Performance_Sample):
+    line: list = [agg_sample['time']]
+    for process_group_name in process_group:
+        index: Performance_Index = agg_sample[process_group_name]
+        line.append(index.CPU_usage)
+        line.append(index.memory_usage / 1024 / 1024)  # B -> Mi
+    for index in range(len(line)):
+        line[index] = round(line[index], 3)
+    if args.console_output:
+        print(fmt.format(*line))
+    if args.file_output:
+        pass  # TODO
+
+
 async def process():
+    if args.console_output:
+        print(fmt.format(*header))
+    if args.file_output:
+        CSV_header_CPU: list[str] = ['time']
+        CSV_header_mem: list[str] = ['time']
+        CSV_header_cooked: list[str] = ['time']
+        for process_group_name in process_group:
+            CSV_header_CPU.append(process_group_name)
+            CSV_header_mem.append(process_group_name)
+            CSV_header_cooked.extend([f'{process_group_name}:CPU', f'{process_group_name}:mem'])
+        # TODO
     while True:
         logger.debug('Start process')
         agg_sample: Aggregated_Performance_Sample = await samples.get()
-        logger.info(pprint.pformat(agg_sample))
+        # logger.info(pprint.pformat(agg_sample))
+        await output(agg_sample)
         logger.debug('End process')
 
 
