@@ -77,29 +77,33 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
 logger.info(pprint.pformat(process_group))
 
 samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
+default_sample_interval: float = 0.5
 
 
-async def sample(process_group: Process_Group, delay: float = 0.5):
-    agg_sample: Aggregated_Performance_Sample = {'time': time.monotonic()}
-    logger.debug(f'Start sample {agg_sample["time"]}')
-    for process_group_name, processes in process_group.items():
-        CPU_usage: float = 0
-        memory_usage: int = 0
-        for process in processes:
-            try:
-                with process.oneshot():
-                    CPU_usage += process.cpu_percent()
-                    memory_usage += process.memory_info().rss
-            except psutil.NoSuchProcess:
-                pass
-        agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
-    await samples.put(agg_sample)
-    logger.debug(f'End sample {agg_sample["time"]}')
-    logger.debug(f'Queue length: {samples.qsize()}')
-    await asyncio.sleep(max(0, delay - (time.monotonic() - agg_sample['time'])))
+async def sample(process_group: Process_Group, delay: float = default_sample_interval):
+    try:
+        agg_sample: Aggregated_Performance_Sample = {'time': time.monotonic()}
+        logger.debug(f'Start sample {agg_sample["time"]}')
+        for process_group_name, processes in process_group.items():
+            CPU_usage: float = 0
+            memory_usage: int = 0
+            for process in processes:
+                try:
+                    with process.oneshot():
+                        CPU_usage += process.cpu_percent()
+                        memory_usage += process.memory_info().rss
+                except psutil.NoSuchProcess:
+                    pass
+            agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
+        await samples.put(agg_sample)
+        logger.debug(f'End sample {agg_sample["time"]}')
+        logger.debug(f'Queue length: {samples.qsize()}')
+        await asyncio.sleep(max(0, delay - (time.monotonic() - agg_sample['time'])))
+    except (asyncio.CancelledError, KeyboardInterrupt):
+        pass
 
 
-async def monitor(process_group: Process_Group, delay: float = 0.5):
+async def monitor(process_group: Process_Group, delay: float = default_sample_interval):
     while True:
         try:
             await sample(process_group, delay)
@@ -135,9 +139,9 @@ async def daemon():
 
 
 async def main():
-    await sample(process_group, 0.5)
+    await sample(process_group, default_sample_interval)
     await samples.get()
-    producer = asyncio.create_task(monitor(process_group, 0.5))
+    producer = asyncio.create_task(monitor(process_group, default_sample_interval))
     consumer = asyncio.create_task(process())
     await asyncio.gather(producer, consumer)
 
