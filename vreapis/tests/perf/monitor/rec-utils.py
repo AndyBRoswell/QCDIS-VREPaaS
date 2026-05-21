@@ -8,7 +8,8 @@ import re
 import argparse
 import logging
 from typing import NamedTuple, TypeAlias
-from datetime import datetime
+import datetime
+from datetime import timedelta
 import time
 from enum import Enum, auto
 import sys
@@ -42,7 +43,7 @@ class Performance_Index(NamedTuple):
     memory_usage: int
 
 
-Aggregated_Performance_Sample: TypeAlias = dict[str, float | Performance_Index]
+Aggregated_Performance_Sample: TypeAlias = dict[str, float | timedelta | Performance_Index]
 Process_Group: TypeAlias = dict[str, list[psutil.Process]]
 
 process_group: Process_Group = {}
@@ -58,7 +59,7 @@ mutually_exclusive_group_IPC.add_argument('-i', '--IPC-channel', nargs=1)
 mutually_exclusive_group_IPC.add_argument('-I', '--No-IPC-channel', action='store_true')
 argument_parser.add_argument('-c', '--console-output', action='store_true')
 argument_parser.add_argument('-f', '--file-output', action='store_true')
-argument_parser.add_argument('-l', '--log-filename-prefix', nargs='?', default=None, const=datetime.now().strftime('%Y%m%d-%H%M%S'))
+argument_parser.add_argument('-l', '--log-filename-prefix', nargs='?', default=None, const=datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
 
 args = argument_parser.parse_args()
 args_dict = vars(args)
@@ -71,7 +72,6 @@ for field, value in args_dict.items():
             process_group[process_group_name] = []
         else:
             del process_filter[process_group_name]
-timestamp = datetime.now()
 for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):
     with proc.oneshot():
         cmdline: str = ' '.join(proc.cmdline())
@@ -87,7 +87,7 @@ default_sample_interval: float = 0.5
 
 async def sample(process_group: Process_Group, delay: float = default_sample_interval):
     try:
-        agg_sample: Aggregated_Performance_Sample = {'time': time.monotonic()}
+        agg_sample: Aggregated_Performance_Sample = {'time': datetime.datetime.now()}
         logger.debug(f'Start sample {agg_sample["time"]}')
         for process_group_name, processes in process_group.items():
             CPU_usage: float = 0
@@ -103,7 +103,7 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
         await samples.put(agg_sample)
         logger.debug(f'End sample {agg_sample["time"]}')
         logger.debug(f'Queue length: {samples.qsize()}')
-        await asyncio.sleep(max(0, delay - (time.monotonic() - agg_sample['time'])))
+        await asyncio.sleep(max(0, delay - (datetime.datetime.now() - agg_sample['time']).total_seconds()))
     except (asyncio.CancelledError, KeyboardInterrupt):
         pass
 
@@ -117,7 +117,7 @@ async def monitor(process_group: Process_Group, delay: float = default_sample_in
 
 
 if args.console_output:
-    fmt = "{:<16}" + " {:>23}" * 2 * len(process_group)
+    fmt = "{:<23}" + " {:>23}" * 2 * len(process_group)
     header = ['time']
     for process_group_name in process_group:
         header.append(f'{process_group_name}:CPU')
@@ -138,9 +138,10 @@ async def output(agg_sample: Aggregated_Performance_Sample):
         index: Performance_Index = agg_sample[process_group_name]
         line.append(index.CPU_usage)
         line.append(index.memory_usage / 1024 / 1024)  # B -> Mi
-    for index in range(len(line)):
-        line[index] = round(line[index], 3)
     if args.console_output:
+        line[0] = line[0].strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        for index in range(1, len(line)):
+            line[index] = round(line[index], 3)
         print(fmt.format(*line))
     if args.file_output:
         pass  # TODO
