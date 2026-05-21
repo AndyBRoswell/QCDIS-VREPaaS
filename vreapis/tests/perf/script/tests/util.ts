@@ -57,3 +57,10 @@ export class Pathname_Operator {
     return p.length === q.length && p.every((value, index) => value === q[index])
   }
 }
+
+export const enum Control {
+  monitor_ready = 1,
+  query_monitor_start,
+  monitor_started,
+  query_monitor_stop,
+}
