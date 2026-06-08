@@ -305,7 +305,12 @@ class Cell_Containerizer_Manipulator {
   }
 }
 
-const test_root: Util.Pathname = 'tmp/rmd'
+const logger = log.getLogger('test')
+logger.setLevel('info')
+
+const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
+
+const repetition_count = 10
 
 var file_browser_manipulator: File_Browser_Manipulator
 
@@ -325,6 +330,8 @@ test.beforeEach(async ({ page }) => {
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true)
   expect(Util.Pathname_Operator.normalize(test_root), Util.Pathname_Operator.normalize(await file_browser_manipulator.current_directory())).toBeTruthy()
+  const perf_mon_ctl_ch: Util.Pathname = await Util.Control.launch_performance_monitor()
+  logger.info(`Performance monitor control channel: ${perf_mon_ctl_ch}`)
 })
 
 // test('sample test', async ({ page }) => {
@@ -375,5 +382,8 @@ test('D1', async ({ page }) => {
       'Base Image': 'r',
     },
   ]
+  logger.info('Waiting for monitoring script to get ready...')
+  await Util.Control.wait(Util.Control_Code.monitor_ready)
+  logger.info('Monitoring script ready')
   await run_test(page, 'D1.0.Rmd', args)
 })
