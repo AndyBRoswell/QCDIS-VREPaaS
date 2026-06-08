@@ -1,4 +1,7 @@
-import Node_Path from 'node:path'
+import node_path from 'node:path'
+import node_os from 'node:os'
+import node_net from 'node:net'
+import node_fs_promises from 'node:fs/promises'
 import log, { type Logger } from "loglevel";
 
 export type Milliseconds = number
@@ -42,11 +45,11 @@ log.methodFactory = (log_method_name, log_level, logger_name) => {
 
 export class Pathname_Operator {
   public static normalize(path: Pathname): Pathname {
-    return Node_Path.normalize(path).replace(/\/+$/, '')
+    return node_path.normalize(path).replace(/\/+$/, '')
   }
 
   public static segmented_Pathname(path: Pathname): Segmented_Pathname { // Break path string in to segments for the convenience of comparison. Blank segments are ignored so inputs like `a///b` are handled correctly
-    return path.split(Node_Path.sep).filter(Boolean)
+    return path.split(node_path.sep).filter(Boolean)
   }
 
   public static identical_Pathname(p: Pathname, q: Pathname): boolean {
@@ -58,9 +61,70 @@ export class Pathname_Operator {
   }
 }
 
-export const enum Control {
-  monitor_ready = 1,
+export const enum Control_Code {
+  init = 0,
+  monitor_ready,
   query_monitor_start,
   monitor_started,
   query_monitor_stop,
+}
+
+export class Control {
+  private static server_pathname: string
+  private static server: node_net.Server
+  private static monitor_ready: boolean = false
+  private static monitor_started: boolean = false
+  private static resolve_with_monitor_ready: (() => void) | null = null
+  private static resolve_with_monitor_started: (() => void) | null = null
+  public static async launch_performance_monitor() {
+    const platform = node_os.platform()
+    switch (platform) {
+      case 'linux':
+        const server_dir = await node_fs_promises.mkdtemp(node_path.join(node_os.tmpdir(), 'Cell-Containerizer-perf-mon-'))
+        Control.server_pathname = node_path.join(server_dir, 'ctl-ch.sock')
+        break
+      default:
+        throw new Error(`Unsupported platform: ${platform}`)
+    }
+    Control.server = node_net.createServer(Control.on_connection)
+    Control.server.listen(Control.server_pathname)
+  }
+  protected static on_connection(socket: node_net.Socket) {
+    socket.on('readable', () => Control.on_readable(socket))
+  }
+  protected static on_readable(socket: node_net.Socket) {
+    let chunk: Buffer
+    while ((chunk = socket.read(1)) !== null) {
+      switch (chunk[0]) {
+        case Control_Code.monitor_ready:
+          Control.resolve_with_monitor_ready!()
+          Control.resolve_with_monitor_ready = null
+          break
+        case Control_Code.monitor_started:
+          Control.resolve_with_monitor_started!()
+          Control.resolve_with_monitor_started = null
+          break
+        default:
+          throw new Error(`Received unsupported control code ${chunk[0]}`)
+      }
+    }
+  }
+  public static wait(expected_control_code: Control_Code): Promise<void> {
+    switch (expected_control_code) {
+      case Control_Code.monitor_ready:
+        if (Control.monitor_ready) {
+          Control.monitor_ready = false
+          return Promise.resolve()
+        }
+        return new Promise(resolve => { Control.resolve_with_monitor_ready = resolve })
+      case Control_Code.monitor_started:
+        if (Control.monitor_started) {
+          Control.monitor_started = false
+          return Promise.resolve()
+        }
+        return new Promise(resolve => { Control.resolve_with_monitor_started = resolve })
+      default:
+        throw new Error(`Could not wait for control code: ${expected_control_code}`)
+    }
+  }
 }
