@@ -167,7 +167,7 @@ async def process():
         logger.debug('End process')
 
 
-class Control(Enum):
+class Control_Code(Enum):
     monitor_ready = auto()
     query_monitor_start = auto()
     monitor_started = auto()
