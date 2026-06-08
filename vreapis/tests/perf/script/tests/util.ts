@@ -70,13 +70,13 @@ export const enum Control_Code {
 }
 
 export class Control {
-  private static server_pathname: string
+  private static server_pathname: Pathname
   private static server: node_net.Server
   private static monitor_ready: boolean = false
   private static monitor_started: boolean = false
   private static resolve_with_monitor_ready: (() => void) | null = null
   private static resolve_with_monitor_started: (() => void) | null = null
-  public static async launch_performance_monitor() {
+  public static async launch_performance_monitor(): Promise<Pathname> {
     const platform = node_os.platform()
     switch (platform) {
       case 'linux':
@@ -88,6 +88,7 @@ export class Control {
     }
     Control.server = node_net.createServer(Control.on_connection)
     Control.server.listen(Control.server_pathname)
+    return Control.server_pathname
   }
   protected static on_connection(socket: node_net.Socket) {
     socket.on('readable', () => Control.on_readable(socket))
