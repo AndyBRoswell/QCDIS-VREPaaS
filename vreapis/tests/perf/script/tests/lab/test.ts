@@ -1,8 +1,8 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import log from 'loglevel'
 import { setTimeout } from "node:timers/promises";
-
 import * as Util from '../util'
+import { notebook_args } from "../containerizer_test_args";
 
 // log.setLevel('info')
 
@@ -336,8 +336,8 @@ test.beforeEach(async ({ page }) => {
   await setTimeout(Util.preset_action_delay.long)
   await file_browser_manipulator.open(test_root, true)
   expect(Util.Pathname_Operator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
-  const perf_mon_ctl_ch: Util.Pathname = await Util.Control.launch_performance_monitor()
-  logger.info(`Performance monitor control channel: ${perf_mon_ctl_ch}`)
+  // const perf_mon_ctl_ch: Util.Pathname = await Util.Control.launch_performance_monitor()
+  // logger.info(`Performance monitor control channel: ${perf_mon_ctl_ch}`)
 })
 
 // test('sample test', async ({ page }) => {
@@ -365,30 +365,9 @@ async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell
 }
 
 test('D1', async ({ page }) => {
-  const args_set: Util.Cell_Containerizer_Manipulation_Arguments[] = [
-    {
-      Outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
-      'Base Image': 'r',
-    },
-    {
-      Inputs: { 'w': "Integer", },
-      Outputs: { names: 'List', },
-      'Base Image': 'r',
-    },
-    {
-      Inputs: { x: "Integer", y: "Integer", names: 'List', },
-      Outputs: { t: "Integer", },
-      Parameters: { param_p: "String", },
-      'Base Image': 'r',
-    },
-    {
-      Inputs: { t: "Integer", },
-      Parameters: { param_a: "String", },
-      'Base Image': 'r',
-    },
-  ]
-  logger.info('Waiting for monitoring script to get ready...')
-  await Util.Control.wait(Util.Control_Code.monitor_ready)
-  logger.info('Monitoring script ready')
+  const args_set = notebook_args['D1']!
+  // logger.info('Waiting for monitoring script to get ready...')
+  // await Util.Control.wait(Util.Control_Code.monitor_ready)
+  // logger.info('Monitoring script ready')
   await run_test(page, 'D1.0.ipynb', args_set)
 })

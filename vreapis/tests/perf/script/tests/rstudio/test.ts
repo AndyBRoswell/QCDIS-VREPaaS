@@ -3,6 +3,7 @@ import { expect, type FrameLocator, type Locator, type Page, test } from '@playw
 import log from "loglevel";
 
 import * as Util from '../util'
+import { notebook_args } from "../containerizer_test_args.ts";
 
 class File_Browser_Manipulator {
   private static logger: Util.Logger_Map = {}
@@ -330,8 +331,8 @@ test.beforeEach(async ({ page }) => {
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true)
   expect(Util.Pathname_Operator.normalize(test_root), Util.Pathname_Operator.normalize(await file_browser_manipulator.current_directory())).toBeTruthy()
-  const perf_mon_ctl_ch: Util.Pathname = await Util.Control.launch_performance_monitor()
-  logger.info(`Performance monitor control channel: ${perf_mon_ctl_ch}`)
+  // const perf_mon_ctl_ch: Util.Pathname = await Util.Control.launch_performance_monitor()
+  // logger.info(`Performance monitor control channel: ${perf_mon_ctl_ch}`)
 })
 
 // test('sample test', async ({ page }) => {
@@ -360,30 +361,9 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
 }
 
 test('D1', async ({ page }) => {
-  const args: Util.Cell_Containerizer_Manipulation_Arguments[] = [
-    {
-      Outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
-      'Base Image': 'r',
-    },
-    {
-      Inputs: { 'w': "Integer", },
-      Outputs: { names: 'List', },
-      'Base Image': 'r',
-    },
-    {
-      Inputs: { x: "Integer", y: "Integer", names: 'List', },
-      Outputs: { t: "Integer", },
-      Parameters: { param_p: "String", },
-      'Base Image': 'r',
-    },
-    {
-      Inputs: { t: "Integer", },
-      Parameters: { param_a: "String", },
-      'Base Image': 'r',
-    },
-  ]
-  logger.info('Waiting for monitoring script to get ready...')
-  await Util.Control.wait(Util.Control_Code.monitor_ready)
-  logger.info('Monitoring script ready')
+  const args = notebook_args['D1']!
+  // logger.info('Waiting for monitoring script to get ready...')
+  // await Util.Control.wait(Util.Control_Code.monitor_ready)
+  // logger.info('Monitoring script ready')
   await run_test(page, 'D1.0.Rmd', args)
 })
