@@ -331,13 +331,28 @@ test.beforeEach(async ({ page }) => {
 //   await expect(page).toHaveTitle('RStudio Server')
 // })
 
-var text_editor_manipulator: Text_Editor_Manipulator
-var Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
-
-test('D1', async ({ page }) => {
+async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
+  let text_editor_manipulator: Text_Editor_Manipulator
+  let Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
-  await text_editor_manipulator.open('D1.0.Rmd')
+  await text_editor_manipulator.open(pathname)
+  await Cell_Containerizer_manipulator.init()
+  await Cell_Containerizer_manipulator.parse()
+  await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
+  await Cell_Containerizer_manipulator.fill_and_create(args[0]!)
+  await setTimeout(Util.preset_action_delay.short)
+  for (let i = 1; i < args.length; ++i) {
+    await Cell_Containerizer_manipulator.select_code_cell(i)
+    await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
+    await Cell_Containerizer_manipulator.fill_and_create(args[i]!)
+  }
+  await Cell_Containerizer_manipulator.close()
+  await text_editor_manipulator.close_all()
+  await setTimeout(Util.preset_action_delay.medium)
+}
+
+test('D1', async ({ page }) => {
   const args: Util.Cell_Containerizer_Manipulation_Arguments[] = [
     {
       Outputs: { 'w': "Integer", 'x': "Integer", 'y': "Integer", },
@@ -360,17 +375,5 @@ test('D1', async ({ page }) => {
       'Base Image': 'r',
     },
   ]
-  await Cell_Containerizer_manipulator.init()
-  await Cell_Containerizer_manipulator.parse()
-  await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
-  await Cell_Containerizer_manipulator.fill_and_create(args[0]!)
-  await setTimeout(Util.preset_action_delay.short)
-  for (let i = 1; i < args.length; ++i) {
-    await Cell_Containerizer_manipulator.select_code_cell(i)
-    await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
-    await Cell_Containerizer_manipulator.fill_and_create(args[i]!)
-  }
-  await Cell_Containerizer_manipulator.close()
-  await text_editor_manipulator.close_all()
-  await setTimeout(Util.preset_action_delay.medium)
+  await run_test(page, 'D1.0.Rmd', args)
 })
