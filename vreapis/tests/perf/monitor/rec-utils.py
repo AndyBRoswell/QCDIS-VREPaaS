@@ -210,6 +210,7 @@ async def main():
     producer = asyncio.create_task(monitor(process_group, default_sample_interval))
     consumer = asyncio.create_task(process())
     await stop
+    logger.warning('Received Ctrl-C')
     producer.cancel()
     consumer.cancel()
     await asyncio.gather(producer, consumer, return_exceptions=True)
