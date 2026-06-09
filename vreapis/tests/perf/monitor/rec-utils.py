@@ -104,7 +104,7 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
         logger.debug(f'Queue length: {samples.qsize()}')
         await asyncio.sleep(max(0, delay - (datetime.datetime.now() - agg_sample['time']).total_seconds()))
     except asyncio.CancelledError:
-        raise  # TODO
+        raise
 
 
 async def monitor(process_group: Process_Group, delay: float = default_sample_interval):
@@ -112,7 +112,7 @@ async def monitor(process_group: Process_Group, delay: float = default_sample_in
         try:
             await sample(process_group, delay)
         except asyncio.CancelledError:
-            raise  # TODO
+            raise
 
 
 if args.console_output:
