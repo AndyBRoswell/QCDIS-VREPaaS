@@ -14,8 +14,7 @@ import time
 from enum import Enum, auto
 import sys
 import os
-from multiprocessing.connection import Listener
-import tempfile
+import socket
 import csv
 from pathlib import Path
 
@@ -104,16 +103,16 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
         logger.debug(f'End sample {agg_sample["time"]}')
         logger.debug(f'Queue length: {samples.qsize()}')
         await asyncio.sleep(max(0, delay - (datetime.datetime.now() - agg_sample['time']).total_seconds()))
-    except (asyncio.CancelledError, KeyboardInterrupt):
-        pass
+    except asyncio.CancelledError:
+        pass  # TODO
 
 
 async def monitor(process_group: Process_Group, delay: float = default_sample_interval):
     while True:
         try:
             await sample(process_group, delay)
-        except (asyncio.CancelledError, KeyboardInterrupt):
-            pass
+        except asyncio.CancelledError:
+            pass  # TODO
 
 
 if args.console_output:
@@ -167,23 +166,36 @@ async def process():
         logger.debug('End process')
 
 
-class Control_Code(Enum):
+class ByteEnum(bytes, Enum):
+    def _generate_next_value_(name, start, count, last_values):
+        return bytes([count + 1])
+
+
+class Control_Code(ByteEnum):
     monitor_ready = auto()
     query_monitor_start = auto()
     monitor_started = auto()
     query_monitor_stop = auto()
 
 
-async def daemon():
-    match sys.platform:
-        case 'linux':
-            channel = args.IPC_channel
-            logger.info(f'Domain Socket: {channel}')
-            with Listener(channel, family='AF_UNIX') as listener:
-                with listener.accept() as connection:
-                    pass  # TODO
-        case _:
-            raise RuntimeError(f'Unsupported operating system: {sys.platform}')
+async def daemon(*tasks):
+    try:
+        match sys.platform:
+            case 'linux':
+                control_channel = args.IPC_channel
+                logger.info(f'Domain Socket: {control_channel}')
+                control_channel_reader, control_channel_writer = asyncio.open_unix_connection(control_channel)
+                while True:
+                    byte = await control_channel_reader.read(1)
+                    match byte[0]:
+                        case Control_Code.query_monitor_start.value:
+                            pass  # TODO
+                        case Control_Code.query_monitor_stop.value:
+                            pass  # TODO
+            case _:
+                raise RuntimeError(f'Unsupported operating system: {sys.platform}')
+    except asyncio.CancelledError:
+        pass  # TODO
 
 
 async def main():
