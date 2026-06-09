@@ -14,7 +14,7 @@ import time
 from enum import Enum, auto
 import sys
 import os
-import socket
+import signal
 import csv
 from pathlib import Path
 
@@ -104,7 +104,7 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
         logger.debug(f'Queue length: {samples.qsize()}')
         await asyncio.sleep(max(0, delay - (datetime.datetime.now() - agg_sample['time']).total_seconds()))
     except asyncio.CancelledError:
-        pass  # TODO
+        raise  # TODO
 
 
 async def monitor(process_group: Process_Group, delay: float = default_sample_interval):
@@ -112,7 +112,7 @@ async def monitor(process_group: Process_Group, delay: float = default_sample_in
         try:
             await sample(process_group, delay)
         except asyncio.CancelledError:
-            pass  # TODO
+            raise  # TODO
 
 
 if args.console_output:
@@ -143,27 +143,30 @@ async def output(agg_sample: Aggregated_Performance_Sample):
             line[index] = round(line[index], 3)
         print(fmt.format(*line))
     if args.file_output:
-        pass  # TODO
+        raise  # TODO
 
 
 async def process():
-    if args.console_output:
-        print(fmt.format(*header))
-    if args.file_output:
-        CSV_header_CPU: list[str] = ['time']
-        CSV_header_mem: list[str] = ['time']
-        CSV_header_cooked: list[str] = ['time']
-        for process_group_name in process_group:
-            CSV_header_CPU.append(process_group_name)
-            CSV_header_mem.append(process_group_name)
-            CSV_header_cooked.extend([f'{process_group_name}:CPU', f'{process_group_name}:mem'])
-        # TODO
-    while True:
-        logger.debug('Start process')
-        agg_sample: Aggregated_Performance_Sample = await samples.get()
-        # logger.info(pprint.pformat(agg_sample))
-        await output(agg_sample)
-        logger.debug('End process')
+    try:
+        if args.console_output:
+            print(fmt.format(*header))
+        if args.file_output:
+            CSV_header_CPU: list[str] = ['time']
+            CSV_header_mem: list[str] = ['time']
+            CSV_header_cooked: list[str] = ['time']
+            for process_group_name in process_group:
+                CSV_header_CPU.append(process_group_name)
+                CSV_header_mem.append(process_group_name)
+                CSV_header_cooked.extend([f'{process_group_name}:CPU', f'{process_group_name}:mem'])
+            # TODO
+        while True:
+            logger.debug('Start process')
+            agg_sample: Aggregated_Performance_Sample = await samples.get()
+            # logger.info(pprint.pformat(agg_sample))
+            await output(agg_sample)
+            logger.debug('End process')
+    except asyncio.CancelledError:
+        raise  # TODO
 
 
 class ByteEnum(bytes, Enum):
@@ -199,11 +202,17 @@ async def daemon(*tasks):
 
 
 async def main():
+    event_loop = asyncio.get_event_loop()
+    stop = event_loop.create_future()
+    event_loop.add_signal_handler(signal.SIGINT, stop.set_result, None)
     await sample(process_group, default_sample_interval)
     await samples.get()
     producer = asyncio.create_task(monitor(process_group, default_sample_interval))
     consumer = asyncio.create_task(process())
-    await asyncio.gather(producer, consumer)
+    await stop
+    producer.cancel()
+    consumer.cancel()
+    await asyncio.gather(producer, consumer, return_exceptions=True)
 
 
 if __name__ == '__main__':
