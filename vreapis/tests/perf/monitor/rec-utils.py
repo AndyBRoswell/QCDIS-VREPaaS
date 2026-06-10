@@ -182,6 +182,7 @@ class Control_Code(ByteEnum):
     query_monitor_start = auto()
     monitor_started = auto()
     query_monitor_stop = auto()
+    monitor_stopped = auto()
 
 
 async def daemon():
@@ -195,19 +196,22 @@ async def daemon():
                     logger.info(f'Domain Socket: {control_channel}')
                     control_channel_reader, control_channel_writer = await asyncio.open_unix_connection(control_channel)
                     logger.info(f'Socket connected')
+                    control_channel_writer.write(Control_Code.monitor_ready)
                     while True:
                         byte = await control_channel_reader.read(1)
-                        match byte[0]:
+                        match byte:
                             case Control_Code.query_monitor_start.value:
                                 producer = asyncio.create_task(monitor(process_group, default_sample_interval))
                                 consumer = asyncio.create_task(process())
+                                control_channel_writer.write(Control_Code.monitor_started)
                                 # pass  # TODO
                             case Control_Code.query_monitor_stop.value:
-                                logger.warning(f'Received {Control_Code.query_monitor_stop} from {control_channel}')
+                                logger.warning(f'Received Control_Code.{Control_Code.query_monitor_stop.name}')
                                 if producer is not None:
                                     producer.cancel()
                                 if consumer is not None:
                                     consumer.cancel()
+                                control_channel_writer.write(Control_Code.monitor_stopped)
                                 raise asyncio.CancelledError()
                                 # pass  # TODO
                             case _:
@@ -218,17 +222,17 @@ async def daemon():
             case _:
                 raise RuntimeError(f'Unsupported operating system: {sys.platform}')
     except asyncio.CancelledError:
+        logger.warning('Cleaning')
         if producer is not None:
             producer.cancel()
         if consumer is not None:
             consumer.cancel()
-        if control_channel_reader is not None:
-            control_channel_reader.close()
-            await control_channel_reader.wait_closed()
         if control_channel_writer is not None:
             control_channel_writer.close()
             await control_channel_writer.wait_closed()
-        raise
+        logger.warning('Cleaned')
+        sys.exit(0)
+        # raise
         # pass  # TODO
 
 
@@ -240,7 +244,7 @@ async def main():
     await samples.get()
     daemon_coro = asyncio.create_task(daemon())
     await stop
-    logger.warning('Received Ctrl-C')
+    logger.warning(f'Received Ctrl-C or Control_Code.{Control_Code.monitor_stopped.name}')
     await asyncio.gather(daemon_coro)
 
 
