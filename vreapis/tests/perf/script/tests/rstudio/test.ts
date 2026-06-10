@@ -384,8 +384,5 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
 
 test('D1', async ({ page }) => {
   const args = notebook_args['D1']!
-  // logger.info('Waiting for monitoring script to get ready...')
-  // await Util.Control.wait(Util.Control_Code.monitor_ready)
-  // logger.info('Monitoring script ready')
   await run_test(page, 'D1.0.Rmd', args)
 })
