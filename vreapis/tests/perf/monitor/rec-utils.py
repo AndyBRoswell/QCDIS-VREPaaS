@@ -172,6 +172,7 @@ async def process():
 
 
 class ByteEnum(bytes, Enum):
+    @staticmethod
     def _generate_next_value_(name, start, count, last_values):
         return bytes([count + 1])
 
