@@ -211,7 +211,8 @@ async def daemon():
                                     producer.cancel()
                                 if consumer is not None:
                                     consumer.cancel()
-                                control_channel_writer.write(Control_Code.monitor_stopped)
+                                # break
+                                logger.warning(f'raise asyncio.CancelledError in daemon')
                                 raise asyncio.CancelledError()
                                 # pass  # TODO
                             case _:
@@ -224,10 +225,18 @@ async def daemon():
     except asyncio.CancelledError:
         logger.warning('Cleaning')
         if producer is not None:
-            producer.cancel()
+            try:
+                await producer
+            except asyncio.CancelledError:
+                logger.warning(f'producer `monitor` cancelled')
         if consumer is not None:
-            consumer.cancel()
+            try:
+                await consumer
+            except asyncio.CancelledError:
+                logger.warning(f'consumer `process` cancelled')
         if control_channel_writer is not None:
+            logger.warning(f'Sending Control_Code.{Control_Code.monitor_stopped.name}')
+            control_channel_writer.write(Control_Code.monitor_stopped)
             control_channel_writer.close()
             await control_channel_writer.wait_closed()
         logger.warning('Cleaned')
@@ -243,10 +252,16 @@ async def main():
     await sample(process_group, default_sample_interval)
     await samples.get()
     daemon_coro = asyncio.create_task(daemon())
+    try:
+        await daemon_coro
+    except SystemExit:
+        sys.exit(0)
     await stop
     logger.warning(f'Received Ctrl-C or Control_Code.{Control_Code.monitor_stopped.name}')
-    await asyncio.gather(daemon_coro)
+    # await asyncio.gather(daemon_coro)
 
 
 if __name__ == '__main__':
     asyncio.run(main())
+    # logger.warning(f'exit with code 0')
+    # sys.exit(0)
