@@ -193,6 +193,7 @@ async def daemon():
                     control_channel = args.IPC_channel
                     logger.info(f'Domain Socket: {control_channel}')
                     control_channel_reader, control_channel_writer = await asyncio.open_unix_connection(control_channel)
+                    logger.info(f'Socket connected')
                     while True:
                         byte = await control_channel_reader.read(1)
                         match byte[0]:
