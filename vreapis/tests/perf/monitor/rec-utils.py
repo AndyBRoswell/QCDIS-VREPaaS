@@ -190,7 +190,7 @@ async def daemon():
         match sys.platform:
             case 'linux':
                 if args.IPC_channel is not None:
-                    control_channel = args.IPC_channel
+                    control_channel = args.IPC_channel[0]  # Passing a list to asyncio.open_unix_connection won't connect to the designated socket
                     logger.info(f'Domain Socket: {control_channel}')
                     control_channel_reader, control_channel_writer = await asyncio.open_unix_connection(control_channel)
                     logger.info(f'Socket connected')
