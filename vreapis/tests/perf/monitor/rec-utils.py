@@ -51,6 +51,7 @@ argument_parser = argparse.ArgumentParser()
 argument_parser.add_argument('-b', '--browser-process-filter', nargs='?', default=None, const=process_filter['chrome'])
 argument_parser.add_argument('-j', '--JupyterLab-backend-process-filter', nargs='?', default=None, const=process_filter['JupyterLab_backend'])
 argument_parser.add_argument('-r', '--RStudio-backend-process-filter', nargs='?', default=None, const=process_filter['RStudio_backend'])
+# TODO: RSession
 argument_parser.add_argument('-v', '--vreapi-process-filter', nargs='?', default=None, const=process_filter['vreapi'])
 argument_parser.add_argument('-d', '--database-process-filter', nargs='?', default=None, const=process_filter['database'])
 argument_parser.add_argument('-i', '--interval', nargs=1, type=float)
@@ -219,6 +220,12 @@ async def daemon():
             producer.cancel()
         if consumer is not None:
             consumer.cancel()
+        if control_channel_reader is not None:
+            control_channel_reader.close()
+            await control_channel_reader.wait_closed()
+        if control_channel_writer is not None:
+            control_channel_writer.close()
+            await control_channel_writer.wait_closed()
         raise
         # pass  # TODO
 
