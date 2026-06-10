@@ -252,8 +252,11 @@ async def main():
     daemon_coro = asyncio.create_task(daemon())
     try:
         await daemon_coro
-    except SystemExit:
-        sys.exit(0)
+    except SystemExit as e:
+        if e.code == 0:
+            sys.exit(0)
+        else:
+            raise e
     await stop
     logger.warning(f'Received Ctrl-C or Control_Code.{Control_Code.monitor_stopped.name}')
 
