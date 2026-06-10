@@ -211,7 +211,6 @@ async def daemon():
                                     producer.cancel()
                                 if consumer is not None:
                                     consumer.cancel()
-                                # break
                                 logger.warning(f'raise asyncio.CancelledError in daemon')
                                 raise asyncio.CancelledError()
                                 # pass  # TODO
@@ -241,8 +240,7 @@ async def daemon():
             await control_channel_writer.wait_closed()
         logger.warning('Cleaned')
         sys.exit(0)
-        # raise
-        # pass  # TODO
+        # TODO
 
 
 async def main():
@@ -258,10 +256,7 @@ async def main():
         sys.exit(0)
     await stop
     logger.warning(f'Received Ctrl-C or Control_Code.{Control_Code.monitor_stopped.name}')
-    # await asyncio.gather(daemon_coro)
 
 
 if __name__ == '__main__':
     asyncio.run(main())
-    # logger.warning(f'exit with code 0')
-    # sys.exit(0)
