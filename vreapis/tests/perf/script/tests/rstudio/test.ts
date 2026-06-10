@@ -245,6 +245,7 @@ class Cell_Containerizer_Manipulator {
     await this.button_Parse.click()
     this.doc_info_output = this.Cell_Containerizer.locator('#doc_info_output')
     const doc_info = await this.doc_info_output.innerText()
+    await expect(this.button_Parse).toBeEnabled()
     const re = /Document ID: .+\r?\nDocument Path: .+\r?\nParsing done/
     const match = doc_info.match(re)
     expect(match)
@@ -347,7 +348,6 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
   await text_editor_manipulator.open(pathname)
   await Cell_Containerizer_manipulator.init()
   await Cell_Containerizer_manipulator.parse()
-  await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
   await Cell_Containerizer_manipulator.fill_and_create(args[0]!)
   await setTimeout(Util.preset_action_delay.short)
   for (let i = 1; i < args.length; ++i) {
