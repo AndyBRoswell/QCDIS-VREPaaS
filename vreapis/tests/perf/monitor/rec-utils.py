@@ -211,7 +211,6 @@ async def daemon():
                                     producer.cancel()
                                 if consumer is not None:
                                     consumer.cancel()
-                                logger.warning(f'raise asyncio.CancelledError in daemon')
                                 raise asyncio.CancelledError()
                                 # pass  # TODO
                             case _:
