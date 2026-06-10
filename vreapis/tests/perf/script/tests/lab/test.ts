@@ -350,7 +350,6 @@ test.beforeEach(async ({ page }) => {
   })
   logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
   logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}`)
-  // await setTimeout(Util.preset_action_delay.extra_long)
   logger.info(`Starting performance monitor`)
   await Util.Control.start_monitor()
   logger.info(`Performance monitor started`)

@@ -141,7 +141,6 @@ export class Control {
           if (Control.resolve_with_monitor_ready) {
             Control.resolve_with_monitor_ready()
             // Control.resolve_with_monitor_ready = null
-            console.log('Monitor is ready, promise resolved')
           }
           break
         case Control_Code.monitor_started:
@@ -149,7 +148,6 @@ export class Control {
           if (Control.resolve_with_monitor_started) {
             Control.resolve_with_monitor_started()
             // Control.resolve_with_monitor_started = null
-            console.log('Monitor is started, promise resolved')
           }
           break
         case Control_Code.monitor_stopped:
@@ -157,7 +155,6 @@ export class Control {
           if (Control.resolve_with_monitor_stopped) {
             Control.resolve_with_monitor_stopped()
             // Control.resolve_with_monitor_stopped = null
-            console.log('Monitor is stopped, promise resolved')
           }
           break
         default:
@@ -193,7 +190,6 @@ export class Control {
           // Control.monitor_ready = false
           return Promise.resolve()
         }
-        console.log('Monitor not ready yet')
         return new Promise(resolve => { Control.resolve_with_monitor_ready = resolve })
       case Control_Code.monitor_started:
         if (Control.monitor_started) {
