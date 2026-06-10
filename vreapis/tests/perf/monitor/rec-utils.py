@@ -229,14 +229,9 @@ async def main():
     event_loop.add_signal_handler(signal.SIGINT, stop.set_result, None)
     await sample(process_group, default_sample_interval)
     await samples.get()
-    # producer = asyncio.create_task(monitor(process_group, default_sample_interval))
-    # consumer = asyncio.create_task(process())
     daemon_coro = asyncio.create_task(daemon())
     await stop
     logger.warning('Received Ctrl-C')
-    # producer.cancel()
-    # consumer.cancel()
-    # await asyncio.gather(producer, consumer, return_exceptions=True)
     await asyncio.gather(daemon_coro)
 
 
