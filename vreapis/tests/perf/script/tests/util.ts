@@ -2,7 +2,11 @@ import node_path from 'node:path'
 import node_os from 'node:os'
 import node_net from 'node:net'
 import node_fs_promises from 'node:fs/promises'
+import node_events from 'node:events'
+import node_child_process from 'node:child_process'
 import log, { type Logger } from "loglevel";
+import * as child_process from "node:child_process";
+import { expect } from "@playwright/test";
 
 export type Milliseconds = number
 export type Pathname = string
@@ -67,63 +71,142 @@ export const enum Control_Code {
   query_monitor_start,
   monitor_started,
   query_monitor_stop,
+  monitor_stopped,
+  monitor_closed,
 }
 
 export class Control {
-  private static server_pathname: Pathname
-  private static server: node_net.Server
+  private static control_channel_pathname: Pathname
+  private static control_server: node_net.Server
+  private static control_socket: node_net.Socket
+  private static monitor: node_child_process.ChildProcess
   private static monitor_ready: boolean = false
   private static monitor_started: boolean = false
+  private static monitor_stopped: boolean = false
   private static resolve_with_monitor_ready: (() => void) | null = null
   private static resolve_with_monitor_started: (() => void) | null = null
-  public static async launch_performance_monitor(): Promise<Pathname> {
+  private static resolve_with_monitor_stopped: (() => void) | null = null
+
+  public static async launch_performance_monitor(
+    cmdline_arg: {
+      browser: boolean,
+      JupyterLab_backend: boolean,
+      RStudio_backend: boolean,
+      vreapi_process: boolean,
+      database_process: boolean,
+      interval: number,
+      control_channel: boolean,
+      console_output: boolean,
+      file_output: boolean,
+    }
+  ) {
     const platform = node_os.platform()
     switch (platform) {
       case 'linux':
-        const server_dir = await node_fs_promises.mkdtemp(node_path.join(node_os.tmpdir(), 'Cell-Containerizer-perf-mon-'))
-        Control.server_pathname = node_path.join(server_dir, 'ctl-ch.sock')
+        const control_channel_dir = await node_fs_promises.mkdtemp(node_path.join(node_os.tmpdir(), 'Cell-Containerizer-perf-mon-'))
+        Control.control_channel_pathname = node_path.join(control_channel_dir, 'ctl-ch.sock')
         break
       default:
         throw new Error(`Unsupported platform: ${platform}`)
     }
-    Control.server = node_net.createServer(Control.on_connection)
-    Control.server.listen(Control.server_pathname)
-    return Control.server_pathname
+    Control.control_server = node_net.createServer(Control.on_connection)
+    Control.control_server.listen(Control.control_channel_pathname)
+    await node_events.once(Control.control_server, 'listening')
+    const monitor_script = node_path.resolve(__dirname, '../../monitor/rec-utils.py')
+    const monitor_script_arg = [ monitor_script ]
+    if (cmdline_arg.browser) { monitor_script_arg.push('-b') }
+    if (cmdline_arg.JupyterLab_backend) { monitor_script_arg.push('-j') }
+    if (cmdline_arg.RStudio_backend) { monitor_script_arg.push('-r') }
+    if (cmdline_arg.vreapi_process) { monitor_script_arg.push('-v') }
+    if (cmdline_arg.database_process) { monitor_script_arg.push('-d') }
+    if (cmdline_arg.interval) { monitor_script_arg.push('-i', cmdline_arg.interval.toString()) }
+    if (cmdline_arg.control_channel) { monitor_script_arg.push('-I', Control.control_channel_pathname) } else { monitor_script_arg.push('-D') }
+    if (cmdline_arg.console_output) { monitor_script_arg.push('-c') }
+    if (cmdline_arg.file_output) { monitor_script_arg.push('-f') }
+    Control.monitor = node_child_process.spawn('python', monitor_script_arg, { stdio: 'inherit', detached: false })
   }
+
   protected static on_connection(socket: node_net.Socket) {
     socket.on('readable', () => Control.on_readable(socket))
+    Control.control_socket = socket
+    expect(Control.control_socket).not.toBeUndefined()
   }
+
   protected static on_readable(socket: node_net.Socket) {
     let chunk: Buffer
     while ((chunk = socket.read(1)) !== null) {
       switch (chunk[0]) {
         case Control_Code.monitor_ready:
-          Control.resolve_with_monitor_ready!()
-          Control.resolve_with_monitor_ready = null
+          Control.monitor_ready = true
+          if (Control.resolve_with_monitor_ready) {
+            Control.resolve_with_monitor_ready()
+            // Control.resolve_with_monitor_ready = null
+            console.log('Monitor is ready, promise resolved')
+          }
           break
         case Control_Code.monitor_started:
-          Control.resolve_with_monitor_started!()
-          Control.resolve_with_monitor_started = null
+          Control.monitor_started = true
+          if (Control.resolve_with_monitor_started) {
+            Control.resolve_with_monitor_started()
+            // Control.resolve_with_monitor_started = null
+            console.log('Monitor is started, promise resolved')
+          }
+          break
+        case Control_Code.monitor_stopped:
+          Control.monitor_stopped = true
+          if (Control.resolve_with_monitor_stopped) {
+            Control.resolve_with_monitor_stopped()
+            // Control.resolve_with_monitor_stopped = null
+            console.log('Monitor is stopped, promise resolved')
+          }
           break
         default:
           throw new Error(`Received unsupported control code ${chunk[0]}`)
       }
     }
   }
+
+  public static get_control_channel_pathname() { return Control.control_channel_pathname }
+
+  public static get_monitor_script_PID() { return this.monitor.pid }
+
+  public static async start_monitor() {
+    await Control.wait(Control_Code.monitor_ready)
+    Control.control_socket.write(Buffer.from([ Control_Code.query_monitor_start ]))
+    await Control.wait(Control_Code.monitor_started)
+  }
+
+  public static async stop_monitor() {
+    const exit_code = new Promise((resolve, reject) => {
+      Control.monitor.on('close', (code) => { resolve(code) })
+      Control.monitor.on('error', (err) => { reject(err) })
+    })
+    Control.control_socket.write(Buffer.from([ Control_Code.query_monitor_stop ]))
+    await Control.wait(Control_Code.monitor_stopped)
+    return await exit_code
+  }
+
   public static wait(expected_control_code: Control_Code): Promise<void> {
     switch (expected_control_code) {
       case Control_Code.monitor_ready:
         if (Control.monitor_ready) {
-          Control.monitor_ready = false
+          // Control.monitor_ready = false
           return Promise.resolve()
         }
+        console.log('Monitor not ready yet')
         return new Promise(resolve => { Control.resolve_with_monitor_ready = resolve })
       case Control_Code.monitor_started:
         if (Control.monitor_started) {
-          Control.monitor_started = false
+          // Control.monitor_started = false
           return Promise.resolve()
         }
         return new Promise(resolve => { Control.resolve_with_monitor_started = resolve })
+      case Control_Code.monitor_stopped:
+        if (Control.monitor_stopped) {
+          // Control.monitor_stopped = false
+          return Promise.resolve()
+        }
+        return new Promise(resolve => { Control.resolve_with_monitor_stopped = resolve })
       default:
         throw new Error(`Could not wait for control code: ${expected_control_code}`)
     }

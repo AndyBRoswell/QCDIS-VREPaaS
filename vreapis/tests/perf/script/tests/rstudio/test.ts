@@ -313,6 +313,7 @@ logger.setLevel('info')
 const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
 
 const repetition_count = 10
+const default_performance_sample_interval = 0.5
 
 var file_browser_manipulator: File_Browser_Manipulator
 
@@ -332,8 +333,27 @@ test.beforeEach(async ({ page }) => {
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true)
   expect(Util.Pathname_Operator.normalize(test_root), Util.Pathname_Operator.normalize(await file_browser_manipulator.current_directory())).toBeTruthy()
-  // const perf_mon_ctl_ch: Util.Pathname = await Util.Control.launch_performance_monitor()
-  // logger.info(`Performance monitor control channel: ${perf_mon_ctl_ch}`)
+  await Util.Control.launch_performance_monitor({
+    browser: true,
+    JupyterLab_backend: false,
+    RStudio_backend: true,
+    vreapi_process: true,
+    database_process: true,
+    interval: default_performance_sample_interval,
+    control_channel: true,
+    console_output: true,
+    file_output: false,
+  })
+  logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
+  logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}`)
+  logger.info(`Starting performance monitor`)
+  await Util.Control.start_monitor()
+  logger.info(`Performance monitor started.`)
+})
+
+test.afterEach(async ({ page }) => {
+  const exit_code = await Util.Control.stop_monitor()
+  expect(exit_code).toEqual(0)
 })
 
 // test('sample test', async ({ page }) => {
