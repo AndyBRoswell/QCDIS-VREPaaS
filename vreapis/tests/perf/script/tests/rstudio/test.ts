@@ -341,7 +341,7 @@ test.beforeEach(async ({ page }) => {
     database_process: true,
     interval: default_performance_sample_interval,
     control_channel: true,
-    console_output: true,
+    console_output: false,
     file_output: false,
   })
   logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
@@ -352,7 +352,9 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.afterEach(async ({ page }) => {
+  logger.info(`Stopping performance monitor`)
   const exit_code = await Util.Control.stop_monitor()
+  logger.info(`Performance monitor stopped`)
   expect(exit_code).toEqual(0)
 })
 

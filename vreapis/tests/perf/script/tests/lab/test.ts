@@ -345,7 +345,7 @@ test.beforeEach(async ({ page }) => {
     database_process: true,
     interval: default_performance_sample_interval,
     control_channel: true,
-    console_output: true,
+    console_output: false,
     file_output: false,
   })
   logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
