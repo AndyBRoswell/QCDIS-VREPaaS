@@ -53,9 +53,10 @@ argument_parser.add_argument('-j', '--JupyterLab-backend-process-filter', nargs=
 argument_parser.add_argument('-r', '--RStudio-backend-process-filter', nargs='?', default=None, const=process_filter['RStudio_backend'])
 argument_parser.add_argument('-v', '--vreapi-process-filter', nargs='?', default=None, const=process_filter['vreapi'])
 argument_parser.add_argument('-d', '--database-process-filter', nargs='?', default=None, const=process_filter['database'])
+argument_parser.add_argument('-i', '--interval', nargs=1, type=float)
 mutually_exclusive_group_IPC = argument_parser.add_mutually_exclusive_group()
-mutually_exclusive_group_IPC.add_argument('-i', '--IPC-channel', nargs=1)
-mutually_exclusive_group_IPC.add_argument('-I', '--No-IPC-channel', action='store_true')
+mutually_exclusive_group_IPC.add_argument('-I', '--IPC-channel', nargs=1)
+mutually_exclusive_group_IPC.add_argument('-D', '--Detached', action='store_true')
 argument_parser.add_argument('-c', '--console-output', action='store_true')
 argument_parser.add_argument('-f', '--file-output', action='store_true')
 argument_parser.add_argument('-l', '--log-filename-prefix', nargs='?', default=None, const=datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
@@ -80,8 +81,8 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
                 process_group[field].append(proc)
 logger.debug(pprint.pformat(process_group))
 
+default_sample_interval: float = args.interval[0] if args.interval is not None else 0.5
 samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
-default_sample_interval: float = 0.5
 
 
 async def sample(process_group: Process_Group, delay: float = default_sample_interval):
