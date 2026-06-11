@@ -148,7 +148,7 @@ class Running_Session_Manipulator {
     const disabled = await this.Close_All_button.getAttribute('disabled')
     if (disabled === null) {
       await this.Close_All_button.click()
-      await setTimeout(Util.preset_action_delay.medium)
+      await setTimeout(Util.preset_action_delay.short)
       const dialog = this.page.locator('body > div').filter({ hasText: 'Close All?' })
       const confirm_button = dialog.getByRole('button').filter({ hasText: 'Close All' })
       await confirm_button.click()
@@ -160,7 +160,7 @@ class Running_Session_Manipulator {
     const disabled = await this.Shut_Down_All_button.getAttribute('disabled')
     if (disabled === null) {
       await this.Shut_Down_All_button.click()
-      await setTimeout(Util.preset_action_delay.medium)
+      await setTimeout(Util.preset_action_delay.short)
       const dialog = this.page.locator('body > div').filter({ hasText: 'Shut Down All?' })
       const confirm_button = dialog.getByRole('button').filter({ hasText: 'Shut Down All' })
       await confirm_button.click()
@@ -228,7 +228,7 @@ class Text_Editor_Manipulator {
 
   public async close_all() {
     await this.running_session_manipulator.close_all_tabs()
-    await setTimeout(Util.preset_action_delay.medium)
+    await setTimeout(Util.preset_action_delay.short)
     await this.running_session_manipulator.shut_down_all_kernels()
   }
 }
@@ -279,7 +279,7 @@ class Cell_Containerizer_Manipulator {
     await analyzing_message.waitFor({ state: 'detached' })
   }
 
-  public async fill_and_create(args: Util.Image_Creation_Arguments) {
+  public async fill(args: Util.Image_Creation_Arguments) {
     await this.toggle()
     for (const category of Util.variable_categories_to_fill) {
       if (category in args) {
@@ -307,7 +307,10 @@ class Cell_Containerizer_Manipulator {
     const base_image_list = base_image_selection_area.getByRole('listbox')
     const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
     await target_base_image_item.click()
-    await setTimeout(Util.preset_action_delay.short)
+    // await setTimeout(Util.preset_action_delay.short)
+  }
+
+  public async create() {
     await this.Create_button.click()
     const success_icon = this.page.getByTestId('CheckCircleOutlineIcon')
     await success_icon.waitFor()
@@ -375,8 +378,9 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
     await Cell_Containerizer_manipulator!.wait_until_completion_of_analysis()
     await setTimeout(Util.preset_action_delay.short)
     if (args.actions.includes('create')) {
-      await Cell_Containerizer_manipulator!.fill_and_create(args.image_args!)
+      await Cell_Containerizer_manipulator!.fill(args.image_args!)
       await setTimeout(Util.preset_action_delay.short)
+      await Cell_Containerizer_manipulator!.create()
     }
   }
   // else {
@@ -391,11 +395,14 @@ async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell
   await text_editor_manipulator.open(pathname)
   // expect(text_editor_manipulator.code_cell.length).toEqual(4)
   await Cell_Containerizer_manipulator.init()
-  for (let i = 1; i < args_set.length; i++) { await test_single_cell(i, args_set[i]!) }
+  for (let i = 1; i < args_set.length; i++) {
+    await test_single_cell(i, args_set[i]!)
+    await setTimeout(Util.preset_action_delay.short)
+  }
   await test_single_cell(0, args_set[0]!)
 
   await text_editor_manipulator.close_all()
-  await setTimeout(Util.preset_action_delay.medium)
+  await setTimeout(Util.preset_action_delay.short)
 }
 
 test('D1', async ({ page }) => {

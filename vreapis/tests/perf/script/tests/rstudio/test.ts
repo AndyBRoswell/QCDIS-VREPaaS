@@ -1,7 +1,6 @@
-import { setTimeout } from "node:timers/promises";
 import { expect, type FrameLocator, type Locator, type Page, test } from '@playwright/test'
 import log from "loglevel";
-
+import { setTimeout } from "node:timers/promises";
 import * as Util from '../util'
 import { notebook_test_args } from "../containerizer_test_args.ts";
 
@@ -149,7 +148,7 @@ class Text_Editor_Manipulator {
     // const context_menu = this.HTML_body.locator('[aria-activedescendant]') // I don't know why this can't locate the menu
     // const item_Close_All = context_menu.getByText('Close All', { exact: true })
     const item_Close_All = this.HTML_body.getByRole('menuitem').filter({ hasText: /Close All$/ })
-    await setTimeout(Util.preset_action_delay.medium)
+    await setTimeout(Util.preset_action_delay.short)
     await item_Close_All.click()
   }
 }
@@ -267,7 +266,7 @@ class Cell_Containerizer_Manipulator {
     await expect(this.button_Parse).toBeEnabled()
   }
 
-  public async fill_and_create(args: Util.Image_Creation_Arguments) {
+  public async fill(args: Util.Image_Creation_Arguments) {
     await this.toggle()
     for (const category of Util.variable_categories_to_fill) {
       if (category in args) {
@@ -294,7 +293,10 @@ class Cell_Containerizer_Manipulator {
     const base_image_list = this.base_image_selector_wrapper.getByRole('listbox')
     const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
     await target_base_image_item.click()
-    await setTimeout(Util.preset_action_delay.short)
+    // await setTimeout(Util.preset_action_delay.short)
+  }
+
+  public async create() {
     await this.button_Create.click()
     const creation_result_output = this.Cell_Containerizer.locator('#creation_result_output')
     const message_of_success = creation_result_output.getByText('The cell has been successfully created!', { exact: true })
@@ -368,8 +370,9 @@ let Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 
 async function test_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
   if (args.actions.includes('create')) {
-    await Cell_Containerizer_manipulator.fill_and_create(args.image_args!)
+    await Cell_Containerizer_manipulator.fill(args.image_args!)
     await setTimeout(Util.preset_action_delay.short)
+    await Cell_Containerizer_manipulator.create()
   }
 }
 
@@ -387,10 +390,13 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
   await Cell_Containerizer_manipulator.init()
   await Cell_Containerizer_manipulator.parse()
   await test_single_cell(0, args[0]!, true)
-  for (let i = 1; i < args.length; i++) { await test_single_cell(i, args[i]!, false) }
+  for (let i = 1; i < args.length; i++) {
+    await setTimeout(Util.preset_action_delay.short)
+    await test_single_cell(i, args[i]!, false)
+  }
   await Cell_Containerizer_manipulator.close()
   await text_editor_manipulator.close_all()
-  await setTimeout(Util.preset_action_delay.medium)
+  await setTimeout(Util.preset_action_delay.short)
 }
 
 test('D1', async ({ page }) => {
