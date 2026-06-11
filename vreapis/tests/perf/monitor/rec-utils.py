@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log_level)
 default_console_handler = logging.StreamHandler()
 default_console_handler.setLevel(log_level)
-logger.addHandler(default_console_handler)
+logger.addHandler(default_console_handler)  # omitting this handler won't let the logger log normally
 
 common_re_flags = re.IGNORECASE
 
-process_filter: dict[str, str] = {
+process_filter: dict[str, str] = {  # Process-group-wide REs. To filter the process to monitor in the process list. Keys are process group names.
     'chrome': r'.*/chrom.*',
     'JupyterLab_backend': r'jupyter.?lab',
     'RStudio_backend': r'rstudio-server',
@@ -37,12 +37,12 @@ process_filter: dict[str, str] = {
 }
 
 
-class Performance_Index(NamedTuple):
+class Performance_Index(NamedTuple):  # Use NamedTuple to reduce overhead
     CPU_usage: float
     memory_usage: int
 
 
-Aggregated_Performance_Sample: TypeAlias = dict[str, float | timedelta | Performance_Index]
+Aggregated_Performance_Sample: TypeAlias = dict[str, float | timedelta | Performance_Index]  # Keys may be process group names and shared property values [i.e. time]
 Process_Group: TypeAlias = dict[str, list[psutil.Process]]
 
 process_group: Process_Group = {}
@@ -63,22 +63,23 @@ argument_parser.add_argument('-f', '--file-output', action='store_true')
 argument_parser.add_argument('-l', '--log-filename-prefix', nargs='?', default=None, const=datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
 
 args = argument_parser.parse_args()
-args_dict = vars(args)
+args_dict = vars(args)  # to iterate over the command-line args conveniently
 logger.debug(pprint.pformat(args_dict))
 for field, value in args_dict.items():
     if field.endswith('_process_filter'):
         process_group_name: str = field.removesuffix('_process_filter')
         if value is not None:
-            process_filter[process_group_name] = value
+            process_filter[process_group_name] = value  # If process filters are designated in command-line args, then override the defaults.
             process_group[process_group_name] = []
         else:
             del process_filter[process_group_name]
-for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):
+
+for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):  # Scan the entire process list and pick up the processes to monitor
     with proc.oneshot():
         cmdline: str = ' '.join(proc.cmdline())
         pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
         for field, value in process_filter.items():
-            if field in process_group and re.search(value, cmdline):
+            if field in process_group and re.search(value, cmdline):  # Match the command-line of the current process
                 process_group[field].append(proc)
 logger.debug(pprint.pformat(process_group))
 
