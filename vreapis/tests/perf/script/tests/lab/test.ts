@@ -2,7 +2,7 @@ import { expect, type Locator, type Page, test } from '@playwright/test'
 import log from 'loglevel'
 import { setTimeout } from "node:timers/promises";
 import * as Util from '../util'
-import { notebook_args } from "../containerizer_test_args";
+import { notebook_test_args } from "../containerizer_test_args";
 
 // log.setLevel('info')
 
@@ -279,7 +279,7 @@ class Cell_Containerizer_Manipulator {
     await analyzing_message.waitFor({ state: 'detached' })
   }
 
-  public async fill_and_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
+  public async fill_and_create(args: Util.Image_Creation_Arguments) {
     await this.toggle()
     for (const category of Util.variable_categories_to_fill) {
       if (category in args) {
@@ -387,6 +387,6 @@ async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell
 }
 
 test('D1', async ({ page }) => {
-  const args_set = notebook_args['D1']!
+  const args_set = notebook_test_args['D1']!
   await run_test(page, 'D1.0.ipynb', args_set)
 })
