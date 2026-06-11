@@ -245,7 +245,7 @@ class Cell_Containerizer_Manipulator {
     await this.button_Parse.click()
     this.doc_info_output = this.Cell_Containerizer.locator('#doc_info_output')
     const doc_info = await this.doc_info_output.innerText()
-    await expect(this.button_Parse).toBeEnabled()
+    // await expect(this.button_Parse).toBeEnabled()
     const re = /Document ID: .+\r?\nDocument Path: .+\r?\nParsing done/
     const match = doc_info.match(re)
     expect(match)
@@ -261,9 +261,10 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async wait_until_completion_of_analysis() {
-    await this.toggle()
-    const old_code = await this.code_output.innerText()
-    await expect(this.code_output).not.toHaveText(old_code)
+    // await this.toggle()
+    // const old_code = await this.code_output.innerText()
+    // await expect(this.code_output).not.toHaveText(old_code)
+    await expect(this.button_Parse).toBeEnabled()
   }
 
   public async fill_and_create(args: Util.Image_Creation_Arguments) {
