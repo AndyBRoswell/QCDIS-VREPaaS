@@ -383,10 +383,6 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
       await Cell_Containerizer_manipulator!.create()
     }
   }
-  // else {
-  //   console.log(`'extract' not found)`)
-  //   console.log(args.actions)
-  // }
 }
 
 async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell_Containerizer_Manipulation_Arguments[]) {
@@ -395,7 +391,6 @@ async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell
   for (let r = 1; r <= repetition_count; r++) {
     logger.info(`Repetition ${r}/${repetition_count}`)
     await text_editor_manipulator.open(pathname)
-    // expect(text_editor_manipulator.code_cell.length).toEqual(4)
     await Cell_Containerizer_manipulator.init()
     for (let i = 1; i < args_set.length; i++) {
       await test_single_cell(i, args_set[i]!)
