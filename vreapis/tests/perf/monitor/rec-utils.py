@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(log_level)
 default_console_handler = logging.StreamHandler()
 default_console_handler.setLevel(log_level)
-logger.addHandler(default_console_handler)  # omitting this handler won't let the logger log normally [then only log with warning or higher levels are shown]
+logger.addHandler(default_console_handler)  # omitting this handler won't let the logger log normally [then only logs with warning or higher levels are shown]
 
 common_re_flags = re.IGNORECASE
 
