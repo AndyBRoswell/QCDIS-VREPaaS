@@ -266,7 +266,7 @@ class Cell_Containerizer_Manipulator {
     await expect(this.code_output).not.toHaveText(old_code)
   }
 
-  public async fill_and_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
+  public async fill_and_create(args: Util.Image_Creation_Arguments) {
     await this.toggle()
     for (const category of Util.variable_categories_to_fill) {
       if (category in args) {
