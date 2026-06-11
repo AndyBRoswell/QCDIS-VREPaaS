@@ -31,7 +31,6 @@ process_filter: dict[str, str] = {  # Process-group-wide REs. To filter the proc
     'chrome': r'.*/chrom.*',
     'JupyterLab_backend': r'jupyter.?lab',
     'RStudio_backend': r'rstudio-server',
-    # 'RSession': '',  # TODO
     'vreapi': r'.*/bin/python\s+.*/VREPaaS/vreapis/manage.py\s+runserver',
     'database': r'postgres',
 }
@@ -51,7 +50,6 @@ argument_parser = argparse.ArgumentParser()
 argument_parser.add_argument('-b', '--browser-process-filter', nargs='?', default=None, const=process_filter['chrome'])
 argument_parser.add_argument('-j', '--JupyterLab-backend-process-filter', nargs='?', default=None, const=process_filter['JupyterLab_backend'])
 argument_parser.add_argument('-r', '--RStudio-backend-process-filter', nargs='?', default=None, const=process_filter['RStudio_backend'])
-# TODO: RSession
 argument_parser.add_argument('-v', '--vreapi-process-filter', nargs='?', default=None, const=process_filter['vreapi'])
 argument_parser.add_argument('-d', '--database-process-filter', nargs='?', default=None, const=process_filter['database'])
 argument_parser.add_argument('-i', '--interval', nargs=1, type=float)
