@@ -120,13 +120,13 @@ if args.console_output:
     fmt = "{:<23}" + " {:>23}" * 2 * len(process_group)
     header = ['time']
     for process_group_name in process_group:
-        header.append(f'{process_group_name}:CPU')
-        header.append(f'{process_group_name}:mem')
+        header.append(f'CPU:{process_group_name}')
+        header.append(f'mem:{process_group_name}')
 if args.file_output:
     Path('.log').mkdir(parents=True, exist_ok=True)
-    CPU_log_file = open(f'{args.log_filename_prefix}.CPU.log', 'w')
-    mem_log_file = open(f'{args.log_filename_prefix}.mem.log', 'w')
-    cooked_log_file = open(f'{args.log_filename_prefix}.cooked.log', 'w')
+    CPU_log_file = open(f'{args.log_filename_prefix}.CPU.csv', 'w')
+    mem_log_file = open(f'{args.log_filename_prefix}.mem.csv', 'w')
+    cooked_log_file = open(f'{args.log_filename_prefix}.cooked.csv', 'w')
     CSV_file_writer_CPU = csv.writer(CPU_log_file)
     CSV_file_writer_mem = csv.writer(mem_log_file)
     CSV_file_writer_cooked = csv.writer(cooked_log_file)
@@ -158,7 +158,7 @@ async def process():
             for process_group_name in process_group:
                 CSV_header_CPU.append(process_group_name)
                 CSV_header_mem.append(process_group_name)
-                CSV_header_cooked.extend([f'{process_group_name}:CPU', f'{process_group_name}:mem'])
+                CSV_header_cooked.extend([f'CPU:{process_group_name}', f'mem:{process_group_name}'])
             # TODO
         while True:
             logger.debug('Start process')
