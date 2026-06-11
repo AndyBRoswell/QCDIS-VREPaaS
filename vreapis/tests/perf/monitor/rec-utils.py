@@ -82,7 +82,7 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
 logger.debug(pprint.pformat(process_group))
 
 default_sample_interval: float = args.interval[0] if args.interval is not None else 0.5
-samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
+aggregated_samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
 
 
 async def sample(process_group: Process_Group, delay: float = default_sample_interval):
@@ -100,9 +100,9 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
                 except psutil.NoSuchProcess:
                     pass
             agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
-        await samples.put(agg_sample)
+        await aggregated_samples.put(agg_sample)
         logger.debug(f'End sample {agg_sample["time"]}')
-        logger.debug(f'Queue length: {samples.qsize()}')
+        logger.debug(f'Aggregated sample queue length: {aggregated_samples.qsize()}')
         await asyncio.sleep(max(0, delay - (datetime.datetime.now() - agg_sample['time']).total_seconds()))
     except asyncio.CancelledError:
         raise
@@ -162,7 +162,7 @@ async def process():
             # TODO
         while True:
             logger.debug('Start process')
-            agg_sample: Aggregated_Performance_Sample = await samples.get()
+            agg_sample: Aggregated_Performance_Sample = await aggregated_samples.get()
             # logger.info(pprint.pformat(agg_sample))
             await output(agg_sample)
             logger.debug('End process')
@@ -246,7 +246,7 @@ async def main():
     stop = event_loop.create_future()
     event_loop.add_signal_handler(signal.SIGINT, stop.set_result, None)
     await sample(process_group, default_sample_interval)
-    await samples.get()
+    await aggregated_samples.get()
     daemon_coro = asyncio.create_task(daemon())
     try:
         await daemon_coro
