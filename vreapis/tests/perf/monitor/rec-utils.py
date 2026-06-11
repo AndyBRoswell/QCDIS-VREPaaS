@@ -203,7 +203,6 @@ async def daemon():
                                 producer = asyncio.create_task(monitor(process_group, default_sample_interval))
                                 consumer = asyncio.create_task(process())
                                 control_channel_writer.write(Control_Code.monitor_started)
-                                # pass  # TODO
                             case Control_Code.query_monitor_stop.value:
                                 logger.warning(f'Received Control_Code.{Control_Code.query_monitor_stop.name}')
                                 if producer is not None:
