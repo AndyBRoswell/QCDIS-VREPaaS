@@ -36,7 +36,7 @@ process_filter: dict[str, str] = {  # Process-group-wide REs. To filter the proc
 }
 
 
-class Performance_Index(NamedTuple):  # Use NamedTuple to reduce overhead
+class Performance_Index(NamedTuple):  # Use NamedTuple to reduce overhead when attribute names are always fixed
     CPU_usage: float
     memory_usage: int
 
