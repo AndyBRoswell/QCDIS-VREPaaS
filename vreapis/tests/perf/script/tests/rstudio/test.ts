@@ -3,7 +3,7 @@ import { expect, type FrameLocator, type Locator, type Page, test } from '@playw
 import log from "loglevel";
 
 import * as Util from '../util'
-import { notebook_args } from "../containerizer_test_args.ts";
+import { notebook_test_args } from "../containerizer_test_args.ts";
 
 class File_Browser_Manipulator {
   private static logger: Util.Logger_Map = {}
@@ -383,6 +383,6 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
 }
 
 test('D1', async ({ page }) => {
-  const args = notebook_args['D1']!
+  const args = notebook_test_args['D1']!
   await run_test(page, 'D1.0.Rmd', args)
 })
