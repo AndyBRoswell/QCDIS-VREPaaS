@@ -390,7 +390,8 @@ async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
   for (let r = 1; r <= repetition_count; r++) {
     logger.info(`Repetition ${r}/${repetition_count}`)
-    await text_editor_manipulator.open(pathname)
+    const modified_pathname = pathname.replace(/ipynb$/, `${r - 1}.ipynb`)
+    await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
     for (let i = 1; i < args_set.length; i++) {
       await test_single_cell(i, args_set[i]!)
@@ -404,5 +405,5 @@ async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell
 
 test('D1', async ({ page }) => {
   const args_set = notebook_test_args['D1']!
-  await run_test(page, 'D1.0.ipynb', args_set)
+  await run_test(page, 'D1.ipynb', args_set)
 })
