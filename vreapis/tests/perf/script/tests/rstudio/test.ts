@@ -386,17 +386,20 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
 async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
-  await text_editor_manipulator.open(pathname)
-  await Cell_Containerizer_manipulator.init()
-  await Cell_Containerizer_manipulator.parse()
-  await test_single_cell(0, args[0]!, true)
-  for (let i = 1; i < args.length; i++) {
+  for (let r = 1; r <= repetition_count; r++) {
+    logger.info(`Repetition ${r}/${repetition_count}`)
+    await text_editor_manipulator.open(pathname)
+    await Cell_Containerizer_manipulator.init()
+    await Cell_Containerizer_manipulator.parse()
+    await test_single_cell(0, args[0]!, true)
+    for (let i = 1; i < args.length; i++) {
+      await setTimeout(Util.preset_action_delay.short)
+      await test_single_cell(i, args[i]!, false)
+    }
+    await Cell_Containerizer_manipulator.close()
+    await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
-    await test_single_cell(i, args[i]!, false)
   }
-  await Cell_Containerizer_manipulator.close()
-  await text_editor_manipulator.close_all()
-  await setTimeout(Util.preset_action_delay.short)
 }
 
 test('D1', async ({ page }) => {
