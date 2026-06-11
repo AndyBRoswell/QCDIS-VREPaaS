@@ -386,14 +386,6 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
   await text_editor_manipulator.open(pathname)
   await Cell_Containerizer_manipulator.init()
   await Cell_Containerizer_manipulator.parse()
-  // await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
-  // await Cell_Containerizer_manipulator.fill_and_create(args[0]!.image_args!)
-  // await setTimeout(Util.preset_action_delay.short)
-  // for (let i = 1; i < args.length; ++i) {
-  //   await Cell_Containerizer_manipulator.select_code_cell(i)
-  //   await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
-  //   await Cell_Containerizer_manipulator.fill_and_create(args[i]!.image_args!)
-  // }
   await test_single_cell(0, args[0]!, true)
   for (let i = 1; i < args.length; i++) { await test_single_cell(i, args[i]!, false) }
   await Cell_Containerizer_manipulator.close()
