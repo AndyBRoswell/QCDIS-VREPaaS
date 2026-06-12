@@ -142,11 +142,11 @@ if args.console_output:
         header.append(f'mem:{process_group_name}')
 if args.file_output:
     Path('.log').mkdir(parents=True, exist_ok=True)
-    CPU_log_file = open(f'{args.log_filename_prefix}.CPU.csv', 'w')
-    mem_log_file = open(f'{args.log_filename_prefix}.mem.csv', 'w')
-    cooked_log_file = open(f'{args.log_filename_prefix}.cooked.csv', 'w')
-    CSV_file_writer_CPU = csv.writer(CPU_log_file)
-    CSV_file_writer_mem = csv.writer(mem_log_file)
+    raw_log_file = open(f'.log/{args.log_filename_prefix}.raw.csv', 'w')
+    logger.warning(f'Raw log file: {raw_log_file.name}')
+    cooked_log_file = open(f'.log/{args.log_filename_prefix}.cooked.csv', 'w')
+    logger.warning(f'Cooked log file: {cooked_log_file.name}')
+    CSV_file_writer_raw = csv.writer(raw_log_file)
     CSV_file_writer_cooked = csv.writer(cooked_log_file)
 
 
@@ -162,30 +162,47 @@ async def output(agg_sample: Aggregated_Performance_Sample):
             line[index] = round(line[index], 3)
         print(fmt.format(*line))
     if args.file_output:
-        raise  # TODO
+        pass
+        # raise NotImplementedError  # TODO
 
 
-async def process():
+async def process_cooked():
     try:
         if args.console_output:
             print(fmt.format(*header))
         if args.file_output:
-            CSV_header_CPU: list[str] = ['time']
-            CSV_header_mem: list[str] = ['time']
             CSV_header_cooked: list[str] = ['time']
             for process_group_name in process_group:
-                CSV_header_CPU.append(process_group_name)
-                CSV_header_mem.append(process_group_name)
                 CSV_header_cooked.extend([f'CPU:{process_group_name}', f'mem:{process_group_name}'])
             # TODO
         while True:
-            logger.debug('Start process')
+            logger.debug('Start process [cooked]')
             agg_sample: Aggregated_Performance_Sample = await aggregated_samples.get()
-            # logger.info(pprint.pformat(agg_sample))
             await output(agg_sample)
-            logger.debug('End process')
+            logger.debug('End process [cooked]')
     except asyncio.CancelledError:
-        raise  # TODO
+        if cooked_log_file is not None:
+            cooked_log_file.close()
+            logger.warning(f'Cooked log file {cooked_log_file.name} closed')
+        raise
+
+
+async def process_raw():
+    try:
+        if args.file_output:
+            CSV_header_raw: list[str] = ['time']
+            for process_group_name in process_group:
+                CSV_header_raw.append(process_group_name)
+            while True:
+                logger.debug('Start process [raw]')
+                await samples.get()  # TODO
+                logger.debug('End process [raw]')
+        pass
+    except asyncio.CancelledError:
+        if raw_log_file is not None:
+            raw_log_file.close()
+            logger.warning(f'Raw log file {raw_log_file.name} closed')
+        raise
 
 
 class ByteEnum(bytes, Enum):
@@ -220,21 +237,24 @@ async def daemon():
                         match byte:
                             case Control_Code.query_monitor_start.value:
                                 producer = asyncio.create_task(monitor(process_group, default_sample_interval))
-                                consumer = asyncio.create_task(process())
+                                consumer_raw = asyncio.create_task(process_raw())
+                                consumer_cooked = asyncio.create_task(process_cooked())
                                 control_channel_writer.write(Control_Code.monitor_started)
                             case Control_Code.query_monitor_stop.value:
                                 logger.warning(f'Received Control_Code.{Control_Code.query_monitor_stop.name}')
                                 if producer is not None:
                                     producer.cancel()
-                                if consumer is not None:
-                                    consumer.cancel()
+                                if consumer_raw is not None:
+                                    consumer_raw.cancel()
+                                if consumer_cooked is not None:
+                                    consumer_cooked.cancel()
                                 raise asyncio.CancelledError()
-                                # pass  # TODO
                             case _:
                                 logger.warning(f'Unsupported control code: {byte[0]}')
                 else:
                     producer = asyncio.create_task(monitor(process_group, default_sample_interval))
-                    consumer = asyncio.create_task(process())
+                    consumer_raw = asyncio.create_task(process_raw())
+                    consumer_cooked = asyncio.create_task(process_cooked())
             case _:
                 raise RuntimeError(f'Unsupported operating system: {sys.platform}')
     except asyncio.CancelledError:
@@ -244,11 +264,16 @@ async def daemon():
                 await producer
             except asyncio.CancelledError:
                 logger.warning(f'producer `monitor` cancelled')
-        if consumer is not None:
+        if consumer_raw is not None:
             try:
-                await consumer
+                await consumer_raw
             except asyncio.CancelledError:
-                logger.warning(f'consumer `process` cancelled')
+                logger.warning(f'consumer `process_raw` cancelled')
+        if consumer_cooked is not None:
+            try:
+                await consumer_cooked
+            except asyncio.CancelledError:
+                logger.warning(f'consumer `process_cooked` cancelled')
         if control_channel_writer is not None:
             logger.warning(f'Sending Control_Code.{Control_Code.monitor_stopped.name}')
             control_channel_writer.write(Control_Code.monitor_stopped)
@@ -256,7 +281,6 @@ async def daemon():
             await control_channel_writer.wait_closed()
         logger.warning('Cleaned')
         sys.exit(0)
-        # TODO
 
 
 async def main():
