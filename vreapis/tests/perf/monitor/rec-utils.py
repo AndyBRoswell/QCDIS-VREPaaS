@@ -99,7 +99,8 @@ aggregated_samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue
 
 async def sample(process_group: Process_Group, delay: float = default_sample_interval):
     try:
-        agg_sample: Aggregated_Performance_Sample = {'time': datetime.datetime.now()}
+        sample_time = datetime.datetime.now()
+        agg_sample: Aggregated_Performance_Sample = {'time': sample_time}
         logger.debug(f'Start sample {agg_sample["time"]}')
         for process_group_name, processes in process_group.items():
             CPU_usage: float = 0
