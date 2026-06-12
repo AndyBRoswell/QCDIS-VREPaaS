@@ -131,6 +131,8 @@ async def monitor(process_group: Process_Group, delay: float = default_sample_in
             raise
 
 
+raw_log_file = None
+cooked_log_file = None
 if args.console_output:
     fmt = "{:<23}" + " {:>23}" * 2 * len(process_group)
     header = ['time']
