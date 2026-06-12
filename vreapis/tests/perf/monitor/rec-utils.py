@@ -40,6 +40,16 @@ process_filter: dict[str, str] = {  # Process-group-wide REs. To filter the proc
 
 class Performance_Index(NamedTuple):  # Use NamedTuple to reduce overhead when attribute names are always fixed
     CPU_usage: float
+    memory_usage: int  # in Bytes
+
+
+class Performance_Sample(NamedTuple):  # Each instance corresponds to exactly 1 row of the raw CPU/memo usage CSVs.
+    time: datetime.datetime
+    PID: int
+    username: str
+    process_name: str
+    cmdline: str
+    CPU_usage: float
     memory_usage: int
 
 
@@ -84,6 +94,7 @@ for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memo
 logger.debug(pprint.pformat(process_group))
 
 default_sample_interval: float = args.interval[0] if args.interval is not None else 0.5
+samples: asyncio.Queue[Performance_Sample] = asyncio.Queue()
 aggregated_samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue()
 
 
@@ -97,6 +108,8 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
             for process in processes:
                 try:
                     with process.oneshot():
+                        if args.file_output:
+                            await samples.put(Performance_Sample(sample_time, process.pid, process.username(), process.name(), ' '.join(process.cmdline()), process.cpu_percent(), process.memory_info().rss))
                         CPU_usage += process.cpu_percent()
                         memory_usage += process.memory_info().rss
                 except psutil.NoSuchProcess:
@@ -104,6 +117,7 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
             agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
         await aggregated_samples.put(agg_sample)
         logger.debug(f'End sample {agg_sample["time"]}')
+        logger.debug(f'Raw sample queue length: {samples.qsize()}')
         logger.debug(f'Aggregated sample queue length: {aggregated_samples.qsize()}')
         await asyncio.sleep(max(0, delay - (datetime.datetime.now() - agg_sample['time']).total_seconds()))
     except asyncio.CancelledError:
