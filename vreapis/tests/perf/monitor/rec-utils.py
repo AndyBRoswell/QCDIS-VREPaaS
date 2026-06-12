@@ -3,6 +3,8 @@ Can run with venv of vreapis
 """
 import asyncio
 import pprint
+from asyncio import Task
+
 import psutil
 import re
 import argparse
@@ -185,8 +187,9 @@ class Control_Code(ByteEnum):
 
 
 async def daemon():
-    producer = None
-    consumer = None
+    producer: Task | None = None
+    consumer_raw: Task | None = None
+    consumer_cooked: Task | None = None
     try:
         match sys.platform:
             case 'linux':
