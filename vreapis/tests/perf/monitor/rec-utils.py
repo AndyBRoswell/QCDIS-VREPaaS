@@ -53,7 +53,7 @@ class Performance_Sample(NamedTuple):  # Each instance corresponds to exactly 1 
     memory_usage: int
 
 
-Aggregated_Performance_Sample: TypeAlias = dict[str, float | timedelta | Performance_Index]  # Keys may be process group names and shared property values [i.e. time]
+Aggregated_Performance_Sample: TypeAlias = dict[str, datetime.datetime | Performance_Index]  # Keys can be process group names and shared property values [i.e. time]. Each instance corresponds to exactly 1 row of the cooked CPU/memo usage CSVs.
 Process_Group: TypeAlias = dict[str, list[psutil.Process]]
 
 process_group: Process_Group = {}
