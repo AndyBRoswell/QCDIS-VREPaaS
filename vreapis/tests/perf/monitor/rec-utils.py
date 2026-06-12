@@ -84,13 +84,12 @@ for field, value in args_dict.items():
         else:
             del process_filter[process_group_name]  # If this process filter is absent, then delete the corresponding column in the output CPU/memory usage records [in CSV].
 
-for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):  # Scan the entire process list and pick up the processes to monitor
-    with proc.oneshot():
-        cmdline: str = ' '.join(proc.cmdline())
-        pathname: str = proc.cmdline()[0] if proc.cmdline() else ''
-        for field, value in process_filter.items():
-            if field in process_group and re.search(value, cmdline):  # Match the command-line of the current process
-                process_group[field].append(proc)
+for proc in psutil.process_iter(['cmdline']):  # Scan the entire process list and pick up the processes to monitor
+    cmdline: str = ' '.join(proc.info['cmdline'])
+    pathname: str = proc.info['cmdline'][0] if proc.info['cmdline'] else ''
+    for field, value in process_filter.items():
+        if field in process_group and re.search(value, cmdline):  # Match the command-line of the current process
+            process_group[field].append(proc)
 logger.debug(pprint.pformat(process_group))
 
 default_sample_interval: float = args.interval[0] if args.interval is not None else 0.5
