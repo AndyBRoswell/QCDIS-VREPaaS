@@ -79,10 +79,10 @@ for field, value in args_dict.items():
     if field.endswith('_process_filter'):
         process_group_name: str = field.removesuffix('_process_filter')
         if value is not None:
-            process_filter[process_group_name] = value  # If process filters are designated in command-line args, then override the defaults.
+            process_filter[process_group_name] = value  # If this process filter is designated in command-line args, then override the defaults.
             process_group[process_group_name] = []
         else:
-            del process_filter[process_group_name]
+            del process_filter[process_group_name]  # If this process filter is absent, then delete the corresponding column in the output CPU/memory usage records [in CSV].
 
 for proc in psutil.process_iter(['pid', 'username', 'name', 'cpu_percent', 'memory_info']):  # Scan the entire process list and pick up the processes to monitor
     with proc.oneshot():
