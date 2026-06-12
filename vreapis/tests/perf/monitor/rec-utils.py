@@ -70,7 +70,7 @@ mutually_exclusive_group_IPC.add_argument('-I', '--IPC-channel', nargs=1)
 mutually_exclusive_group_IPC.add_argument('-D', '--Detached', action='store_true')
 argument_parser.add_argument('-c', '--console-output', action='store_true')
 argument_parser.add_argument('-f', '--file-output', action='store_true')
-argument_parser.add_argument('-l', '--log-filename-prefix', nargs='?', default=None, const=datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
+argument_parser.add_argument('-l', '--log-filename-prefix', nargs=1, default=datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
 
 args = argument_parser.parse_args()
 args_dict = vars(args)  # to iterate over the command-line args conveniently
