@@ -150,20 +150,18 @@ if args.file_output:
     CSV_file_writer_cooked = csv.writer(cooked_log_file)
 
 
-async def output(agg_sample: Aggregated_Performance_Sample):
-    line: list = [agg_sample['time']]
+async def output_cooked_row(agg_sample: Aggregated_Performance_Sample):
+    entry: list = [agg_sample['time'].strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]]
     for process_group_name in process_group:
-        index: Performance_Index = agg_sample[process_group_name]
-        line.append(index.CPU_usage)
-        line.append(index.memory_usage / 1024 / 1024)  # B -> Mi
+        pf_idx: Performance_Index = agg_sample[process_group_name]
+        entry.append(pf_idx.CPU_usage)
+        entry.append(pf_idx.memory_usage / 1024 / 1024)  # B -> Mi
+        for idx in range(1, len(entry)):
+            entry[idx] = round(entry[idx], 3)
     if args.console_output:
-        line[0] = line[0].strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        for index in range(1, len(line)):
-            line[index] = round(line[index], 3)
-        print(fmt.format(*line))
+        print(fmt.format(*entry))
     if args.file_output:
-        pass
-        # raise NotImplementedError  # TODO
+        CSV_file_writer_cooked.writerow(entry)
 
 
 async def process_cooked():
@@ -173,12 +171,12 @@ async def process_cooked():
         if args.file_output:
             CSV_header_cooked: list[str] = ['time']
             for process_group_name in process_group:
-                CSV_header_cooked.extend([f'CPU:{process_group_name}', f'mem:{process_group_name}'])
-            # TODO
+                CSV_header_cooked.extend([f'CPU:{process_group_name} (%)', f'mem:{process_group_name} (Mi)'])
+            CSV_file_writer_cooked.writerow(CSV_header_cooked)
         while True:
             logger.debug('Start process [cooked]')
             agg_sample: Aggregated_Performance_Sample = await aggregated_samples.get()
-            await output(agg_sample)
+            await output_cooked_row(agg_sample)
             logger.debug('End process [cooked]')
     except asyncio.CancelledError:
         if cooked_log_file is not None:
@@ -190,12 +188,12 @@ async def process_cooked():
 async def process_raw():
     try:
         if args.file_output:
-            CSV_header_raw: list[str] = ['time']
-            for process_group_name in process_group:
-                CSV_header_raw.append(process_group_name)
+            CSV_header_raw = Performance_Sample._fields
+            CSV_file_writer_raw.writerow(CSV_header_raw)
             while True:
                 logger.debug('Start process [raw]')
-                await samples.get()  # TODO
+                row = await samples.get()
+                CSV_file_writer_raw.writerow(row)
                 logger.debug('End process [raw]')
         pass
     except asyncio.CancelledError:
