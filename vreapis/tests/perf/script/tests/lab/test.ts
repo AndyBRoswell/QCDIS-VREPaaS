@@ -242,6 +242,7 @@ class Cell_Containerizer_Manipulator {
   public Cell_Containerizer_tab!: Locator
   public Cell_Containerizer!: Locator
   public Create_button!: Locator
+  public success_icon!: Locator
 
   static {
     const instance_members = Object.getOwnPropertyNames(Cell_Containerizer_Manipulator.prototype)
@@ -312,10 +313,15 @@ class Cell_Containerizer_Manipulator {
 
   public async create() {
     await this.Create_button.click()
-    const success_icon = this.page.getByTestId('CheckCircleOutlineIcon')
-    await success_icon.waitFor()
-    await setTimeout(Util.preset_action_delay.short)
-    const backdrop_wrapper = this.page.locator('body > div').filter({ has: success_icon })
+  }
+
+  public async wait_until_completion_of_creation() {
+    this.success_icon = this.page.getByTestId('CheckCircleOutlineIcon')
+    await this.success_icon.waitFor()
+  }
+
+  public async close_successful_creation_popup() {
+    const backdrop_wrapper = this.page.locator('body > div').filter({ has: this.success_icon })
     await backdrop_wrapper.dispatchEvent('click') // I don't know why locator.click doesn't work
   }
 }
@@ -381,6 +387,9 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
       await Cell_Containerizer_manipulator!.fill(args.image_args!)
       await setTimeout(Util.preset_action_delay.short)
       await Cell_Containerizer_manipulator!.create()
+      await Cell_Containerizer_manipulator!.wait_until_completion_of_creation()
+      await setTimeout(Util.preset_action_delay.short)
+      await Cell_Containerizer_manipulator.close_successful_creation_popup()
     }
   }
 }
@@ -398,6 +407,7 @@ async function run_test(page: Page, pathname: Util.Pathname, args_set: Util.Cell
       await setTimeout(Util.preset_action_delay.short)
     }
     await test_single_cell(0, args_set[0]!)
+    await setTimeout(Util.preset_action_delay.short)
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
