@@ -298,6 +298,9 @@ class Cell_Containerizer_Manipulator {
 
   public async create() {
     await this.button_Create.click()
+  }
+
+  public async wait_until_completion_of_creation() {
     const creation_result_output = this.Cell_Containerizer.locator('#creation_result_output')
     const message_of_success = creation_result_output.getByText('The cell has been successfully created!', { exact: true })
     await message_of_success.waitFor()
@@ -373,6 +376,7 @@ async function test_create(args: Util.Cell_Containerizer_Manipulation_Arguments)
     await Cell_Containerizer_manipulator.fill(args.image_args!)
     await setTimeout(Util.preset_action_delay.short)
     await Cell_Containerizer_manipulator.create()
+    await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
   }
 }
 
@@ -397,6 +401,7 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
       await setTimeout(Util.preset_action_delay.short)
       await test_single_cell(i, args[i]!, false)
     }
+    await setTimeout(Util.preset_action_delay.short)
     await Cell_Containerizer_manipulator.close()
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
