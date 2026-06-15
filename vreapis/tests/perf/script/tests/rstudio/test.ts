@@ -317,7 +317,6 @@ const logger = log.getLogger('test')
 logger.setLevel('info')
 
 const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
-
 const repetition_count = 10
 const default_performance_sample_interval = 0.5
 
@@ -387,12 +386,12 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
   await test_create(args)
 }
 
-async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
+async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
   for (let r = 1; r <= repetition_count; r++) {
     logger.info(`Repetition ${r}/${repetition_count}`)
-    const modified_pathname = pathname.replace(/Rmd$/, `${r - 1}.Rmd`)
+    const modified_pathname = pathname_prefix + `.${r - 1}.Rmd`
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
     await Cell_Containerizer_manipulator.parse()
@@ -409,6 +408,7 @@ async function run_test(page: Page, pathname: Util.Pathname, args: Util.Cell_Con
 }
 
 test('D1', async ({ page }) => {
-  const args = notebook_test_args['D1']!
-  await run_test(page, 'D1.Rmd', args)
+  const pathname_prefix = 'D1'
+  const args = notebook_test_args[pathname_prefix]!
+  await run_test(page, `${pathname_prefix}`, args)
 })
