@@ -215,3 +215,14 @@ export class Control {
     }
   }
 }
+
+export type Trial_Result = {
+  action: Supported_Test_Manipulations
+  duration: number
+}
+
+export type Cell_Result = {
+  ID: number | string
+  action: Supported_Test_Manipulations
+  duration: number[]
+}

@@ -372,33 +372,61 @@ let Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 
 async function test_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
   if (args.actions.includes('create')) {
+    let t0: number, t1: number
     await Cell_Containerizer_manipulator.fill(args.image_args!)
     await setTimeout(Util.preset_action_delay.short)
     await Cell_Containerizer_manipulator.create()
+    t0 = performance.now()
     await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
+    t1 = performance.now()
+    return { action: "create", duration: t1 - t0 } as Util.Trial_Result
   }
+  return null
 }
 
 async function test_single_cell(index: number, args: Util.Cell_Containerizer_Manipulation_Arguments, right_after_parsing: boolean = false) {
-  if (right_after_parsing === false && args.actions.includes('extract')) { await Cell_Containerizer_manipulator.select_code_cell(index) }
+  const trial_results: Util.Trial_Result[] = []
+  let t0: number, t1: number
+  if (right_after_parsing === false && args.actions.includes('extract')) { await Cell_Containerizer_manipulator.select_code_cell(index) } // The 0th cell is automatically selected by the combobox from shiny.
+  t0 = performance.now()
   await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
+  t1 = performance.now()
+  trial_results.push({ action: 'extract', duration: t1 - t0 }) // At this moment `extract` is a must for every cell since it is mandatory to extract all the variables that comes from the previous cells and will be passed to subsequent cells.
   await setTimeout(Util.preset_action_delay.short)
-  await test_create(args)
+  const creation_result = await test_create(args)
+  if (creation_result !== null) { trial_results.push(creation_result) }
+  return trial_results
 }
 
 async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
+  const execution_durations: Util.Cell_Result[] = [ { ID: '', action: 'parse', duration: [] } ]
+  for (let i = 0; i < args.length; i++) {
+    for (const action of args[i]!.actions) { execution_durations.push({ ID: i, action: action, duration: [] })}
+  }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
-  for (let r = 1; r <= repetition_count; r++) {
-    logger.info(`Repetition ${r}/${repetition_count}`)
-    const modified_pathname = pathname_prefix + `.${r - 1}.Rmd`
+  for (let r = 0; r < repetition_count; r++) {
+    let CSV_cursor = 1
+    logger.info(`Repetition ${r + 1}/${repetition_count}`)
+    const modified_pathname = pathname_prefix + `.${r}.Rmd`
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
+    const t0 = performance.now()
     await Cell_Containerizer_manipulator.parse()
-    await test_single_cell(0, args[0]!, true)
+    const t1 = performance.now()
+    execution_durations[0]!.duration[r] = t1 - t0
+    const trial_results = await test_single_cell(0, args[0]!, true)
+    for (const result of trial_results) {
+      execution_durations[CSV_cursor]!.duration[r] = result.duration
+      CSV_cursor++
+    }
     for (let i = 1; i < args.length; i++) {
       await setTimeout(Util.preset_action_delay.short)
-      await test_single_cell(i, args[i]!, false)
+      const trial_results = await test_single_cell(i, args[i]!, false)
+      for (const result of trial_results) {
+        execution_durations[CSV_cursor]!.duration[r] = result.duration
+        CSV_cursor++
+      }
     }
     await setTimeout(Util.preset_action_delay.short)
     await Cell_Containerizer_manipulator.close()

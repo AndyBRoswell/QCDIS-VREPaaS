@@ -3,6 +3,7 @@ import log from 'loglevel'
 import { setTimeout } from "node:timers/promises";
 import * as Util from '../util'
 import { notebook_test_args } from "../containerizer_test_args";
+import * as csv_stringify from 'csv-stringify'
 
 // log.setLevel('info')
 
@@ -378,35 +379,51 @@ let Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 let text_editor_manipulator: Text_Editor_Manipulator
 
 async function test_single_cell(index: number, args: Util.Cell_Containerizer_Manipulation_Arguments) {
+  const trial_result: Util.Trial_Result[] = []
+  let t0: number, t1: number
   if (args.actions.includes('extract')) {
     await text_editor_manipulator!.select_code_cell(index)
+    t0 = performance.now()
     await Cell_Containerizer_manipulator!.wait_until_completion_of_analysis()
+    t1 = performance.now()
+    trial_result.push({ action: 'extract', duration: t1 - t0 })
     await setTimeout(Util.preset_action_delay.short)
     if (args.actions.includes('create')) {
       await Cell_Containerizer_manipulator!.fill(args.image_args!)
       await setTimeout(Util.preset_action_delay.short)
       await Cell_Containerizer_manipulator!.create()
+      t0 = performance.now()
       await Cell_Containerizer_manipulator!.wait_until_completion_of_creation()
+      t1 = performance.now()
+      trial_result.push({ action: 'create', duration: t1 - t0 })
       await setTimeout(Util.preset_action_delay.short)
       await Cell_Containerizer_manipulator.close_successful_creation_popup()
     }
   }
+  return trial_result
 }
 
-async function run_test(page: Page, pathname_prefix: Util.Pathname, args_set: Util.Cell_Containerizer_Manipulation_Arguments[]) {
+async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
+  const execution_durations: Util.Cell_Result[] = []
+  const indices_of_cells_to_test = Array.from({ length: args.length - 1 }, (_, i) => 1 + 1 * i).concat([ 0 ])
+  for (const index of indices_of_cells_to_test) {
+    for (const action of args[index]!.actions) { execution_durations.push({ ID: index, action: action, duration: [] }) }
+  }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
-  for (let r = 1; r <= repetition_count; r++) {
-    logger.info(`Repetition ${r}/${repetition_count}`)
-    const modified_pathname = pathname_prefix +`.${r - 1}.ipynb`
+  for (let r = 0; r < repetition_count; r++) {
+    let CSV_cursor = 0
+    logger.info(`Repetition ${r + 1}/${repetition_count}`)
+    const modified_pathname = pathname_prefix + `.${r}.ipynb`
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
-    for (let i = 1; i < args_set.length; i++) {
-      await test_single_cell(i, args_set[i]!)
-      await setTimeout(Util.preset_action_delay.short)
+    for (const index of indices_of_cells_to_test) {
+      const trial_results = await test_single_cell(index, args[index]!)
+      for (const result of trial_results) {
+        execution_durations[CSV_cursor]!.duration[r] = result.duration
+        CSV_cursor++
+      }
     }
-    await test_single_cell(0, args_set[0]!)
-    await setTimeout(Util.preset_action_delay.short)
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
