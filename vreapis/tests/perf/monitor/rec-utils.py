@@ -144,9 +144,9 @@ if args.console_output:
         header.append(f'mem:{process_group_name}')
 if args.file_output:
     Path('.log').mkdir(parents=True, exist_ok=True)
-    raw_log_file = open(f'.log/{args.log_filename_prefix}.raw.csv', 'w')
+    raw_log_file = open(f'.log/{args.log_filename_prefix[0]}.raw.csv', 'w')
     logger.warning(f'Raw log file: {raw_log_file.name}')
-    cooked_log_file = open(f'.log/{args.log_filename_prefix}.cooked.csv', 'w')
+    cooked_log_file = open(f'.log/{args.log_filename_prefix[0]}.cooked.csv', 'w')
     logger.warning(f'Cooked log file: {cooked_log_file.name}')
     CSV_file_writer_raw = csv.writer(raw_log_file)
     CSV_file_writer_cooked = csv.writer(cooked_log_file)
