@@ -54,6 +54,14 @@ log.methodFactory = (log_method_name, log_level, logger_name) => {
   }
 }
 
+export function current_date() {
+  return new Date().toISOString().substring(0, 'XXXX-XX-XXTXX:XX:XX'.length).replace(/[-:]/g, '').replace('T', '-')
+}
+
+export function log_filename_prefix() {
+  return process.env['notebook_platform'] !== undefined ? `${current_date()}.${process.env['notebook_platform']}` : current_date()
+}
+
 export class Pathname_Operator {
   public static normalize(path: Pathname): Pathname {
     return node_path.normalize(path).replace(/\/+$/, '')
@@ -105,6 +113,7 @@ export class Control {
       control_channel: boolean,
       console_output: boolean,
       file_output: boolean,
+      log_filename_prefix: string,
     }
   ) {
     const platform = node_os.platform()
@@ -130,6 +139,7 @@ export class Control {
     if (cmdline_arg.control_channel) { monitor_script_arg.push('-I', Control.control_channel_pathname) } else { monitor_script_arg.push('-D') }
     if (cmdline_arg.console_output) { monitor_script_arg.push('-c') }
     if (cmdline_arg.file_output) { monitor_script_arg.push('-f') }
+    if (cmdline_arg.log_filename_prefix) { monitor_script_arg.push('-l', cmdline_arg.log_filename_prefix) }
     Control.monitor = node_child_process.spawn('python', monitor_script_arg, { stdio: 'inherit', detached: false })
   }
 
