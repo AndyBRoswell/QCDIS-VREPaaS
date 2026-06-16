@@ -17,7 +17,9 @@ export type Logger_Map = { [key: TypeScript_Identifier]: Logger }
 export type Delay_Map = { [key: string]: Milliseconds | Delay_Map }
 export type File_Info = { [key: Pathname]: Pathname } & { name: Pathname, path: Pathname }
 export type Supported_Variable_Types = "Integer" | "Float" | "String" | "List" //| 'int' | 'float' | 'string' | 'list'
-export type Supported_Cell_Containerizer_Manipulations = "extract" | "create"
+export type Supported_Cell_Manipulations = "extract" | "create"
+export type Supported_File_Manipulations = "parse"
+export type Supported_Test_Manipulations = Supported_File_Manipulations | Supported_Cell_Manipulations
 export type Variable_Type_Map = { [key: string]: string }
 export type Supported_Variable_Type_Map = { [key: string]: Supported_Variable_Types }
 export type Image_Creation_Arguments = { [key: string]: string | string[] | Supported_Variable_Type_Map } & {
@@ -28,7 +30,7 @@ export type Image_Creation_Arguments = { [key: string]: string | string[] | Supp
   'Base Image': string,
 }
 export type Cell_Containerizer_Manipulation_Arguments = {
-  actions: Supported_Cell_Containerizer_Manipulations[],
+  actions: Supported_Cell_Manipulations[],
   image_args?: Image_Creation_Arguments,
 }
 
