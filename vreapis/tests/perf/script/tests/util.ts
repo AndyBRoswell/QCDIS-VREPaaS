@@ -6,6 +6,7 @@ import node_events from 'node:events'
 import node_child_process from 'node:child_process'
 import log, { type Logger } from "loglevel";
 import * as child_process from "node:child_process";
+import * as csv_stringify from 'csv-stringify'
 import { expect } from "@playwright/test";
 
 export type Milliseconds = number
@@ -235,4 +236,17 @@ export type Cell_Result = {
   ID: number | string
   action: Supported_Test_Manipulations
   duration: number[]
+}
+
+export async function save_Cell_Results(pathname: Pathname, results: Cell_Result[]) {
+  const columns = [ 'ID', 'Action' ].concat(Array.from({ length: results.length }, (_, i) => `Duration ${i}`))
+  const mangled_results = []
+  for (let result of results) { mangled_results.push([ result.ID, result.action ].concat(result.duration)) }
+  await node_fs_promises.writeFile(
+    pathname,
+    csv_stringify.stringify(
+      mangled_results,
+      { columns: columns },
+    )
+  )
 }

@@ -3,7 +3,6 @@ import log from 'loglevel'
 import { setTimeout } from "node:timers/promises";
 import * as Util from '../util'
 import { notebook_test_args } from "../containerizer_test_args";
-import * as csv_stringify from 'csv-stringify'
 
 // log.setLevel('info')
 
@@ -333,6 +332,8 @@ logger.setLevel('info')
 const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
 const repetition_count = 10
 const default_performance_sample_interval = 0.5
+const result_root = '.log'
+const log_filename_prefix = Util.log_filename_prefix()
 
 var file_browser_manipulator: File_Browser_Manipulator
 var running_session_manipulator: Running_Session_Manipulator
@@ -356,7 +357,7 @@ test.beforeEach(async ({ page }) => {
     control_channel: true,
     console_output: false,
     file_output: true,
-    log_filename_prefix: Util.log_filename_prefix()
+    log_filename_prefix: `${log_filename_prefix}.util`
   })
   logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
   logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}`)
@@ -428,6 +429,7 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
+  await Util.save_Cell_Results(`${result_root}/${log_filename_prefix}.time.csv`, execution_durations)
 }
 
 test('D1', async ({ page }) => {
