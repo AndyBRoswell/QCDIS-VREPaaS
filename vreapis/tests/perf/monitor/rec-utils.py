@@ -240,8 +240,11 @@ async def daemon():
                                 consumer_raw = asyncio.create_task(process_raw())
                                 consumer_cooked = asyncio.create_task(process_cooked())
                                 control_channel_writer.write(Control_Code.monitor_started)
-                            case Control_Code.query_monitor_stop.value:
-                                logger.warning(f'Received Control_Code.{Control_Code.query_monitor_stop.name}')
+                            case Control_Code.query_monitor_stop.value | '':
+                                if byte == '':
+                                    logger.warning(f'EOF from control channel. Stopping the performance monitor.')
+                                else:
+                                    logger.warning(f'Received Control_Code.{Control_Code.query_monitor_stop.name}')
                                 if producer is not None:
                                     producer.cancel()
                                 if consumer_raw is not None:
