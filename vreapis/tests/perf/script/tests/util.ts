@@ -238,15 +238,19 @@ export type Cell_Result = {
   duration: number[]
 }
 
-export async function save_Cell_Results(pathname: Pathname, results: Cell_Result[]) {
-  const columns = [ 'ID', 'Action' ].concat(Array.from({ length: results.length }, (_, i) => `Duration ${i}`))
+export async function save_Cell_Results(pathname: Pathname, results: Cell_Result[], repetitions: number) {
+  const columns = [ 'ID', 'Action' ].concat(Array.from({ length: repetitions }, (_, i) => `Duration ${i}`))
   const mangled_results = []
   for (let result of results) { mangled_results.push([ result.ID, result.action ].concat(result.duration)) }
   await node_fs_promises.writeFile(
     pathname,
     csv_stringify.stringify(
       mangled_results,
-      { columns: columns },
+      // { columns: columns },
+      {
+        header: true,
+        columns: columns,
+      },
     )
   )
 }
