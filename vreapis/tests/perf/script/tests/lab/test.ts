@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page, test } from '@playwright/test'
+import { type ConsoleMessage, expect, type Locator, type Page, test } from '@playwright/test'
 import log from 'loglevel'
 import { setTimeout } from "node:timers/promises";
 import * as Util from '../util'
@@ -326,6 +326,22 @@ class Cell_Containerizer_Manipulator {
   }
 }
 
+// Measuring execution durations directly in Playwright seems to work normally for JupyterLab-ver. But for RStudio-ver the measured results are obviously much shorter than the actual ones. So we directly pick the durations measured inside both versions of Cell Containerizer.
+class DevTools_Console_Handler {
+  private filtered_message: string[] = []
+  constructor(private page: Page) {}
+  public handler = (msg: ConsoleMessage) => { if (msg.type() === 'log') { this.filtered_message.push(msg.text()) } }
+  public init() { this.page.on('console', this.handler) }
+  public get_last_execution_time(function_name: string): number { // in seconds
+    const RE = new RegExp('^' + function_name + '\\s+done in ' + '(\\d+(\\.\\d+)?)\\s*ms')
+    for (let i = this.filtered_message.length - 1; i > 0; i--) {
+      const match = this.filtered_message[i]!.match(RE)
+      if (match) { return parseFloat(match[1]!) / 1e3 } // ms -> s
+    }
+    return Number.NaN
+  }
+}
+
 const logger = log.getLogger('test')
 logger.setLevel('info')
 
@@ -337,6 +353,7 @@ const log_filename_prefix = Util.log_filename_prefix()
 
 var file_browser_manipulator: File_Browser_Manipulator
 var running_session_manipulator: Running_Session_Manipulator
+var console_handler: DevTools_Console_Handler
 
 test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8888/lab') // Use the local JupyterLab instance to reduce measuring errors
@@ -382,22 +399,32 @@ let text_editor_manipulator: Text_Editor_Manipulator
 
 async function test_single_cell(index: number, args: Util.Cell_Containerizer_Manipulation_Arguments) {
   const trial_result: Util.Trial_Result[] = []
-  let t0: number, t1: number
+  // let t0: number, t1: number
   if (args.actions.includes('extract')) {
+    // await text_editor_manipulator!.select_code_cell(index)
+    // t0 = performance.now()
+    // await Cell_Containerizer_manipulator!.wait_until_completion_of_analysis()
+    // t1 = performance.now()
+    // trial_result.push({ action: 'extract', duration: t1 - t0 })
     await text_editor_manipulator!.select_code_cell(index)
-    t0 = performance.now()
     await Cell_Containerizer_manipulator!.wait_until_completion_of_analysis()
-    t1 = performance.now()
-    trial_result.push({ action: 'extract', duration: t1 - t0 })
+    const duration_of_extraction = console_handler.get_last_execution_time('extractor')
+    expect(Number.isNaN(duration_of_extraction)).toBeFalsy()
+    trial_result.push({ action: 'extract', duration: duration_of_extraction })
     await setTimeout(Util.preset_action_delay.short)
     if (args.actions.includes('create')) {
       await Cell_Containerizer_manipulator!.fill(args.image_args!)
       await setTimeout(Util.preset_action_delay.short)
+      // await Cell_Containerizer_manipulator!.create()
+      // t0 = performance.now()
+      // await Cell_Containerizer_manipulator!.wait_until_completion_of_creation()
+      // t1 = performance.now()
+      // trial_result.push({ action: 'create', duration: t1 - t0 })
       await Cell_Containerizer_manipulator!.create()
-      t0 = performance.now()
-      await Cell_Containerizer_manipulator!.wait_until_completion_of_creation()
-      t1 = performance.now()
-      trial_result.push({ action: 'create', duration: t1 - t0 })
+      await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
+      const duration_of_creation = console_handler.get_last_execution_time('createCell')
+      expect(Number.isNaN(duration_of_creation)).toBeFalsy()
+      trial_result.push({ action: 'create', duration: duration_of_creation })
       await setTimeout(Util.preset_action_delay.short)
       await Cell_Containerizer_manipulator.close_successful_creation_popup()
     }
@@ -413,6 +440,8 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
   }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
+  console_handler = new DevTools_Console_Handler(page)
+  console_handler.init()
   for (let r = 0; r < repetition_count; r++) {
     let CSV_cursor = 0
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
