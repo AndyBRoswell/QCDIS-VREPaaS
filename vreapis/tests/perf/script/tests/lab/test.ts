@@ -338,7 +338,7 @@ class DevTools_Console_Handler {
       const match = this.filtered_message[i]!.match(RE)
       if (match) { return parseFloat(match[1]!) / 1e3 } // ms -> s
     }
-    return Number.NaN
+    throw new Error(`Could not get execution duration of ${function_name}`)
   }
 }
 
@@ -401,29 +401,17 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
   const trial_result: Util.Trial_Result[] = []
   // let t0: number, t1: number
   if (args.actions.includes('extract')) {
-    // await text_editor_manipulator!.select_code_cell(index)
-    // t0 = performance.now()
-    // await Cell_Containerizer_manipulator!.wait_until_completion_of_analysis()
-    // t1 = performance.now()
-    // trial_result.push({ action: 'extract', duration: t1 - t0 })
     await text_editor_manipulator!.select_code_cell(index)
     await Cell_Containerizer_manipulator!.wait_until_completion_of_analysis()
     const duration_of_extraction = console_handler.get_last_execution_time('extractor')
-    expect(Number.isNaN(duration_of_extraction)).toBeFalsy()
     trial_result.push({ action: 'extract', duration: duration_of_extraction })
     await setTimeout(Util.preset_action_delay.short)
     if (args.actions.includes('create')) {
       await Cell_Containerizer_manipulator!.fill(args.image_args!)
       await setTimeout(Util.preset_action_delay.short)
-      // await Cell_Containerizer_manipulator!.create()
-      // t0 = performance.now()
-      // await Cell_Containerizer_manipulator!.wait_until_completion_of_creation()
-      // t1 = performance.now()
-      // trial_result.push({ action: 'create', duration: t1 - t0 })
       await Cell_Containerizer_manipulator!.create()
       await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
       const duration_of_creation = console_handler.get_last_execution_time('createCell')
-      expect(Number.isNaN(duration_of_creation)).toBeFalsy()
       trial_result.push({ action: 'create', duration: duration_of_creation })
       await setTimeout(Util.preset_action_delay.short)
       await Cell_Containerizer_manipulator.close_successful_creation_popup()

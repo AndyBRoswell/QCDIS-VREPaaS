@@ -246,7 +246,6 @@ export async function save_Cell_Results(pathname: Pathname, results: Cell_Result
     pathname,
     csv_stringify.stringify(
       mangled_results,
-      // { columns: columns },
       {
         header: true,
         columns: columns,
