@@ -263,7 +263,8 @@ class Cell_Containerizer_Manipulator {
     // await this.toggle()
     // const old_code = await this.code_output.innerText()
     // await expect(this.code_output).not.toHaveText(old_code)
-    await expect(this.button_Parse).toBeEnabled()
+    // await expect(this.button_Parse).toBeEnabled()
+    await expect(this.button_Create).toBeEnabled()
   }
 
   public async fill(args: Util.Image_Creation_Arguments) {
@@ -313,6 +314,29 @@ class Cell_Containerizer_Manipulator {
   }
 }
 
+class RStudio_Console_Handler {
+  public RStudio_console_output!: Locator
+  constructor(public page: Page) {}
+  public init() {
+    this.RStudio_console_output = this.page.locator('#rstudio_console_output')
+  }
+  public async get_last_execution_time(action: Util.Supported_Test_Manipulations): Promise<number> {
+    const filtered_message = (await this.RStudio_console_output.textContent())!.split(/\r?\n|\r/)
+    const RE_prompt = new RegExp('^Execution duration of function ' + action)
+    const RE_durations = /\s*(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\s+(\d+(\.\d+)?)/
+    for (let i = filtered_message.length - 1; i > 0; i--) {
+      const match_prompt = filtered_message[i]!.match(RE_prompt)
+      if (match_prompt) {
+        console.log(filtered_message[i]!)
+        console.log(filtered_message[i + 2]!)
+        const match_duration = filtered_message[i + 2]!.match(RE_durations)
+        if (match_duration) { return parseFloat(match_duration[5]!) }
+      }
+    }
+    throw new Error(`Could not get execution duration of ${action}`)
+  }
+}
+
 const logger = log.getLogger('test')
 logger.setLevel('info')
 
@@ -323,6 +347,7 @@ const result_root = '.log'
 const log_filename_prefix = Util.log_filename_prefix()
 
 var file_browser_manipulator: File_Browser_Manipulator
+var console_handler: RStudio_Console_Handler
 
 test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8787/')
@@ -373,31 +398,40 @@ test.afterEach(async ({ page }) => {
 let text_editor_manipulator: Text_Editor_Manipulator
 let Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 
-async function test_create(args: Util.Cell_Containerizer_Manipulation_Arguments) {
+async function test_create(args: Util.Cell_Containerizer_Manipulation_Arguments): Promise<Util.Trial_Result> {
   if (args.actions.includes('create')) {
-    let t0: number, t1: number
+    // let t0: number, t1: number
     await Cell_Containerizer_manipulator.fill(args.image_args!)
     await setTimeout(Util.preset_action_delay.short)
     await Cell_Containerizer_manipulator.create()
-    t0 = performance.now()
+    // t0 = performance.now()
     await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
-    t1 = performance.now()
-    return { action: "create", duration: t1 - t0 } as Util.Trial_Result
+    // t1 = performance.now()
+    // return { action: "create", duration: t1 - t0 } as Util.Trial_Result
+    // await setTimeout(Util.preset_action_delay.extra_short)
+    return { action: 'create', duration: await console_handler.get_last_execution_time('create') }
   }
-  return null
+  throw new Error(`Could not get execution duration of create`)
 }
 
 async function test_single_cell(index: number, args: Util.Cell_Containerizer_Manipulation_Arguments, right_after_parsing: boolean = false) {
   const trial_results: Util.Trial_Result[] = []
-  let t0: number, t1: number
+  // let t0: number, t1: number
   if (right_after_parsing === false && args.actions.includes('extract')) { await Cell_Containerizer_manipulator.select_code_cell(index) } // The 0th cell is automatically selected by the combobox from shiny.
-  t0 = performance.now()
-  await Cell_Containerizer_manipulator.wait_until_completion_of_analysis()
-  t1 = performance.now()
-  trial_results.push({ action: 'extract', duration: t1 - t0 }) // At this moment `extract` is a must for every cell since it is mandatory to extract all the variables that comes from the previous cells and will be passed to subsequent cells.
+  // t0 = performance.now()
+  await Cell_Containerizer_manipulator.wait_until_completion_of_analysis() // At this moment `extract` is a must for every cell since it is mandatory to extract all the variables that comes from the previous cells and will be passed to subsequent cells.
+  // t1 = performance.now()
+  // trial_results.push({ action: 'extract', duration: t1 - t0 })
+  // await setTimeout(Util.preset_action_delay.extra_short)
+  trial_results.push({ action: 'extract', duration: await console_handler.get_last_execution_time('extract') })
+  // expect(Number.isNaN(trial_results[trial_results.length - 1])).toBeFalsy()
   await setTimeout(Util.preset_action_delay.short)
+  // await setTimeout(Util.preset_action_delay.extra_short)
   const creation_result = await test_create(args)
-  if (creation_result !== null) { trial_results.push(creation_result) }
+  if (creation_result !== null) {
+    trial_results.push(creation_result)
+    // expect(Number.isNaN(trial_results[trial_results.length - 1])).toBeFalsy()
+  }
   return trial_results
 }
 
@@ -408,17 +442,21 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
   }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
+  console_handler = new RStudio_Console_Handler(page)
+  console_handler.init()
   for (let r = 0; r < repetition_count; r++) {
     let CSV_cursor = 1
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
     const modified_pathname = pathname_prefix + `.${r}.Rmd`
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
-    const t0 = performance.now()
+    // const t0 = performance.now()
     await Cell_Containerizer_manipulator.parse()
-    const t1 = performance.now()
-    execution_durations[0]!.duration[r] = t1 - t0
+    // const t1 = performance.now()
+    // execution_durations[0]!.duration[r] = t1 - t0
     const trial_results = await test_single_cell(0, args[0]!, true)
+    execution_durations[0]!.duration[r] = await console_handler.get_last_execution_time('parse')
+    // expect(Number.isNaN(execution_durations[0]!.duration[r])).toBeFalsy()
     for (const result of trial_results) {
       execution_durations[CSV_cursor]!.duration[r] = result.duration
       CSV_cursor++
