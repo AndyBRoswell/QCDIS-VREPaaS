@@ -446,6 +446,7 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
+  execution_durations.sort((a, b) => a.index - b.index) // stable sort
   await Util.save_Cell_Results(`${result_root}/${log_filename_prefix}.time.csv`, execution_durations, repetition_count)
 }
 
