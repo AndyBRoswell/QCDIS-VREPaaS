@@ -427,9 +427,9 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
 }
 
 async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
-  const execution_durations: Util.Cell_Result[] = [ { ID: '', action: 'parse', duration: [] } ]
+  const execution_durations: Util.Cell_Result[] = [ { index: -1, action: 'parse', duration: [] } ]
   for (let i = 0; i < args.length; i++) {
-    for (const action of args[i]!.actions) { execution_durations.push({ ID: i, action: action, duration: [] })}
+    for (const action of args[i]!.actions) { execution_durations.push({ index: i, action: action, duration: [] })}
   }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
