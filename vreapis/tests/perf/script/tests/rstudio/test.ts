@@ -323,11 +323,36 @@ class Cell_Containerizer_Manipulator {
 }
 
 class RStudio_Console_Handler {
+  public region_Console!: Locator
+  public button_Minimize_or_Maximize_or_Restore_Console!: Locator[]
   public RStudio_console_output!: Locator
+  public button_clear_console!: Locator
+
   constructor(public page: Page) {}
-  public init() {
+
+  public async init() {
+    this.region_Console = this.page.getByRole('region', { name: /^Console/ })
+    await this.show_console()
     this.RStudio_console_output = this.page.locator('#rstudio_console_output')
+    this.button_clear_console = this.page.locator('#rstudio_tb_consoleclear')
   }
+
+  public async show_console() {
+    this.button_Minimize_or_Maximize_or_Restore_Console = await this.region_Console.getByRole('button', { name: /(Minimize|Maximize|Restore) Console/ }).all()
+    let is_minimized = true
+    for (const button of this.button_Minimize_or_Maximize_or_Restore_Console) {
+      if (await button.getAttribute('aria-label') === 'Minimize Console') {
+        is_minimized = false
+        break
+      }
+    }
+    if (is_minimized) { await this.button_Minimize_or_Maximize_or_Restore_Console[0]!.click() }
+  }
+
+  public async clear_console() {
+    await this.button_clear_console.click()
+  }
+
   public async get_last_execution_time(action: Util.Supported_Test_Manipulations): Promise<number> {
     const filtered_message = (await this.RStudio_console_output.textContent())!.split(/\r?\n|\r/)
     const RE_prompt = new RegExp('^Execution duration of function ' + action)
@@ -434,7 +459,8 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
   console_handler = new RStudio_Console_Handler(page)
-  console_handler.init()
+  await console_handler.init()
+  await console_handler.clear_console()
   for (let r = 0; r < repetition_count; r++) {
     let CSV_cursor = 1
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
