@@ -32,14 +32,7 @@ class File_Browser_Manipulator {
 
   public async init() {
     this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ })
-    this.button_Minimize_or_Maximize_or_Restore_Tabset2 = await this.region_TabSet2.getByRole('button', { name: /(Minimize|Maximize|Restore) TabSet2/ }).all()
-    for (const button of this.button_Minimize_or_Maximize_or_Restore_Tabset2) {
-      if (await button.getAttribute('aria-label') === 'Maximize TabSet2') {
-        await button.click() // Maximize file browser to make the UI as similar to JupyterLab [file browser + editor] as possible.
-        await setTimeout(Util.preset_action_delay.medium)
-        this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ }) // Re-locate the region after maximizing since the DOM has changed
-      }
-    }
+    await this.maximize_TabSet2()
     this.tablist_TabSet2 = this.region_TabSet2.getByRole('tablist', { name: 'TabSet2' })
     this.tab_files = this.tablist_TabSet2.locator('[role="tab"][aria-controls="rstudio_workbench_panel_files"]')
     await this.toggle()
@@ -57,6 +50,17 @@ class File_Browser_Manipulator {
     for (const table of tables) {
       const table_headers = await table.locator('th').all()
       if (table_headers.length > 0) { this.file_list_header = table } else { this.file_list = table }
+    }
+  }
+
+  public async maximize_TabSet2() {
+    this.button_Minimize_or_Maximize_or_Restore_Tabset2 = await this.region_TabSet2.getByRole('button', { name: /(Minimize|Maximize|Restore) TabSet2/ }).all()
+    for (const button of this.button_Minimize_or_Maximize_or_Restore_Tabset2) {
+      if (await button.getAttribute('aria-label') === 'Maximize TabSet2') {
+        await button.click() // Maximize file browser to make the UI as similar to JupyterLab [file browser + editor] as possible.
+        await setTimeout(Util.preset_action_delay.medium)
+        this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ }) // Re-locate the region after maximizing since the DOM has changed
+      }
     }
   }
 
@@ -133,6 +137,11 @@ class Text_Editor_Manipulator {
 
   public async open(pathname: Util.Pathname): Promise<Util.File_Info> {
     await this.file_browser_manipulator.open(pathname)
+    await this.maximize_Source()
+    return await this.get_current_tab()
+  }
+
+  public async maximize_Source() {
     this.region_Source = this.page.getByRole('region', { name: /^Source/ }) // Re-locate the region after opening a file since the DOM has changed
     const maximize_button = this.region_Source.getByRole('button', { name: "Maximize Source" })
     if (await maximize_button.count() > 0) {
@@ -140,7 +149,6 @@ class Text_Editor_Manipulator {
       await setTimeout(Util.preset_action_delay.medium)
       this.region_Source = this.page.getByRole('region', { name: /^Source/ }) // Re-locate the region after maximizing since the DOM has changed
     }
-    return await this.get_current_tab()
   }
 
   public async close_all() {
