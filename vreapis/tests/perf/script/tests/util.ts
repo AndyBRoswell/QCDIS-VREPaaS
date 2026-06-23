@@ -233,7 +233,7 @@ export type Trial_Result = {
 }
 
 export type Cell_Result = {
-  ID: number | string
+  index: number
   action: Supported_Test_Manipulations
   duration: number[]
 }
@@ -241,7 +241,9 @@ export type Cell_Result = {
 export async function save_Cell_Results(pathname: Pathname, results: Cell_Result[], repetitions: number) {
   const columns = [ 'ID', 'Action' ].concat(Array.from({ length: repetitions }, (_, i) => `Duration ${i}`))
   const mangled_results = []
-  for (let result of results) { mangled_results.push([ result.ID, result.action ].concat(result.duration.map(num => num.toFixed(3)))) }
+  for (let result of results) { // @ts-ignore
+    mangled_results.push([ result.index, result.action ].concat(result.duration.map(num => num.toFixed(3))))
+  }
   await node_fs_promises.writeFile(
     pathname,
     csv_stringify.stringify(

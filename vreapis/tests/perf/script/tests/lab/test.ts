@@ -424,7 +424,7 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
   const execution_durations: Util.Cell_Result[] = []
   const indices_of_cells_to_test = Array.from({ length: args.length - 1 }, (_, i) => 1 + 1 * i).concat([ 0 ])
   for (const index of indices_of_cells_to_test) {
-    for (const action of args[index]!.actions) { execution_durations.push({ ID: index, action: action, duration: [] }) }
+    for (const action of args[index]!.actions) { execution_durations.push({ index: index, action: action, duration: [] }) }
   }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
