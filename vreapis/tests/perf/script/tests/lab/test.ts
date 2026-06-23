@@ -3,6 +3,8 @@ import log from 'loglevel'
 import { setTimeout } from "node:timers/promises";
 import * as Util from '../util'
 import { notebook_test_args } from "../containerizer_test_args";
+import node_fs_promises from 'node:fs/promises'
+import node_os from "node:os";
 
 // log.setLevel('info')
 
@@ -329,16 +331,31 @@ class Cell_Containerizer_Manipulator {
 // Measuring execution durations directly in Playwright seems to work normally for JupyterLab-ver. But for RStudio-ver the measured results are obviously much shorter than the actual ones. So we directly pick the durations measured inside both versions of Cell Containerizer.
 class DevTools_Console_Handler {
   private filtered_message: string[] = []
+
   constructor(private page: Page) {}
-  public handler = (msg: ConsoleMessage) => { if (msg.type() === 'log') { this.filtered_message.push(msg.text()) } }
-  public init() { this.page.on('console', this.handler) }
-  public get_last_execution_time(function_name: string): number { // in seconds
-    const RE = new RegExp('^' + function_name + '\\s+done in ' + '(\\d+(\\.\\d+)?)\\s*ms')
-    for (let i = this.filtered_message.length - 1; i > 0; i--) {
-      const match = this.filtered_message[i]!.match(RE)
-      if (match) { return parseFloat(match[1]!) / 1e3 } // ms -> s
+
+  public handler
+    = (msg: ConsoleMessage) => {
+    if (msg.type() === 'log' && msg.text().match(/\s+done in (\d+(\.\d+)?)\s*ms/)) {
+      this.filtered_message.push(msg.text())
     }
-    throw new Error(`Could not get execution duration of ${function_name}`)
+  }
+
+  public init() { this.page.on('console', this.handler) }
+
+  public clear_filtered_message() { this.filtered_message.length = 0 }
+
+  // public get_last_execution_time(function_name: string): number { // in seconds
+  //   const RE = new RegExp('^' + function_name + '\\s+done in ' + '(\\d+(\\.\\d+)?)\\s*ms')
+  //   for (let i = this.filtered_message.length - 1; i > 0; i--) {
+  //     const match = this.filtered_message[i]!.match(RE)
+  //     if (match) { return parseFloat(match[1]!) / 1e3 } // ms -> s
+  //   }
+  //   throw new Error(`Could not get execution duration of ${function_name}`)
+  // }
+
+  public async save_filtered_message(pathname: Util.Pathname) {
+    await node_fs_promises.writeFile(pathname, this.filtered_message.join(node_os.EOL))
   }
 }
 
@@ -398,34 +415,34 @@ let Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 let text_editor_manipulator: Text_Editor_Manipulator
 
 async function test_single_cell(index: number, args: Util.Cell_Containerizer_Manipulation_Arguments) {
-  const trial_result: Util.Trial_Result[] = []
+  // const trial_result: Util.Trial_Result[] = []
   // let t0: number, t1: number
   if (args.actions.includes('extract')) {
     await text_editor_manipulator!.select_code_cell(index)
     await Cell_Containerizer_manipulator!.wait_until_completion_of_analysis()
-    const duration_of_extraction = console_handler.get_last_execution_time('extractor')
-    trial_result.push({ action: 'extract', duration: duration_of_extraction })
+    // const duration_of_extraction = console_handler.get_last_execution_time('extractor')
+    // trial_result.push({ action: 'extract', duration: duration_of_extraction })
     await setTimeout(Util.preset_action_delay.short)
     if (args.actions.includes('create')) {
       await Cell_Containerizer_manipulator!.fill(args.image_args!)
       await setTimeout(Util.preset_action_delay.short)
       await Cell_Containerizer_manipulator!.create()
       await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
-      const duration_of_creation = console_handler.get_last_execution_time('createCell')
-      trial_result.push({ action: 'create', duration: duration_of_creation })
+      // const duration_of_creation = console_handler.get_last_execution_time('createCell')
+      // trial_result.push({ action: 'create', duration: duration_of_creation })
       await setTimeout(Util.preset_action_delay.short)
       await Cell_Containerizer_manipulator.close_successful_creation_popup()
     }
   }
-  return trial_result
+  // return trial_result
 }
 
 async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
-  const execution_durations: Util.Cell_Result[] = []
+  // const execution_durations: Util.Cell_Result[] = []
   const indices_of_cells_to_test = Array.from({ length: args.length - 1 }, (_, i) => 1 + 1 * i).concat([ 0 ])
-  for (const index of indices_of_cells_to_test) {
-    for (const action of args[index]!.actions) { execution_durations.push({ index: index, action: action, duration: [] }) }
-  }
+  // for (const index of indices_of_cells_to_test) {
+  //   for (const action of args[index]!.actions) { execution_durations.push({ index: index, action: action, duration: [] }) }
+  // }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
   console_handler = new DevTools_Console_Handler(page)
@@ -437,17 +454,19 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
     for (const index of indices_of_cells_to_test) {
-      const trial_results = await test_single_cell(index, args[index]!)
-      for (const result of trial_results) {
-        execution_durations[CSV_cursor]!.duration[r] = result.duration
-        CSV_cursor++
-      }
+      // const trial_results = await test_single_cell(index, args[index]!)
+      // for (const result of trial_results) {
+      //   execution_durations[CSV_cursor]!.duration[r] = result.duration
+      //   CSV_cursor++
+      // }
+      await test_single_cell(index, args[index]!)
     }
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
-  execution_durations.sort((a, b) => a.index - b.index) // stable sort
-  await Util.save_Cell_Results(`${result_root}/${log_filename_prefix}.time.csv`, execution_durations, repetition_count)
+  // execution_durations.sort((a, b) => a.index - b.index) // stable sort
+  // await Util.save_Cell_Results(`${result_root}/${log_filename_prefix}.time.csv`, execution_durations, repetition_count)
+  await console_handler.save_filtered_message(`${result_root}/${log_filename_prefix}.con.log`)
 }
 
 test('D1', async ({ page }) => {
