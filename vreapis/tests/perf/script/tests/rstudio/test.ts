@@ -208,14 +208,6 @@ class Cell_Containerizer_Manipulator {
     await this.menuitem_CellContainerizer.click()
     await setTimeout(Util.preset_action_delay.short)
     this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ })
-    // this.button_Minimize_or_Maximize_or_Restore_Tabset2 = await this.region_TabSet2.getByRole('button', { name: /(Minimize|Maximize|Restore) TabSet2/ }).all()
-    // for (const button of this.button_Minimize_or_Maximize_or_Restore_Tabset2) {
-    //   if (await button.getAttribute('aria-label') === 'Maximize TabSet2') {
-    //     await button.click() // Maximize cell containerizer to make the UI as similar to JupyterLab [file browser + editor] as possible.
-    //     await setTimeout(Util.preset_action_delay.medium)
-    //     this.region_TabSet2 = this.page.getByRole('region', { name: /^TabSet2/ }) // Re-locate the region after maximizing since the DOM has changed
-    //   }
-    // }
     this.tablist_TabSet2 = this.region_TabSet2.getByRole('tablist', { name: 'TabSet2' })
     this.tab_viewer = this.tablist_TabSet2.locator('[role="tab"][aria-controls="rstudio_workbench_panel_viewer"]')
     await this.toggle()
@@ -224,15 +216,9 @@ class Cell_Containerizer_Manipulator {
     this.Cell_Containerizer = this.tabpanel_Viewer.locator('iframe').contentFrame()
     this.button_Parse = this.Cell_Containerizer.getByRole('button').filter({ hasText: /^Parse$/ })
     this.code_output = this.Cell_Containerizer.locator('#code_output')
-    // this.label_Select_Code_Chunk = this.Cell_Containerizer.getByLabel(`Select Code Chunk`, { exact: true })
-    // const labels = await this.Cell_Containerizer.locator('label').all()
-    // expect(labels.length).toEqual(2)
-    // expect(await this.label_Select_Code_Chunk.textContent()).toEqual("Select Code Chunk")
-    // expect(await this.label_Base_Image.textContent()).toEqual("Base Image")
     this.label_Select_Code_Chunk = this.Cell_Containerizer.locator('label', { hasText: /^Select Code Chunk$/ })
     this.code_chunk_selector_wrapper = this.label_Select_Code_Chunk.locator('xpath=..')
     this.code_chunk_selector = this.Cell_Containerizer.locator(String.raw`#${await this.label_Select_Code_Chunk.getAttribute('for')}`)
-    // this.label_Base_Image = this.Cell_Containerizer.getByLabel('Base Image', { exact: true })
     this.label_Base_Image = this.Cell_Containerizer.locator('label', { hasText: /^Base Image$/ })
     this.base_image_selector = this.Cell_Containerizer.locator(String.raw`#${await this.label_Base_Image.getAttribute('for')}`)
     this.base_image_selector_wrapper = this.label_Base_Image.locator('xpath=..')
@@ -254,7 +240,6 @@ class Cell_Containerizer_Manipulator {
     await this.button_Parse.click()
     this.doc_info_output = this.Cell_Containerizer.locator('#doc_info_output')
     const doc_info = await this.doc_info_output.innerText()
-    // await expect(this.button_Parse).toBeEnabled()
     const re = /Document ID: .+\r?\nDocument Path: .+\r?\nParsing done/
     const match = doc_info.match(re)
     expect(match)
@@ -270,10 +255,6 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async wait_until_completion_of_analysis() {
-    // await this.toggle()
-    // const old_code = await this.code_output.innerText()
-    // await expect(this.code_output).not.toHaveText(old_code)
-    // await expect(this.button_Parse).toBeEnabled()
     await expect(this.button_Create).toBeEnabled()
   }
 
@@ -285,7 +266,6 @@ class Cell_Containerizer_Manipulator {
         const variable_type_selection_area = category_heading.locator('xpath=..')
         const target_type = args[category] as Util.Variable_Type_Map
         for (const variable in target_type) {
-          // const var_label = variable_type_selection_area.getByLabel(variable, { exact: true })
           const var_label = variable_type_selection_area.locator('label', { hasText: new RegExp('^' + variable + '$') }) // TODO: Use RegExp.escape if ES2025 is fully supported
           const wrapper = var_label.locator('xpath=..')
           const type_combo = wrapper.getByRole('combobox')
@@ -304,7 +284,6 @@ class Cell_Containerizer_Manipulator {
     const base_image_list = this.base_image_selector_wrapper.getByRole('listbox')
     const target_base_image_item = base_image_list.getByText(args['Base Image'], { exact: true })
     await target_base_image_item.click()
-    // await setTimeout(Util.preset_action_delay.short)
   }
 
   public async create() {
@@ -354,20 +333,6 @@ class RStudio_Console_Handler {
   public async clear_console() {
     await this.button_clear_console.click()
   }
-
-  // public async get_last_execution_time(action: Util.Supported_Test_Manipulations): Promise<number> {
-  //   const filtered_message = (await this.RStudio_console_output.textContent())!.split(/\r?\n|\r/)
-  //   const RE_prompt = new RegExp('^Execution duration of function ' + action)
-  //   const RE_durations = /\s*(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\s+(\d+(\.\d+)?)/
-  //   for (let i = filtered_message.length - 1; i > 0; i--) {
-  //     const match_prompt = filtered_message[i]!.match(RE_prompt)
-  //     if (match_prompt) {
-  //       const match_duration = filtered_message[i + 2]!.match(RE_durations)
-  //       if (match_duration) { return parseFloat(match_duration[5]!) }
-  //     }
-  //   }
-  //   throw new Error(`Could not get execution duration of ${action}`)
-  // }
 
   public async save_filtered_message(pathname: Util.Pathname) {
     const console_line = (await this.RStudio_console_output.textContent())!.split(/\r?\n|\r/)
@@ -443,66 +408,33 @@ test.afterEach(async ({ page }) => {
 let text_editor_manipulator: Text_Editor_Manipulator
 let Cell_Containerizer_manipulator: Cell_Containerizer_Manipulator
 
-// async function test_create(args: Util.Cell_Containerizer_Manipulation_Arguments): Promise<Util.Trial_Result | null> {
-//   if (args.actions.includes('create')) {
-//     await Cell_Containerizer_manipulator.fill(args.image_args!)
-//     await setTimeout(Util.preset_action_delay.short)
-//     await Cell_Containerizer_manipulator.create()
-//     await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
-//     return { action: 'create', duration: await console_handler.get_last_execution_time('create') }
-//   }
-//   return null
-// }
-
 async function test_single_cell(index: number, args: Util.Cell_Containerizer_Manipulation_Arguments, right_after_parsing: boolean = false) {
-  // const trial_results: Util.Trial_Result[] = []
   if (right_after_parsing === false && args.actions.includes('extract')) { await Cell_Containerizer_manipulator.select_code_cell(index) } // The 0th cell is automatically selected by the combobox from shiny.
   await Cell_Containerizer_manipulator.wait_until_completion_of_analysis() // At this moment `extract` is a must for every cell since it is mandatory to extract all the variables that comes from the previous cells and will be passed to subsequent cells.
   await setTimeout(Util.preset_action_delay.short)
-  // trial_results.push({ action: 'extract', duration: await console_handler.get_last_execution_time('extract') }) // get after a delay to avoid its throwing errors
-  // const creation_result = await test_create(args)
-  // if (creation_result !== null) { trial_results.push(creation_result) }
   if (args.actions.includes('create')) {
     await Cell_Containerizer_manipulator.fill(args.image_args!)
     await setTimeout(Util.preset_action_delay.short)
     await Cell_Containerizer_manipulator.create()
     await Cell_Containerizer_manipulator.wait_until_completion_of_creation()
-    // await setTimeout(Util.preset_action_delay.short)
-    // trial_results.push({ action: 'create', duration: await console_handler.get_last_execution_time('create') })
   }
-  // return trial_results
 }
 
 async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
-  // const execution_durations: Util.Cell_Result[] = [ { index: -1, action: 'parse', duration: [] } ]
-  // for (let i = 0; i < args.length; i++) {
-  //   for (const action of args[i]!.actions) { execution_durations.push({ index: i, action: action, duration: [] })}
-  // }
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
   console_handler = new RStudio_Console_Handler(page)
   await console_handler.init()
   await console_handler.clear_console()
   for (let r = 0; r < repetition_count; r++) {
-    // let CSV_cursor = 1
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
     const modified_pathname = pathname_prefix + `.${r}.Rmd`
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
     await Cell_Containerizer_manipulator.parse()
-    const trial_results = await test_single_cell(0, args[0]!, true)
-    // execution_durations[0]!.duration[r] = await console_handler.get_last_execution_time('parse')
-    // for (const result of trial_results) {
-    //   execution_durations[CSV_cursor]!.duration[r] = result.duration
-    //   CSV_cursor++
-    // }
+    await test_single_cell(0, args[0]!, true)
     for (let i = 1; i < args.length; i++) {
       await setTimeout(Util.preset_action_delay.short)
-      // const trial_results = await test_single_cell(i, args[i]!, false)
-      // for (const result of trial_results) {
-      //   execution_durations[CSV_cursor]!.duration[r] = result.duration
-      //   CSV_cursor++
-      // }
       await test_single_cell(i, args[i]!, false)
     }
     await setTimeout(Util.preset_action_delay.short)
@@ -510,7 +442,6 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
-  // await Util.save_Cell_Results(`${result_root}/${log_filename_prefix}.time.csv`, execution_durations, repetition_count)
   await console_handler.save_filtered_message(`${result_root}/${log_filename_prefix}.con.log`)
 }
 
