@@ -45,6 +45,8 @@ export const enum preset_action_delay {
 
 export const variable_categories_to_fill = [ 'Inputs', 'Outputs', 'Parameters', ]
 
+const logger = log.getLogger('Util')
+
 const original_log_method_factory = log.methodFactory
 log.methodFactory = (log_method_name, log_level, logger_name) => {
   const raw = original_log_method_factory(log_method_name, log_level, logger_name)
@@ -91,6 +93,19 @@ export const enum Control_Code {
   monitor_closed,
 }
 
+export type Performance_Monitor_Command_Line_Parameter = {
+  browser: boolean,
+  JupyterLab_backend: boolean,
+  RStudio_backend: boolean,
+  vreapi_process: boolean,
+  database_process: boolean,
+  interval: number,
+  control_channel: boolean,
+  console_output: boolean,
+  file_output: boolean,
+  log_filename_prefix: string,
+}
+
 export class Control {
   private static control_channel_pathname: Pathname
   private static control_server: node_net.Server
@@ -103,20 +118,7 @@ export class Control {
   private static resolve_with_monitor_started: (() => void) | null = null
   private static resolve_with_monitor_stopped: (() => void) | null = null
 
-  public static async launch_performance_monitor(
-    cmdline_arg: {
-      browser: boolean,
-      JupyterLab_backend: boolean,
-      RStudio_backend: boolean,
-      vreapi_process: boolean,
-      database_process: boolean,
-      interval: number,
-      control_channel: boolean,
-      console_output: boolean,
-      file_output: boolean,
-      log_filename_prefix: string,
-    }
-  ) {
+  public static async launch_performance_monitor(cmdline_arg: Performance_Monitor_Command_Line_Parameter) {
     const platform = node_os.platform()
     switch (platform) {
       case 'linux':
@@ -189,6 +191,11 @@ export class Control {
     await Control.wait(Control_Code.monitor_ready)
     Control.control_socket.write(Buffer.from([ Control_Code.query_monitor_start ]))
     await Control.wait(Control_Code.monitor_started)
+  }
+
+  public static async launch_and_start_performance_monitor(cmdline_arg: Performance_Monitor_Command_Line_Parameter) {
+    await this.launch_performance_monitor(cmdline_arg)
+    await this.start_monitor()
   }
 
   public static async stop_monitor() {
