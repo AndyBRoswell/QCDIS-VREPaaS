@@ -59,9 +59,10 @@ class File_Browser_Manipulator {
   public async current_directory(): Promise<Util.Pathname> {
     await this.toggle()
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(`Getting the current directory...`)
-    const r = await this.path_indicator.textContent() as string
-    File_Browser_Manipulator.logger[this.current_directory.name]!.info(r)
-    return r
+    // const r = await this.path_indicator.textContent() as string
+    const seg = await this.path_indicator.locator('[title]').all()
+    if (seg.length == 1) { return '/' } // only 1 that shows the full pathname of home
+    else { return (await seg[seg.length - 1]!.getAttribute('title'))! }
   }
 
   public async go_home(delay: Util.Milliseconds = Util.preset_action_delay.medium) { // Go to the home directory
@@ -74,12 +75,12 @@ class File_Browser_Manipulator {
     } while (await this.current_directory() !== '/')
   }
 
-  public async open(path: Util.Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
+  public async open(path: Util.Pathname, go_home: boolean = false): Promise<void> { // Go to the designated directory
     File_Browser_Manipulator.logger[this.open.name]!.info(`Dest: ${path}`)
     const path_segments = Util.Pathname_Operator.segmented_Pathname(path)
     await this.toggle()
-    if (home_as_relative_root) { await this.go_home() }
-    const target_path: Util.Pathname[] = []
+    if (go_home) { await this.go_home() }
+    const target_path: Util.Pathname[] = Util.Pathname_Operator.segmented_Pathname(await this.current_directory())
     for (const [ index, segment ] of path_segments.entries()) {
       File_Browser_Manipulator.logger[this.open.name]!.info(`Entering ${segment}...`)
       const entry = this.file_list.locator(`[title^="Name: ${segment}"]`)
