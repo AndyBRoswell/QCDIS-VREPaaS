@@ -447,3 +447,9 @@ test('D1', async ({ page }) => {
   const args_set = notebook_test_args[pathname_prefix]!
   await run_test(page, `${pathname_prefix}`, args_set)
 })
+
+test('port/dependency_with_submodule.notebook', async ({ page }) => {
+  const pathname_prefix = 'port/dependency_with_submodule.notebook'
+  const args_set = notebook_test_args[pathname_prefix]!
+  await run_test(page, `${pathname_prefix}`, args_set)
+})
