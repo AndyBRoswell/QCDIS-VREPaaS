@@ -374,9 +374,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.afterEach(async ({ page }) => {
-  logger.info(`Stopping performance monitor`)
   const exit_code = await Util.Control.stop_monitor()
-  logger.info(`Performance monitor stopped`)
   expect(exit_code).toEqual(0)
 })
 
@@ -441,7 +439,6 @@ async function start_pf_mon(log_filename_prefix: Util.Pathname) {
   })
   logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}. Control channel: ${Util.Control.get_control_channel_pathname()}`)
   await Util.Control.start_monitor()
-  logger.info(`Performance monitor started`)
 }
 
 async function main(page: Page, pathname_prefix: Util.Pathname) {
