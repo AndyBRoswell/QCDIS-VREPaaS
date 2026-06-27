@@ -372,23 +372,6 @@ test.beforeEach(async ({ page }) => {
   await setTimeout(Util.preset_action_delay.long)
   await file_browser_manipulator.open(test_root, true)
   expect(Util.Pathname_Operator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
-  // await Util.Control.launch_performance_monitor({
-  //   browser: true,
-  //   JupyterLab_backend: true,
-  //   RStudio_backend: false,
-  //   vreapi_process: true,
-  //   database_process: true,
-  //   interval: default_performance_sample_interval,
-  //   control_channel: true,
-  //   console_output: false,
-  //   file_output: true,
-  //   log_filename_prefix: `${log_filename_prefix}.util`
-  // })
-  // logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
-  // logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}`)
-  // logger.info(`Starting performance monitor`)
-  // await Util.Control.start_monitor()
-  // logger.info(`Performance monitor started`)
 })
 
 test.afterEach(async ({ page }) => {
