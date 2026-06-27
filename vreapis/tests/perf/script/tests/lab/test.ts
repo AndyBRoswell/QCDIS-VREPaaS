@@ -357,7 +357,6 @@ const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be place
 const repetition_count = 1
 const default_performance_sample_interval = 0.5
 const result_root = '.log'
-let log_filename_prefix = Util.log_filename_prefix()
 
 let file_browser_manipulator: File_Browser_Manipulator;
 let running_session_manipulator: Running_Session_Manipulator;
@@ -404,6 +403,8 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
   }
 }
 
+const platform_specific_file_extension = process.env['notebook_platform'] !== undefined ? `.${process.env['notebook_platform']}` : ''
+
 async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
   const indices_of_cells_to_test = Array.from({ length: args.length - 1 }, (_, i) => 1 + 1 * i).concat([ 0 ])
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
@@ -422,10 +423,10 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
-  await console_handler.save_filtered_message(`${result_root}/${log_filename_prefix}.con.log`)
+  await console_handler.save_filtered_message(`${result_root}/${pathname_prefix}${platform_specific_file_extension}.con.log`)
 }
 
-async function launch_and_start_performance_monitor() {
+async function start_pf_mon(log_filename_prefix: Util.Pathname) {
   await Util.Control.launch_performance_monitor({
     browser: true,
     JupyterLab_backend: true,
@@ -436,27 +437,25 @@ async function launch_and_start_performance_monitor() {
     control_channel: true,
     console_output: false,
     file_output: true,
-    log_filename_prefix: `${log_filename_prefix}.util`
+    log_filename_prefix: `${log_filename_prefix}${platform_specific_file_extension}.util`
   })
-  logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
-  logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}`)
-  logger.info(`Starting performance monitor`)
+  logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}. Control channel: ${Util.Control.get_control_channel_pathname()}`)
   await Util.Control.start_monitor()
   logger.info(`Performance monitor started`)
 }
 
-test('D1', async ({ page }) => {
-  const pathname_prefix = 'D1'
-  log_filename_prefix = pathname_prefix
-  await launch_and_start_performance_monitor()
+async function main(page: Page, pathname_prefix: Util.Pathname) {
+  await start_pf_mon(pathname_prefix)
   const args_set = notebook_test_args[pathname_prefix]!
   await run_test(page, `${pathname_prefix}`, args_set)
+}
+
+test('D1', async ({ page }) => {
+  const pathname_prefix = 'D1'
+  await main(page, pathname_prefix)
 })
 
 test('port/dependency_with_submodule.notebook', async ({ page }) => {
   const pathname_prefix = 'port/dependency_with_submodule.notebook'
-  log_filename_prefix = pathname_prefix
-  await launch_and_start_performance_monitor()
-  const args_set = notebook_test_args[pathname_prefix]!
-  await run_test(page, `${pathname_prefix}`, args_set)
+  await main(page, pathname_prefix)
 })
