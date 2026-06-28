@@ -1,12 +1,13 @@
 name: venv
 channels:
   - conda-forge
-  - r
-  - bioconda
-  - defaults
+{#  - r#}
+{#  - bioconda#}
+{#  - defaults#}
 dependencies:
   - pip
   - python>=3.8
+  - nbconvert
 {% for d in conda_deps %}
   - {{ d }}
 {% endfor %}
