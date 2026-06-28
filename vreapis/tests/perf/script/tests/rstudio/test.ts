@@ -427,7 +427,7 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
-  await console_handler.save_filtered_message(`${result_root}/${log_filename_prefix}.con.log`)
+  await console_handler.save_filtered_message(`${result_root}/${log_filename_prefix}.con.rstudio.log`)
 }
 
 async function start_pf_mon(log_filename_prefix: Util.Pathname) {
