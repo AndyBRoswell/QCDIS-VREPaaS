@@ -380,9 +380,9 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.afterEach(async ({ page }) => {
-  logger.info(`Stopping performance monitor`)
+  // logger.info(`Stopping performance monitor`)
   const exit_code = await Util.Control.stop_monitor()
-  logger.info(`Performance monitor stopped`)
+  // logger.info(`Performance monitor stopped`)
   expect(exit_code).toEqual(0)
 })
 
