@@ -377,23 +377,6 @@ test.beforeEach(async ({ page }) => {
   await file_browser_manipulator.init()
   await file_browser_manipulator.open(test_root, true)
   expect(Util.Pathname_Operator.normalize(test_root), Util.Pathname_Operator.normalize(await file_browser_manipulator.current_directory())).toBeTruthy()
-  await Util.Control.launch_performance_monitor({
-    browser: true,
-    JupyterLab_backend: false,
-    RStudio_backend: true,
-    vreapi_process: true,
-    database_process: true,
-    interval: default_performance_sample_interval,
-    control_channel: true,
-    console_output: false,
-    file_output: true,
-    log_filename_prefix: `${log_filename_prefix}.util`
-  })
-  logger.info(`Performance monitor control channel: ${Util.Control.get_control_channel_pathname()}`)
-  logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}`)
-  logger.info(`Starting performance monitor`)
-  await Util.Control.start_monitor()
-  logger.info(`Performance monitor started.`)
 })
 
 test.afterEach(async ({ page }) => {
@@ -445,6 +428,30 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await setTimeout(Util.preset_action_delay.short)
   }
   await console_handler.save_filtered_message(`${result_root}/${log_filename_prefix}.con.log`)
+}
+
+async function start_pf_mon(log_filename_prefix: Util.Pathname) {
+  await Util.Control.launch_performance_monitor({
+    browser: true,
+    JupyterLab_backend: false,
+    RStudio_backend: true,
+    vreapi_process: true,
+    database_process: true,
+    interval: default_performance_sample_interval,
+    control_channel: true,
+    console_output: false,
+    file_output: true,
+    log_filename_prefix: `${log_filename_prefix}.util.rstudio`
+  })
+  logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}. Control channel: ${Util.Control.get_control_channel_pathname()}`)
+  await Util.Control.start_monitor()
+  // logger.info(`Performance monitor started`)
+}
+
+async function main(page: Page, pathname_prefix: Util.Pathname) {
+  await start_pf_mon(pathname_prefix)
+  const args_set = notebook_test_args[pathname_prefix]!
+  await run_test(page, `${pathname_prefix}`, args_set)
 }
 
 test('D1', async ({ page }) => {
