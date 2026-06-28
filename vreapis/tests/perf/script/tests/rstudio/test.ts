@@ -91,10 +91,11 @@ class File_Browser_Manipulator {
     } while (await this.current_directory() !== this.home)
   }
 
-  public async open(path: Util.Pathname, home_as_relative_root: boolean = false): Promise<void> { // Go to the designated directory
-    const path_segments = Util.Pathname_Operator.segmented_Pathname(path)
+  public async open(path: Util.Pathname, go_home: boolean = false): Promise<void> { // Go to the designated directory
     await this.toggle()
-    if (home_as_relative_root) { await this.go_home() }
+    if (go_home) { await this.go_home() }
+    const path_segments = Util.Pathname_Operator.segmented_Pathname(path)
+    // const path_segments = Util.Pathname_Operator.segmented_Pathname(await this.current_directory()).concat(Util.Pathname_Operator.segmented_Pathname(path))
     for (const [ index, segment ] of path_segments.entries()) {
       const entry = this.file_list.getByText(segment, { exact: true })
       await entry.click()
