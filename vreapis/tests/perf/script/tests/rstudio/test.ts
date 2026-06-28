@@ -356,10 +356,10 @@ const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be place
 const repetition_count = 1
 const default_performance_sample_interval = 0.5
 const result_root = '.log'
-const log_filename_prefix = Util.log_filename_prefix()
+let log_filename_prefix = Util.log_filename_prefix()
 
-var file_browser_manipulator: File_Browser_Manipulator
-var console_handler: RStudio_Console_Handler
+let file_browser_manipulator: File_Browser_Manipulator;
+let console_handler: RStudio_Console_Handler;
 
 test.beforeEach(async ({ page }) => {
   await page.goto('http://localhost:8787/')
