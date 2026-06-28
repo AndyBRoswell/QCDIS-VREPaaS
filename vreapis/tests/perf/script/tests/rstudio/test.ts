@@ -456,6 +456,8 @@ async function main(page: Page, pathname_prefix: Util.Pathname) {
 
 test('D1', async ({ page }) => {
   const pathname_prefix = 'D1'
-  const args = notebook_test_args[pathname_prefix]!
-  await run_test(page, `${pathname_prefix}`, args)
+  // await start_pf_mon(pathname_prefix)
+  // const args = notebook_test_args[pathname_prefix]!
+  // await run_test(page, `${pathname_prefix}`, args)
+  await main(page, pathname_prefix)
 })
