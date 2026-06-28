@@ -59,7 +59,6 @@ class File_Browser_Manipulator {
   public async current_directory(): Promise<Util.Pathname> {
     await this.toggle()
     File_Browser_Manipulator.logger[this.current_directory.name]!.info(`Getting the current directory...`)
-    // const r = await this.path_indicator.textContent() as string
     const seg = await this.path_indicator.locator('[title]').all()
     if (seg.length == 1) { return '/' } // only 1 that shows the full pathname of home
     else { return (await seg[seg.length - 1]!.getAttribute('title'))! }
