@@ -39,8 +39,6 @@ class File_Browser_Manipulator {
     this.tab_files = this.tablist_TabSet2.locator('[role="tab"][aria-controls="rstudio_workbench_panel_files"]')
     await this.toggle()
     this.tabpanel_Files = this.region_TabSet2.getByRole('tabpanel', { name: 'Files' })
-    // await this.tabpanel_Files.waitFor()
-    // File_Browser_Manipulator.logger[this.init.name]!.info('Located this.tabpanel_Files')
     this.Selected_path_breadcrumb = this.tabpanel_Files.getByLabel('Selected path breadcrumb')
     File_Browser_Manipulator.logger[this.init.name]!.info(`Selected_path_breadcrumb.textContent(): ${await this.Selected_path_breadcrumb.textContent()}`)
     this.path_indicator = this.Selected_path_breadcrumb.locator('[aria-current="location"]')
@@ -95,7 +93,6 @@ class File_Browser_Manipulator {
     await this.toggle()
     if (go_home) { await this.go_home() }
     const path_segments = Util.Pathname_Operator.segmented_Pathname(path)
-    // const path_segments = Util.Pathname_Operator.segmented_Pathname(await this.current_directory()).concat(Util.Pathname_Operator.segmented_Pathname(path))
     for (const [ index, segment ] of path_segments.entries()) {
       const entry = this.file_list.getByText(segment, { exact: true })
       await entry.click()
@@ -156,8 +153,6 @@ class Text_Editor_Manipulator {
 
   public async close_all() {
     await this.current_tab.click({ button: 'right' })
-    // const context_menu = this.HTML_body.locator('[aria-activedescendant]') // I don't know why this can't locate the menu
-    // const item_Close_All = context_menu.getByText('Close All', { exact: true })
     const item_Close_All = this.HTML_body.getByRole('menuitem').filter({ hasText: /Close All$/ })
     await setTimeout(Util.preset_action_delay.short)
     await item_Close_All.click()
@@ -256,7 +251,6 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async wait_until_completion_of_analysis() {
-    // await expect(this.button_Create).toBeEnabled()
     await expect(this.code_output).not.toHaveClass('recalculating')
   }
 
@@ -380,9 +374,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.afterEach(async ({ page }) => {
-  // logger.info(`Stopping performance monitor`)
   const exit_code = await Util.Control.stop_monitor()
-  // logger.info(`Performance monitor stopped`)
   expect(exit_code).toEqual(0)
 })
 
@@ -445,7 +437,6 @@ async function start_pf_mon(log_filename_prefix: Util.Pathname) {
   })
   logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}. Control channel: ${Util.Control.get_control_channel_pathname()}`)
   await Util.Control.start_monitor()
-  // logger.info(`Performance monitor started`)
 }
 
 async function main(page: Page, pathname_prefix: Util.Pathname) {
@@ -456,17 +447,11 @@ async function main(page: Page, pathname_prefix: Util.Pathname) {
 
 test('D1', async ({ page }) => {
   const pathname_prefix = 'D1'
-  // await start_pf_mon(pathname_prefix)
-  // const args = notebook_test_args[pathname_prefix]!
-  // await run_test(page, `${pathname_prefix}`, args)
   await main(page, pathname_prefix)
 })
 
 test('port/dependency_with_submodule.notebook', async ({ page }) => {
   const pathname_prefix = 'port/dependency_with_submodule.notebook'
-  // await start_pf_mon(pathname_prefix)
-  // const args_set = notebook_test_args[pathname_prefix]!
-  // await run_test(page, `${pathname_prefix}`, args_set)
   await main(page, pathname_prefix)
 })
 
