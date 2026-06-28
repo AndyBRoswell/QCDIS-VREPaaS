@@ -256,7 +256,8 @@ class Cell_Containerizer_Manipulator {
   }
 
   public async wait_until_completion_of_analysis() {
-    await expect(this.button_Create).toBeEnabled()
+    // await expect(this.button_Create).toBeEnabled()
+    await expect(this.code_output).not.toHaveClass('recalculating')
   }
 
   public async fill(args: Util.Image_Creation_Arguments) {
