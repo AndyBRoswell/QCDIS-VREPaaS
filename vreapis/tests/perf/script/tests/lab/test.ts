@@ -353,7 +353,7 @@ const logger = log.getLogger('test')
 logger.setLevel('info')
 
 const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
-const repetition_count = 1
+const repetition_count = 2
 const default_performance_sample_interval = 0.5
 const result_root = '.log'
 
@@ -368,8 +368,8 @@ test.beforeEach(async ({ page }) => {
   file_browser_manipulator = new File_Browser_Manipulator(page)
   await file_browser_manipulator.init()
   await setTimeout(Util.preset_action_delay.long)
-  await file_browser_manipulator.open(test_root, true)
-  expect(Util.Pathname_Operator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
+  // await file_browser_manipulator.open(test_root, true)
+  // expect(Util.Pathname_Operator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
 })
 
 test.afterEach(async ({ page }) => {
@@ -411,6 +411,8 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
   for (let r = 0; r < repetition_count; r++) {
     let CSV_cursor = 0
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
+    await file_browser_manipulator.open(test_root, true)
+    expect(Util.Pathname_Operator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
     const modified_pathname = pathname_prefix + `.${r}.ipynb`
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
