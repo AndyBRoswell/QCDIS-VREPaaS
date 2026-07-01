@@ -450,22 +450,22 @@ async function main(page: Page, pathname_prefix: Util.Pathname) {
   await run_test(page, `${pathname_prefix}`, args_set)
 }
 
-test('D1', async ({ page }) => {
+test('D1', { tag: [ '@D1' ], }, async ({ page }) => {
   const pathname_prefix = 'D1'
   await main(page, pathname_prefix)
 })
 
-test('port/dependency_with_submodule.notebook', async ({ page }) => {
+test('port/dependency_with_submodule.notebook', { tag: [ '@port/dependency_with_submodule.notebook' ], }, async ({ page }) => {
   const pathname_prefix = 'port/dependency_with_submodule.notebook'
   await main(page, pathname_prefix)
 })
 
-test('port/R-notebook', async ({ page }) => {
+test('port/R-notebook', { tag: [ '@port/R-notebook' ], }, async ({ page }) => {
   const pathname_prefix = 'port/R-notebook'
   await main(page, pathname_prefix)
 })
 
-test('port/test_!', async ({ page }) => {
+test('port/test_!', { tag: [ '@port/test_!' ], }, async ({ page }) => {
   const pathname_prefix = 'port/test_!'
   await main(page, pathname_prefix)
 })
@@ -475,22 +475,22 @@ test('port/test_conf_nesting', { tag: [ '@port/test_conf_nesting' ], }, async ({
   await main(page, pathname_prefix)
 })
 
-test('port/test_param_in_cell_notebook', async ({ page }) => {
+test('port/test_param_in_cell_notebook', { tag: [ '@port/test_param_in_cell_notebook' ], }, async ({ page }) => {
   const pathname_prefix = 'port/test_param_in_cell_notebook'
   await main(page, pathname_prefix)
 })
 
-test('power-in-my-room', async ({ page }) => {
+test('power-in-my-room', { tag: [ '@power-in-my-room' ], }, async ({ page }) => {
   const pathname_prefix = 'power-in-my-room'
   await main(page, pathname_prefix)
 })
 
-test('exynos-7420-power-curves', async ({ page }) => {
+test('exynos-7420-power-curves', { tag: [ '@exynos-7420-power-curves' ], }, async ({ page }) => {
   const pathname_prefix = 'exynos-7420-power-curves'
   await main(page, pathname_prefix)
 })
 
-test('equal-loudness-curve', async ({ page }) => {
+test('equal-loudness-curve', { tag: [ '@equal-loudness-curve' ], }, async ({ page }) => {
   const pathname_prefix = 'equal-loudness-curve'
   await main(page, pathname_prefix)
 })
