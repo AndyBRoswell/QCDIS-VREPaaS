@@ -247,11 +247,14 @@ class Cell_Containerizer_Manipulator {
     const listbox = this.code_chunk_selector_wrapper.getByRole('listbox')
     const option = await listbox.getByRole('option').all()
     const target_option = option[index]!
+    // const started = expect(this.code_output).toContainClass('recalculating') // wait for the start of analysis
     await target_option.click()
+    await expect(this.code_output).toContainClass('recalculating') // wait for the start of analysis
+    // await started
   }
 
   public async wait_until_completion_of_analysis() {
-    await expect(this.code_output).not.toHaveClass('recalculating')
+    await expect(this.code_output).not.toContainClass('recalculating')
   }
 
   public async fill(args: Util.Image_Creation_Arguments) {
