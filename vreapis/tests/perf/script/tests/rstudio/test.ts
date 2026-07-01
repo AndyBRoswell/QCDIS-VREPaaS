@@ -470,10 +470,10 @@ test('port/test_!', async ({ page }) => {
   await main(page, pathname_prefix)
 })
 
-// test('port/test_conf_nesting', async ({ page }) => {
-//   const pathname_prefix = 'port/test_conf_nesting'
-//   await main(page, pathname_prefix)
-// })
+test('port/test_conf_nesting', { tag: [ '@port/test_conf_nesting' ], }, async ({ page }) => {
+  const pathname_prefix = 'port/test_conf_nesting'
+  await main(page, pathname_prefix)
+})
 
 test('port/test_param_in_cell_notebook', async ({ page }) => {
   const pathname_prefix = 'port/test_param_in_cell_notebook'
