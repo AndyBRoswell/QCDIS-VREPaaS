@@ -1,4 +1,5 @@
 import * as Util from './util.ts'
+import node_fs from "node:fs"
 
 export const notebook_test_args: { [key: Util.Pathname]: Util.Cell_Containerizer_Manipulation_Arguments[] } = {
   'D1': [
@@ -387,3 +388,5 @@ export const notebook_test_args: { [key: Util.Pathname]: Util.Cell_Containerizer
     }
   ]
 }
+
+node_fs.writeFileSync(`${__dirname}/notebook_test_args.json`, JSON.stringify(notebook_test_args, null, 2))
