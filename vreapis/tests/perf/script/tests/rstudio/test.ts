@@ -424,7 +424,7 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     await text_editor_manipulator.close_all()
     await setTimeout(Util.preset_action_delay.short)
   }
-  await console_handler.save_filtered_message(`${result_root}/${log_filename_prefix}.con.rstudio.log`)
+  await console_handler.save_filtered_message(`${result_root}/${pathname_prefix}.rstudio.con.log`)
 }
 
 async function start_pf_mon(log_filename_prefix: Util.Pathname) {
@@ -438,7 +438,7 @@ async function start_pf_mon(log_filename_prefix: Util.Pathname) {
     control_channel: true,
     console_output: false,
     file_output: true,
-    log_filename_prefix: `${log_filename_prefix}.util.rstudio`
+    log_filename_prefix: `${log_filename_prefix}.rstudio.util`
   })
   logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}. Control channel: ${Util.Control.get_control_channel_pathname()}`)
   await Util.Control.start_monitor()
