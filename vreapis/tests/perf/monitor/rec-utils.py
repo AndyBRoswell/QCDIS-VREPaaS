@@ -115,8 +115,8 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
                             await samples.put(Performance_Sample(sample_time, process.pid, process.username(), process.name(), ' '.join(process.cmdline()), cpu_percent, process.memory_info().rss))
                         CPU_usage += cpu_percent
                         memory_usage += process.memory_info().rss
-                except psutil.NoSuchProcess:
-                    logger.info('psutil.NoSuchProcess')
+                except psutil.NoSuchProcess as e:
+                    logger.info(f'psutil.NoSuchProcess {e.name} (PID {e.pid})')
                     pass
             agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
             logger.debug(f'agg_sample[{process_group_name}] = {agg_sample[process_group_name]}')
