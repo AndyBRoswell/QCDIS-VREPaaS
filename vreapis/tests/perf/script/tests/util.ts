@@ -111,14 +111,20 @@ export class Control {
   private static control_server: node_net.Server
   private static control_socket: node_net.Socket
   private static monitor: node_child_process.ChildProcess
-  private static monitor_ready: boolean = false
-  private static monitor_started: boolean = false
-  private static monitor_stopped: boolean = false
-  private static resolve_with_monitor_ready: (() => void) | null = null
-  private static resolve_with_monitor_started: (() => void) | null = null
-  private static resolve_with_monitor_stopped: (() => void) | null = null
+  private static monitor_ready: boolean
+  private static monitor_started: boolean
+  private static monitor_stopped: boolean
+  private static resolve_with_monitor_ready: (() => void) | null
+  private static resolve_with_monitor_started: (() => void) | null
+  private static resolve_with_monitor_stopped: (() => void) | null
 
   public static async launch_performance_monitor(cmdline_arg: Performance_Monitor_Command_Line_Parameter) {
+    Control.monitor_ready = false
+    Control.monitor_started = false
+    Control.monitor_stopped = false
+    Control.resolve_with_monitor_ready = null
+    Control.resolve_with_monitor_started = null
+    Control.resolve_with_monitor_stopped = null
     const platform = node_os.platform()
     switch (platform) {
       case 'linux':
