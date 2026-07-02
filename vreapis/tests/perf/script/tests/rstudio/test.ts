@@ -239,6 +239,7 @@ class Cell_Containerizer_Manipulator {
     const re = /Document ID: .+\r?\nDocument Path: .+\r?\nParsing done/
     const match = doc_info.match(re)
     expect(match)
+    await this.wait_until_start_of_analysis() // The 0th cell is automatically selected by the combobox from shiny. Then it will be automatically extracted.
   }
 
   public async select_code_cell(index: number) { // 0-indexed
@@ -247,10 +248,12 @@ class Cell_Containerizer_Manipulator {
     const listbox = this.code_chunk_selector_wrapper.getByRole('listbox')
     const option = await listbox.getByRole('option').all()
     const target_option = option[index]!
-    // const started = expect(this.code_output).toContainClass('recalculating') // wait for the start of analysis
     await target_option.click()
-    await expect(this.code_output).toContainClass('recalculating') // wait for the start of analysis
-    // await started
+    await this.wait_until_start_of_analysis()
+  }
+
+  public async wait_until_start_of_analysis() {
+    await expect(this.code_output).toContainClass('recalculating')
   }
 
   public async wait_until_completion_of_analysis() {
