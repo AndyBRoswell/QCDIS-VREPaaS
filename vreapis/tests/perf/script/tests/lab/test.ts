@@ -438,7 +438,7 @@ async function start_pf_mon(log_filename_prefix: Util.Pathname) {
     file_output: true,
     log_filename_prefix: `${log_filename_prefix}${platform_specific_file_extension}.util`
   })
-  logger.info(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}. Control channel: ${Util.Control.get_control_channel_pathname()}`)
+  logger.debug(`Performance monitor PID: ${Util.Control.get_monitor_script_PID()}. Control channel: ${Util.Control.get_control_channel_pathname()}`)
   await Util.Control.start_monitor()
 }
 

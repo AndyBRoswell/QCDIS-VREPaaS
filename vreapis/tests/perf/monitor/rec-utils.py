@@ -149,9 +149,9 @@ if args.console_output:
 if args.file_output:
     Path(f'{log_root}/{args.log_filename_prefix[0]}').parent.mkdir(parents=True, exist_ok=True)
     raw_log_file = open(f'{log_root}/{args.log_filename_prefix[0]}.raw.csv', 'w')
-    logger.warning(f'Raw log file: {raw_log_file.name}')
+    logger.info(f'Raw log file: {raw_log_file.name}')
     cooked_log_file = open(f'{log_root}/{args.log_filename_prefix[0]}.cooked.csv', 'w')
-    logger.warning(f'Cooked log file: {cooked_log_file.name}')
+    logger.info(f'Cooked log file: {cooked_log_file.name}')
     CSV_file_writer_raw = csv.writer(raw_log_file)
     CSV_file_writer_cooked = csv.writer(cooked_log_file)
 
@@ -189,7 +189,7 @@ async def process_cooked():
     except asyncio.CancelledError:
         if cooked_log_file is not None:
             cooked_log_file.close()
-            logger.warning(f'Cooked log file {cooked_log_file.name} closed')
+            logger.info(f'Cooked log file {cooked_log_file.name} closed')
         raise
 
 
@@ -207,7 +207,7 @@ async def process_raw():
     except asyncio.CancelledError:
         if raw_log_file is not None:
             raw_log_file.close()
-            logger.warning(f'Raw log file {raw_log_file.name} closed')
+            logger.info(f'Raw log file {raw_log_file.name} closed')
         raise
 
 
@@ -234,23 +234,24 @@ async def daemon():
             case 'linux':
                 if args.IPC_channel is not None:
                     control_channel = args.IPC_channel[0]  # Passing a list to asyncio.open_unix_connection won't connect to the designated socket
-                    logger.info(f'Domain Socket: {control_channel}')
                     control_channel_reader, control_channel_writer = await asyncio.open_unix_connection(control_channel)
-                    logger.info(f'Socket connected')
+                    logger.info(f'Domain Socket {control_channel} connected')
                     control_channel_writer.write(Control_Code.monitor_ready)
                     while True:
                         byte = await control_channel_reader.read(1)
                         match byte:
                             case Control_Code.query_monitor_start.value:
+                                logger.info(f'Received Control_Code.{Control_Code.query_monitor_start.name}')
                                 producer = asyncio.create_task(monitor(process_group, default_sample_interval))
                                 consumer_raw = asyncio.create_task(process_raw())
                                 consumer_cooked = asyncio.create_task(process_cooked())
+                                logger.info(f'Sending Control_Code.{Control_Code.monitor_started.name}')
                                 control_channel_writer.write(Control_Code.monitor_started)
                             case Control_Code.query_monitor_stop.value | '':
                                 if byte == '':
-                                    logger.warning(f'EOF from control channel. Stopping the performance monitor.')
+                                    logger.info(f'EOF from control channel. Stopping the performance monitor.')
                                 else:
-                                    logger.warning(f'Received Control_Code.{Control_Code.query_monitor_stop.name}')
+                                    logger.info(f'Received Control_Code.{Control_Code.query_monitor_stop.name}')
                                 if producer is not None:
                                     producer.cancel()
                                 if consumer_raw is not None:
@@ -267,28 +268,28 @@ async def daemon():
             case _:
                 raise RuntimeError(f'Unsupported operating system: {sys.platform}')
     except asyncio.CancelledError:
-        logger.warning('Cleaning')
+        logger.info('Cleaning')
         if producer is not None:
             try:
                 await producer
             except asyncio.CancelledError:
-                logger.warning(f'producer `monitor` cancelled')
+                logger.info(f'producer `monitor` cancelled')
         if consumer_raw is not None:
             try:
                 await consumer_raw
             except asyncio.CancelledError:
-                logger.warning(f'consumer `process_raw` cancelled')
+                logger.info(f'consumer `process_raw` cancelled')
         if consumer_cooked is not None:
             try:
                 await consumer_cooked
             except asyncio.CancelledError:
-                logger.warning(f'consumer `process_cooked` cancelled')
+                logger.info(f'consumer `process_cooked` cancelled')
         if control_channel_writer is not None:
-            logger.warning(f'Sending Control_Code.{Control_Code.monitor_stopped.name}')
+            logger.info(f'Sending Control_Code.{Control_Code.monitor_stopped.name}')
             control_channel_writer.write(Control_Code.monitor_stopped)
             control_channel_writer.close()
             await control_channel_writer.wait_closed()
-        logger.warning('Cleaned')
+        logger.info('Cleaned')
         sys.exit(0)
 
 
@@ -307,7 +308,7 @@ async def main():
         else:
             raise e
     await stop
-    logger.warning(f'Received Ctrl-C or Control_Code.{Control_Code.monitor_stopped.name}')
+    logger.info(f'Received Ctrl-C or Control_Code.{Control_Code.monitor_stopped.name}')
 
 
 if __name__ == '__main__':
