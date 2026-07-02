@@ -105,18 +105,21 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
         agg_sample: Aggregated_Performance_Sample = {'time': sample_time}
         logger.debug(f'Start sample {agg_sample["time"]}')
         for process_group_name, processes in process_group.items():
-            CPU_usage: float = 0
+            CPU_usage: float = 0.0
             memory_usage: int = 0
             for process in processes:
                 try:
                     with process.oneshot():
+                        cpu_percent: float = process.cpu_percent()  # call only once to avoid returning 0.0 since 2nd calls within a single oneshot()
                         if args.file_output:
-                            await samples.put(Performance_Sample(sample_time, process.pid, process.username(), process.name(), ' '.join(process.cmdline()), process.cpu_percent(), process.memory_info().rss))
-                        CPU_usage += process.cpu_percent()
+                            await samples.put(Performance_Sample(sample_time, process.pid, process.username(), process.name(), ' '.join(process.cmdline()), cpu_percent, process.memory_info().rss))
+                        CPU_usage += cpu_percent
                         memory_usage += process.memory_info().rss
                 except psutil.NoSuchProcess:
+                    logger.info('psutil.NoSuchProcess')
                     pass
             agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
+            logger.debug(f'agg_sample[{process_group_name}] = {agg_sample[process_group_name]}')
         await aggregated_samples.put(agg_sample)
         logger.debug(f'End sample {agg_sample["time"]}')
         logger.debug(f'Raw sample queue length: {samples.qsize()}')
@@ -132,6 +135,7 @@ async def monitor(process_group: Process_Group, delay: float = default_sample_in
             await sample(process_group, delay)
         except asyncio.CancelledError:
             raise
+
 
 log_root = '.log'
 raw_log_file = None
@@ -156,6 +160,7 @@ async def output_cooked_row(agg_sample: Aggregated_Performance_Sample):
     entry: list = [agg_sample['time'].strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]]
     for process_group_name in process_group:
         pf_idx: Performance_Index = agg_sample[process_group_name]
+        logger.debug(f'Process group: {process_group_name}, CPU usage: {pf_idx.CPU_usage}, Memory usage: {pf_idx.memory_usage / 1024 / 1024} Mi')
         entry.append(pf_idx.CPU_usage)
         entry.append(pf_idx.memory_usage / 1024 / 1024)  # B -> Mi
         for idx in range(1, len(entry)):
@@ -164,6 +169,7 @@ async def output_cooked_row(agg_sample: Aggregated_Performance_Sample):
         print(fmt.format(*entry))
     if args.file_output:
         CSV_file_writer_cooked.writerow(entry)
+        logger.debug(f'Entry: {entry}')
 
 
 async def process_cooked():
