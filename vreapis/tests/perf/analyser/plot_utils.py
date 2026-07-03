@@ -40,8 +40,8 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
             ax.legend(bbox_to_anchor=(1.01, 1), loc='upper left')
             ax.grid(which='major', color='dimgrey', linestyle='-', linewidth=0.75)
             ax.grid(which='minor', color='lightgrey', linestyle='-', linewidth=0.5)
-    ax_CPU.set_title("CPU Usage Over Time")
-    ax_mem.set_title("Memory Usage Over Time")
+    ax_CPU.set_title(f"{csv_file}: CPU Usage")
+    ax_mem.set_title(f"{csv_file}: Memory Usage")
 
     matplotlib.pyplot.tight_layout()
 
