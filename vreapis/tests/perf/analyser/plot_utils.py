@@ -21,25 +21,25 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
 
     df['time'] = pandas.to_datetime(df['time'])  # Parse the leftmost column into datetime objects
 
-    CPU_columns: list[str] = [col for col in df.columns if col.startswith('CPU:')]
-    mem_columns: list[str] = [col for col in df.columns if col.startswith('mem:')]
+    CPU_column_names: list[str] = [col for col in df.columns if col.startswith('CPU:')]
+    mem_column_names: list[str] = [col for col in df.columns if col.startswith('mem:')]
 
     fig: matplotlib.figure.Figure
     ax_CPU: matplotlib.axes.Axes
     ax_mem: matplotlib.axes.Axes
     fig, [ax_CPU, ax_mem] = matplotlib.pyplot.subplots(2, 1, figsize=(38.4, 21.6))  # 38.4 x 21.6 inches at 100 DPI yields 3840x2160 resolution
 
-    for index, col in enumerate(CPU_columns):
-        for ax in [ax_CPU, ax_mem]:
-            process_group = col[4:]  # Extract process name by bypassing the prefix
-            ax.plot(df['time'], df[col], color=line_colors[index], label=process_group)
-            ax.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(interval=5))
-            ax.xaxis.set_minor_locator(matplotlib.dates.MinuteLocator(interval=1))
-            ax.margins(x=0)
-            ax.set_ylim(bottom=0)
-            ax.legend(bbox_to_anchor=(1.01, 1), loc='upper left')
-            ax.grid(which='major', color='dimgrey', linestyle='-', linewidth=0.75)
-            ax.grid(which='minor', color='lightgrey', linestyle='-', linewidth=0.5)
+    for [ax, column_names] in [[ax_CPU, CPU_column_names], [ax_mem, mem_column_names]]:
+        for index, column_name in enumerate(column_names):
+            process_group = column_name[len('CPU:'):]  # Extract process name by bypassing the prefix
+            ax.plot(df['time'], df[column_name], color=line_colors[index], label=process_group)
+        ax.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(interval=5))
+        ax.xaxis.set_minor_locator(matplotlib.dates.MinuteLocator(interval=1))
+        ax.margins(x=0)
+        ax.set_ylim(bottom=0)
+        ax.legend(bbox_to_anchor=(1.01, 1), loc='upper left')
+        ax.grid(which='major', color='dimgrey', linestyle='-', linewidth=0.75)
+        ax.grid(which='minor', color='lightgrey', linestyle='-', linewidth=0.5)
     ax_CPU.set_title(f"{csv_file}: CPU Usage")
     ax_mem.set_title(f"{csv_file}: Memory Usage")
 
