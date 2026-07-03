@@ -353,7 +353,7 @@ const logger = log.getLogger('test')
 logger.setLevel('info')
 
 const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
-const repetition_count = 2
+const repetition_count = 10
 const default_performance_sample_interval = 0.5
 const result_root = '.log'
 let log_filename_prefix = Util.log_filename_prefix()
