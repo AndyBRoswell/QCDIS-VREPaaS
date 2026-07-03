@@ -31,8 +31,8 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
 
     for [ax, column_names] in [[ax_CPU, CPU_column_names], [ax_mem, mem_column_names]]:
         for index, column_name in enumerate(column_names):
-            process_group = column_name[len('CPU:'):]  # Extract process name by bypassing the prefix
-            ax.plot(df['time'], df[column_name], color=line_colors[index], label=process_group)
+            process_group_name = column_name[len('CPU:'):]  # Extract process name by bypassing the prefix
+            ax.plot(df['time'], df[column_name], color=line_colors[index], label=process_group_name)
         ax.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(interval=5))
         ax.xaxis.set_minor_locator(matplotlib.dates.MinuteLocator(interval=1))
         ax.margins(x=0)
@@ -45,9 +45,9 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
 
     matplotlib.pyplot.tight_layout()
 
-    relative_path = csv_file.relative_to(source_dir)
-    out_filename = relative_path.name.replace('.util.cooked.csv', '.png')
-    out_path = export_dir / relative_path.parent / out_filename
+    relative_path: pathlib.Path = csv_file.relative_to(source_dir)
+    out_filename: str = relative_path.name.replace('.util.cooked.csv', '.png')
+    out_path: pathlib.Path = export_dir / relative_path.parent / out_filename
 
     out_path.parent.mkdir(parents=True, exist_ok=True)  # Automatically create recursively if the folder doesn't exist
 
