@@ -3,7 +3,7 @@ import pathlib
 import pandas
 import matplotlib.pyplot
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')  # Default logger level: info
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(name)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')  # Default logger level: info
 
 matplotlib.pyplot.rcParams.update({'font.size': 24, 'lines.linewidth': 4})  # Make the fonts relatively larger and lines relatively thicker
 
