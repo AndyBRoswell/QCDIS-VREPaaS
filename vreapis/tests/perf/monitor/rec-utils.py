@@ -84,15 +84,20 @@ for field, value in args_dict.items():
         else:
             del process_filter[process_group_name]  # If this process filter is absent, then delete the corresponding column in the output CPU/memory usage records [in CSV].
 
-for proc in psutil.process_iter(['cmdline']):  # Scan the entire process list and pick up the processes to monitor
-    if proc.info['cmdline'] is None:
-        continue
-    cmdline: str = ' '.join(proc.info['cmdline'])
-    pathname: str = proc.info['cmdline'][0] if proc.info['cmdline'] else ''
-    for field, value in process_filter.items():
-        if field in process_group and re.search(value, cmdline):  # Match the command-line of the current process
-            process_group[field].append(proc)
-logger.debug(pprint.pformat(process_group))
+
+def fetch_processes():
+    for key, value in process_group.items():  # Clear the old process group info
+        process_group[key] = []
+    for proc in psutil.process_iter(['cmdline']):  # Scan the entire process list and pick up the processes to monitor
+        if proc.info['cmdline'] is None:
+            continue
+        cmdline: str = ' '.join(proc.info['cmdline'])
+        # pathname: str = proc.info['cmdline'][0] if proc.info['cmdline'] else ''
+        for field, value in process_filter.items():
+            if field in process_group and re.search(value, cmdline):  # Match the command-line of the current process
+                process_group[field].append(proc)
+    logger.debug(pprint.pformat(process_group))
+
 
 default_sample_interval: float = args.interval[0] if args.interval is not None else 0.5
 samples: asyncio.Queue[Performance_Sample] = asyncio.Queue()
@@ -102,6 +107,7 @@ aggregated_samples: asyncio.Queue[Aggregated_Performance_Sample] = asyncio.Queue
 async def sample(process_group: Process_Group, delay: float = default_sample_interval):
     try:
         sample_time = datetime.datetime.now()
+        fetch_processes()  # Re-fetch before every sample since during the monitoring some processes may be created or terminated
         agg_sample: Aggregated_Performance_Sample = {'time': sample_time}
         logger.debug(f'Start sample {agg_sample["time"]}')
         for process_group_name, processes in process_group.items():
@@ -116,7 +122,7 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
                         CPU_usage += cpu_percent
                         memory_usage += process.memory_info().rss
                 except psutil.NoSuchProcess as e:
-                    logger.info(f'psutil.NoSuchProcess {e.name} (PID {e.pid})')
+                    logger.warning(f'psutil.NoSuchProcess {e.name} (PID {e.pid})')
                     pass
             agg_sample[process_group_name] = Performance_Index(CPU_usage, memory_usage)
             logger.debug(f'agg_sample[{process_group_name}] = {agg_sample[process_group_name]}')
@@ -124,7 +130,7 @@ async def sample(process_group: Process_Group, delay: float = default_sample_int
         logger.debug(f'End sample {agg_sample["time"]}')
         logger.debug(f'Raw sample queue length: {samples.qsize()}')
         logger.debug(f'Aggregated sample queue length: {aggregated_samples.qsize()}')
-        await asyncio.sleep(max(0, delay - (datetime.datetime.now() - agg_sample['time']).total_seconds()))
+        await asyncio.sleep(max(0, delay - (datetime.datetime.now() - sample_time).total_seconds()))
     except asyncio.CancelledError:
         raise
 
