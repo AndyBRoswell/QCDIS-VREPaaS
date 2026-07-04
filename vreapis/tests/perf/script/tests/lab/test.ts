@@ -413,7 +413,6 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
   await setTimeout(delay_before_1st_repetition) // wait for a short while to let CPU/mem usage stabilize
   await start_pf_mon(pathname_prefix)
   for (let r = 0; r < repetition_count; r++) {
-    let CSV_cursor = 0
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
     await file_browser_manipulator.open(test_root, true)
     expect(Util.Pathname_Operator.identical_Pathname(test_root, await file_browser_manipulator.current_directory())).toBeTruthy()
