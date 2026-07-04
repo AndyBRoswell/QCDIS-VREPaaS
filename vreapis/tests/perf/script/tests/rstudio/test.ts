@@ -421,6 +421,8 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
     const modified_pathname = pathname_prefix + `.${r}.Rmd`
     await text_editor_manipulator.open(modified_pathname)
     await Cell_Containerizer_manipulator.init()
+    await Cell_Containerizer_manipulator.code_output.waitFor() // wait until it becomes visible
+    await setTimeout(Util.preset_action_delay.short)
     await Cell_Containerizer_manipulator.parse()
     await test_single_cell(0, args[0]!, true)
     for (let i = 1; i < args.length; i++) {
