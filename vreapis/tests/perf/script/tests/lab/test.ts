@@ -401,6 +401,7 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
 }
 
 const platform_specific_file_extension = process.env['notebook_platform'] !== undefined ? `.${process.env['notebook_platform']}` : ''
+const delay_before_1st_repetition = 5_000
 
 async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
   const indices_of_cells_to_test = Array.from({ length: args.length - 1 }, (_, i) => 1 + 1 * i).concat([ 0 ])
@@ -408,6 +409,9 @@ async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.C
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator, running_session_manipulator, Cell_Containerizer_manipulator)
   console_handler = new DevTools_Console_Handler(page)
   console_handler.init()
+  logger.info(`Waiting for ${delay_before_1st_repetition} ms to let CPU/mem usage stabilize...`)
+  await setTimeout(delay_before_1st_repetition) // wait for a short while to let CPU/mem usage stabilize
+  await start_pf_mon(pathname_prefix)
   for (let r = 0; r < repetition_count; r++) {
     let CSV_cursor = 0
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
@@ -443,7 +447,6 @@ async function start_pf_mon(log_filename_prefix: Util.Pathname) {
 }
 
 async function main(page: Page, pathname_prefix: Util.Pathname) {
-  await start_pf_mon(pathname_prefix)
   const args_set = notebook_test_args[pathname_prefix]!
   await run_test(page, `${pathname_prefix}`, args_set)
 }

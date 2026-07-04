@@ -403,12 +403,17 @@ async function test_single_cell(index: number, args: Util.Cell_Containerizer_Man
   }
 }
 
+const delay_before_1st_repetition = 5_000
+
 async function run_test(page: Page, pathname_prefix: Util.Pathname, args: Util.Cell_Containerizer_Manipulation_Arguments[]) {
   Cell_Containerizer_manipulator = new Cell_Containerizer_Manipulator(page)
   text_editor_manipulator = new Text_Editor_Manipulator(page, file_browser_manipulator)
   console_handler = new RStudio_Console_Handler(page)
   await console_handler.init()
   await console_handler.clear_console()
+  logger.info(`Waiting for ${delay_before_1st_repetition} ms to let CPU/mem usage stabilize...`)
+  await setTimeout(delay_before_1st_repetition) // wait for a short while to let CPU/mem usage stabilize
+  await start_pf_mon(pathname_prefix)
   for (let r = 0; r < repetition_count; r++) {
     logger.info(`Repetition ${r + 1}/${repetition_count}`)
     await file_browser_manipulator.open(test_root, true)
@@ -448,7 +453,6 @@ async function start_pf_mon(log_filename_prefix: Util.Pathname) {
 }
 
 async function main(page: Page, pathname_prefix: Util.Pathname) {
-  await start_pf_mon(pathname_prefix)
   const args_set = notebook_test_args[pathname_prefix]!
   await run_test(page, `${pathname_prefix}`, args_set)
 }
