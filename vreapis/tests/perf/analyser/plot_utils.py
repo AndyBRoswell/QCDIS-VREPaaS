@@ -16,8 +16,16 @@ export_dir = pathlib.Path('export/util')
 line_colors: list[str] = ["magenta", "orangered", "limegreen", "royalblue"]
 
 for csv_file in source_dir.rglob('*.util.cooked.csv'):
+    relative_path: pathlib.Path = csv_file.relative_to(source_dir)
+    out_filename: str = relative_path.name.replace('.util.cooked.csv', '.png')
+    out_pathname: pathlib.Path = export_dir / relative_path.parent / out_filename
+    out_pathname.parent.mkdir(parents=True, exist_ok=True)  # Automatically create recursively if the folder doesn't exist
+    if out_pathname.is_file():
+        logging.info(f"Skipped existing PNG chart: {out_pathname}")
+        continue
+
     df: pandas.DataFrame = pandas.read_csv(csv_file)
-    logging.info(f"Successfully read CSV: {csv_file}")
+    logging.info(f"CSV read: {csv_file}")
 
     df['time'] = pandas.to_datetime(df['time'])  # Parse the leftmost column into datetime objects
 
@@ -45,13 +53,7 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
 
     matplotlib.pyplot.tight_layout()
 
-    relative_path: pathlib.Path = csv_file.relative_to(source_dir)
-    out_filename: str = relative_path.name.replace('.util.cooked.csv', '.png')
-    out_path: pathlib.Path = export_dir / relative_path.parent / out_filename
-
-    out_path.parent.mkdir(parents=True, exist_ok=True)  # Automatically create recursively if the folder doesn't exist
-
-    fig.savefig(out_path, dpi=100)
-    logging.info(f"Successfully saved PNG chart: {out_path}")
+    fig.savefig(out_pathname, dpi=100)
+    logging.info(f"Saved PNG chart: {out_pathname}")
 
     matplotlib.pyplot.close(fig)  # Free up memory
