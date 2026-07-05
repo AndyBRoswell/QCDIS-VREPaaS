@@ -58,6 +58,7 @@ for csv_pathname in common.source_dir.rglob('*.util.cooked.csv'):
     ave.at[file_info[csv_pathname_str].pathname_prefix, f'ave:mem:{file_info[csv_pathname_str].platform}'] = ave_mem_usage
 
 print('Average CPU and memory usage by test cases: ')
+# noinspection PyStringConversionWithoutDunderMethod
 print(ave.round(1))
 
 diff_columns: list[str] = []
@@ -74,16 +75,19 @@ for pathname_prefix in pathname_prefices:
         second_platform: str = item[1][1]
         target_column_name_CPU: str = f'ave CPU: {second_platform} v. {first_platform}'
         target_column_name_mem: str = f'ave mem: {second_platform} v. {first_platform}'
-        diff_rate_CPU: float = (
-                                       ave.at[pathname_prefix, f'ave:CPU:{second_platform}']
-                                       - ave.at[pathname_prefix, f'ave:CPU:{first_platform}']
-                               ) / ave.at[pathname_prefix, f'ave:CPU:{first_platform}'] * 100  # pyright: ignore[reportOperatorIssue, reportAssignmentType]
-        diff_rate_mem: float = (
-                                       ave.at[pathname_prefix, f'ave:mem:{second_platform}']
-                                       - ave.at[pathname_prefix, f'ave:mem:{first_platform}']
-                               ) / ave.at[pathname_prefix, f'ave:mem:{first_platform}'] * 100  # pyright: ignore[reportOperatorIssue, reportAssignmentType]
+        # noinspection PyTypeChecker
+        this_CPU_util: float = ave.at[pathname_prefix, f'ave:CPU:{second_platform}']  # pyright: ignore[reportAssignmentType]
+        # noinspection PyTypeChecker
+        ref_CPU_util: float = ave.at[pathname_prefix, f'ave:CPU:{first_platform}']  # pyright: ignore[reportAssignmentType]
+        diff_rate_CPU: float = (this_CPU_util - ref_CPU_util) / ref_CPU_util * 100  # pyright: ignore[reportAssignmentType]
+        # noinspection PyTypeChecker
+        this_mem_util: float = ave.at[pathname_prefix, f'ave:mem:{second_platform}']  # pyright: ignore[reportAssignmentType]
+        # noinspection PyTypeChecker
+        ref_mem_util: float = ave.at[pathname_prefix, f'ave:mem:{first_platform}']  # pyright: ignore[reportAssignmentType]
+        diff_rate_mem: float = (this_mem_util - ref_mem_util) / ref_mem_util * 100  # pyright: ignore[reportAssignmentType]
         diff.at[pathname_prefix, target_column_name_CPU] = diff_rate_CPU
         diff.at[pathname_prefix, target_column_name_mem] = diff_rate_mem
 
 print('Differences of CPU and memory usage by test cases: (In %)')
+# noinspection PyStringConversionWithoutDunderMethod
 print(diff.round(1))
