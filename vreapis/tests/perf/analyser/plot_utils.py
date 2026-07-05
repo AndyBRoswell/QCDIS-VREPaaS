@@ -15,6 +15,7 @@ source_dir = pathlib.Path('.log')
 export_dir = pathlib.Path('export/util')
 line_colors: list[str] = ["magenta", "orangered", "limegreen", "royalblue"]
 
+logging.info(f"Start plotting")
 for csv_file in source_dir.rglob('*.util.cooked.csv'):
     relative_path: pathlib.Path = csv_file.relative_to(source_dir)
     out_filename: str = relative_path.name.replace('.util.cooked.csv', '.png')
