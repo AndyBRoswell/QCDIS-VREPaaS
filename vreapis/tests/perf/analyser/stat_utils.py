@@ -60,3 +60,16 @@ for csv_pathname in common.source_dir.rglob('*.util.cooked.csv'):
 print('Average CPU and memory usage by test cases: ')
 print(ave.round(1))
 
+diff_columns: list[str] = []
+diff_combos = list(itertools.combinations(supported_platforms, 2))
+for combo in diff_combos:
+    for prefix in ['ave CPU: ', 'ave mem: ']:
+        diff_columns.append(f'{prefix}{combo[0]} v. {combo[1]}')
+
+placeholders = numpy.full((len(pathname_prefices), len(diff_columns)), numpy.nan, dtype=numpy.float64)
+diff = pandas.DataFrame(placeholders, index=pathname_prefices, columns=diff_columns)
+
+
+
+print('Differences of CPU and memory usage by test cases: ')
+print(diff.round(1))
