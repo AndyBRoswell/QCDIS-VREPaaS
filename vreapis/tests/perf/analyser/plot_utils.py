@@ -21,9 +21,9 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
     out_filename: str = relative_path.name.replace('.util.cooked.csv', '.png')
     out_pathname: pathlib.Path = export_dir / relative_path.parent / out_filename
     out_pathname.parent.mkdir(parents=True, exist_ok=True)  # Automatically create recursively if the folder doesn't exist
-    if out_pathname.is_file():
-        logging.info(f"Skipped existing PNG chart: {out_pathname}")
-        continue
+    # if out_pathname.is_file():
+    #     logging.info(f"Skipped existing PNG chart: {out_pathname}")
+    #     continue
 
     df: pandas.DataFrame = pandas.read_csv(csv_file)
     logging.info(f"CSV read: {csv_file}")
