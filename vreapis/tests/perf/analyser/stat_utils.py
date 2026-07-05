@@ -5,6 +5,7 @@ import re
 import pandas
 import numpy
 from collections import namedtuple
+import itertools
 import common
 
 supported_platforms: list[str] = ['lab.original', 'lab.vreapi', 'rstudio']
@@ -56,4 +57,5 @@ for csv_pathname in common.source_dir.rglob('*.util.cooked.csv'):
     ave.at[file_info[csv_pathname_str].pathname_prefix, f'ave:mem:{file_info[csv_pathname_str].platform}'] = ave_mem_usage
 ave = ave.round(1)
 
+print('Average CPU and memory usage by test cases: ')
 print(ave)
