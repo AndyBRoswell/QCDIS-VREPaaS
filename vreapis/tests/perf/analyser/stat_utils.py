@@ -2,7 +2,6 @@ import os
 import logging
 import pathlib
 import re
-from numpy.random import f
 import pandas
 import numpy
 from collections import namedtuple
@@ -72,11 +71,17 @@ diff = pandas.DataFrame(placeholders, index=pathname_prefices, columns=diff_colu
 for pathname_prefix in pathname_prefices:
     for item in itertools.combinations(enumerate(supported_platforms), 2):
         first_platform: str = item[0][1]
-        second_platform: str= item[1][1]
+        second_platform: str = item[1][1]
         target_column_name_CPU: str = f'ave CPU: {second_platform} v. {first_platform}'
         target_column_name_mem: str = f'ave mem: {second_platform} v. {first_platform}'
-        diff_rate_CPU: float = (ave.at[pathname_prefix, f'ave:CPU:{second_platform}'] - ave.at[pathname_prefix, f'ave:CPU:{first_platform}']) / ave.at[pathname_prefix, f'ave:CPU:{first_platform}'] * 100  # pyright: ignore[reportOperatorIssue, reportAssignmentType]
-        diff_rate_mem: float = (ave.at[pathname_prefix, f'ave:mem:{second_platform}'] - ave.at[pathname_prefix, f'ave:mem:{first_platform}']) / ave.at[pathname_prefix, f'ave:mem:{first_platform}'] * 100  # pyright: ignore[reportOperatorIssue, reportAssignmentType]
+        diff_rate_CPU: float = (
+                                       ave.at[pathname_prefix, f'ave:CPU:{second_platform}']
+                                       - ave.at[pathname_prefix, f'ave:CPU:{first_platform}']
+                               ) / ave.at[pathname_prefix, f'ave:CPU:{first_platform}'] * 100  # pyright: ignore[reportOperatorIssue, reportAssignmentType]
+        diff_rate_mem: float = (
+                                       ave.at[pathname_prefix, f'ave:mem:{second_platform}']
+                                       - ave.at[pathname_prefix, f'ave:mem:{first_platform}']
+                               ) / ave.at[pathname_prefix, f'ave:mem:{first_platform}'] * 100  # pyright: ignore[reportOperatorIssue, reportAssignmentType]
         diff.at[pathname_prefix, target_column_name_CPU] = diff_rate_CPU
         diff.at[pathname_prefix, target_column_name_mem] = diff_rate_mem
 
