@@ -13,13 +13,14 @@ RE_platform_suffix: re.Pattern[str] = re.compile('|'.join(re.escape(platform) fo
 
 export_dir = pathlib.Path('export/util')
 
+pathname_prefices: list[str] = []
 ave_columns: list[str] = []
+
 for prefix in ['ave:CPU:', 'ave:mem:']:
     for platform in supported_platforms:
         ave_columns.append(f'{prefix}{platform}')
 
 logging.info('Start statisticization')
-pathname_prefices: list[str] = []
 File_Info = namedtuple('File_Info', ['pathname_prefix', 'platform'])
 file_info: dict[str, File_Info] = {}
 for csv_pathname in common.source_dir.rglob('*.util.cooked.csv'):
@@ -55,7 +56,7 @@ for csv_pathname in common.source_dir.rglob('*.util.cooked.csv'):
     ave_mem_usage = table[mem_column_names].mean().sum()
     ave.at[file_info[csv_pathname_str].pathname_prefix, f'ave:CPU:{file_info[csv_pathname_str].platform}'] = ave_CPU_usage
     ave.at[file_info[csv_pathname_str].pathname_prefix, f'ave:mem:{file_info[csv_pathname_str].platform}'] = ave_mem_usage
-ave = ave.round(1)
 
 print('Average CPU and memory usage by test cases: ')
-print(ave)
+print(ave.round(1))
+
