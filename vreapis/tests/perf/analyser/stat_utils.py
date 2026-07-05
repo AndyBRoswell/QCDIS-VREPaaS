@@ -2,6 +2,7 @@ import os
 import logging
 import pathlib
 import re
+from numpy.random import f
 import pandas
 import numpy
 from collections import namedtuple
@@ -61,15 +62,23 @@ print('Average CPU and memory usage by test cases: ')
 print(ave.round(1))
 
 diff_columns: list[str] = []
-diff_combos = list(itertools.combinations(supported_platforms, 2))
-for combo in diff_combos:
+for item in itertools.combinations(supported_platforms, 2):
     for prefix in ['ave CPU: ', 'ave mem: ']:
-        diff_columns.append(f'{prefix}{combo[1]} v. {combo[0]}')
+        diff_columns.append(f'{prefix}{item[1]} v. {item[0]}')
 
 placeholders = numpy.full((len(pathname_prefices), len(diff_columns)), numpy.nan, dtype=numpy.float64)
 diff = pandas.DataFrame(placeholders, index=pathname_prefices, columns=diff_columns)
 
+for pathname_prefix in pathname_prefices:
+    for item in itertools.combinations(enumerate(supported_platforms), 2):
+        first_platform: str = item[0][1]
+        second_platform: str= item[1][1]
+        target_column_name_CPU: str = f'ave CPU: {second_platform} v. {first_platform}'
+        target_column_name_mem: str = f'ave mem: {second_platform} v. {first_platform}'
+        diff_rate_CPU: float = (ave.at[pathname_prefix, f'ave:CPU:{second_platform}'] - ave.at[pathname_prefix, f'ave:CPU:{first_platform}']) / ave.at[pathname_prefix, f'ave:CPU:{first_platform}'] * 100
+        diff_rate_mem: float = (ave.at[pathname_prefix, f'ave:mem:{second_platform}'] - ave.at[pathname_prefix, f'ave:mem:{first_platform}']) / ave.at[pathname_prefix, f'ave:mem:{first_platform}'] * 100
+        diff.at[pathname_prefix, target_column_name_CPU] = diff_rate_CPU
+        diff.at[pathname_prefix, target_column_name_mem] = diff_rate_mem
 
-
-print('Differences of CPU and memory usage by test cases: ')
+print('Differences of CPU and memory usage by test cases: (In %)')
 print(diff.round(1))
