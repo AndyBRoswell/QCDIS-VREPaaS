@@ -50,7 +50,9 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
         ax.grid(which='major', color='dimgrey', linestyle='-', linewidth=0.75)
         ax.grid(which='minor', color='lightgrey', linestyle='-', linewidth=0.5)
     ax_CPU.set_title(f"{csv_file}: CPU Usage")
+    ax_CPU.set_ylim(top=200)
     ax_mem.set_title(f"{csv_file}: Memory Usage")
+    ax_mem.set_ylim(top=1600)
 
     matplotlib.pyplot.tight_layout()
 
