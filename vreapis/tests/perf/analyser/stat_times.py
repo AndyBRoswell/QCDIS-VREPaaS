@@ -1,8 +1,10 @@
 import json
+import re
 import pathlib
 import logging
 import numpy
 import pandas
+
 import common
 
 export_dir = pathlib.Path('export/time')
@@ -19,9 +21,9 @@ index_tuples: list[tuple[str, str, int | str, str]] = []
 for pathname_prefix, cell_level_args in notebook_test_args.items():
     for platform in common.supported_platforms:
         for index, args in enumerate(cell_level_args):
-            for action in args['actions']:
+            for actual_action in args['actions']:
                 rows_of_cell_level_records += 1
-                index_tuples.append((pathname_prefix, platform, index, action))
+                index_tuples.append((pathname_prefix, platform, index, actual_action))
 multi_index = pandas.MultiIndex.from_tuples(index_tuples, names=index_column_names)
 
 placeholders = numpy.full((rows_of_cell_level_records, repetition_count), numpy.nan, dtype=numpy.float64)
@@ -31,19 +33,75 @@ placeholders = numpy.full((rows_of_cell_level_records, len(cell_level_stats_colu
 cell_level_stats = pandas.DataFrame(placeholders, index=multi_index, columns=cell_level_stats_column_names)
 
 target_file_extension: str = '.con.log'
+RE_log_lab = re.compile(r'(\b.+\b)\s+done in (\d+(\.\d+)?)\s*ms$', common.RE_flags)
+RE_log_rstudio = re.compile(r'^Execution duration of function (\b.+\b)', common.RE_flags)
+RE_log_rstudio_time = re.compile(r'^\s*(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\s*$', common.RE_flags)
 for log_pathname in common.source_dir.glob(f'*{target_file_extension}'):
     pathname_prefix, platform = common.get_pathname_prefix_and_platform_suffix(log_pathname, target_file_extension)
     cell_level_args: list[dict[str, list[str] | dict[str, dict[str, str] | str]]] = notebook_test_args[pathname_prefix]
+    cell_count = len(cell_level_args)
+    total_action_count_of_each_repetition: int = len([action for args in cell_level_args for action in args['actions']])
     match platform:
         case lab if lab.startswith('lab.'):
-
-            pass
+            total_log_line_count_of_each_repetition: int = total_action_count_of_each_repetition + 1 * cell_count  # plus 1 line of ignored log of `loadBaseImage` per cell
+            with open(log_pathname) as log_file:
+                line = log_file.read().splitlines()
+                l = 0
+                for repetition in range(0, repetition_count):
+                    for c in range(0, cell_count):
+                        l += 1  # skip the ignored `loadBaseImages`
+                        cell_no = (c + 1) % cell_count  # The original implementation of NaaVRE Cell Containerizer only detects changes of selected cell. When an ipynb file is open and the 0th cell is automatically selected, extraction won't be triggered. So the test begins at 1st cell and finally test 0th cell.
+                        for expected_action in cell_level_args[cell_no]['actions']:
+                            function_match: re.Match[str] | None = RE_log_lab.search(line[l])  # check the log format
+                            if not function_match:
+                                logging.critical(f"Log line with unsupported format at line {l}: {line[l]}")
+                                raise Exception(f"Terminated to prevent incorrect results.")
+                            expected_function: str
+                            actual_function: str = function_match.group(1)
+                            time: float = float(function_match.group(2))
+                            match expected_action:
+                                case 'extract':
+                                    expected_function = 'extractor'
+                                case 'create':
+                                    expected_function = 'createCell'
+                                case _:
+                                    logging.critical(f'Unknown expected_action {expected_action}')
+                                    raise Exception(f"Terminated to prevent incorrect results.")
+                            if expected_function != actual_function:
+                                logging.critical(f"Expected function: {expected_function}. Actual function at line {l}: {actual_function}")
+                                raise Exception(f"Terminated to prevent incorrect results.")
+                            cell_level_records.at[(pathname_prefix, platform, cell_no, expected_action), f't{repetition}'] = time / 1000  # ms -> s
+                            l += 1
         case 'rstudio':
-            pass
+            total_log_line_count_of_each_repetition: int = 3 * (total_action_count_of_each_repetition + 2)  # Each Sys.time call produces 3 lines of console output. A parsing is needed before extraction of each cell. Before the parsing the current implementation of RStudio-ver Containerizer automatically tries to extract once right after the code cell selector is loaded.
+            with open(log_pathname) as log_file:
+                line = log_file.read().splitlines()
+                l = 0
+                for repetition in range(0, repetition_count):
+                    l += 3
+                    # todo parse
+                    l += 3
+                    for cell_no in range(0, cell_count):
+                        for expected_action in cell_level_args[cell_no]['actions']:
+                            function_match: re.Match[str] | None = RE_log_rstudio.search(line[l])
+                            if not function_match:
+                                logging.critical(f"Log line with unsupported format at line {l}: {line[l]}")
+                                raise Exception(f"Terminated to prevent incorrect results.")
+                            actual_action: str = function_match.group(1)
+                            time_match: re.Match[str] | None = RE_log_rstudio_time.search(line[l + 2])
+                            if not time_match:
+                                logging.critical(f"Log line with unsupported format at line {l + 2}: {line[l + 2]}")
+                                raise Exception(f"Terminated to prevent incorrect results.")
+                            time: float = float(time_match.group(5))
+                            if expected_action == actual_action:
+                                cell_level_records.at[(pathname_prefix, platform, cell_no, expected_action), f't{repetition}'] = time
+                            else:
+                                logging.critical(f"Expected action: {expected_action}. Actual action at line {l}: {actual_action}")
+                                raise Exception(f"Terminated to prevent incorrect results.")
+                            l += 3
         case _:
             logging.warning(f"Skipped log pathname with unsupported platform suffix: {log_pathname}")
             continue
-
 
 print('Original records:')
 # noinspection PyStringConversionWithoutDunderMethod
