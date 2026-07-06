@@ -4,6 +4,7 @@ import pathlib
 import logging
 import numpy
 import pandas
+
 import common
 
 export_dir = pathlib.Path('export/time')
@@ -15,7 +16,7 @@ logging.info('Start statisticization')
 rows_of_cell_level_records: int = 0
 repetition_count: int = 10
 index_column_names: list[str] = ['pathname_prefix', 'platform', 'cell', 'action']
-cell_level_stats_column_names: list[str] = ['min', 'med', 'max']
+cell_level_stats_column_names: list[str] = ['trunc_min', 'med', 'trunc_max']
 index_tuples: list[tuple[str, str, int | str, str]] = []
 
 _notebook_test_args = {}
@@ -112,8 +113,10 @@ for log_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
 
 print('Original records:')
 # noinspection PyStringConversionWithoutDunderMethod
-print(cell_level_records)
+print(cell_level_records.round(3))
+
+cell_level_stats[['trunc_min', 'med', 'trunc_max']] = cell_level_records.quantile([0.1, 0.9], axis=1).T.agg(['min', 'median', 'max'], axis=1)
 
 print('Cell-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
-print(cell_level_stats)
+print(cell_level_stats.round(3))
