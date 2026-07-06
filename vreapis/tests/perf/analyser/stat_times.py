@@ -125,6 +125,7 @@ grouped_records = {group_keys: dataframe for group_keys, dataframe in grouped_re
 # print('Group by platform and action')
 # print(grouped_records)
 
+# noinspection PyTypeChecker
 group_level_stats_index_tuples: list[tuple[str, str]] = list(grouped_records.keys())
 group_level_multi_index = pandas.MultiIndex.from_tuples(group_level_stats_index_tuples, names=['platform', 'action'])
 
@@ -133,9 +134,12 @@ group_level_stats = pandas.DataFrame(placeholders, index=group_level_multi_index
 
 for group_keys, dataframe in grouped_records.items():
     trunc_dataframe = dataframe.quantile([0.1, 0.5, 0.9], axis=1).T
+    # noinspection PyTypeChecker
     group_level_stats.at[group_keys, 'trunc_min'] = trunc_dataframe[0.1].min()
     group_level_stats.at[group_keys, 'med'] = trunc_dataframe[0.5].median()
+    # noinspection PyTypeChecker
     group_level_stats.at[group_keys, 'trunc_max'] = trunc_dataframe[0.9].max()
+
 print('Group-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
 print(group_level_stats.round(3))
