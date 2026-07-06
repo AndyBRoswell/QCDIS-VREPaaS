@@ -116,9 +116,9 @@ cell_level_stats = pandas.DataFrame(placeholders, index=cell_level_multi_index, 
 
 cell_level_stats[stats_column_names] = cell_level_records.quantile([0.1, 0.5, 0.9], axis=1).T.agg(['min', 'median', 'max'], axis=1)
 
-print('Cell-level statistics:')
+# print('Cell-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
-print(cell_level_stats.round(3))
+# print(cell_level_stats.round(3))
 
 grouped_records = cell_level_records.groupby(level=[1, 3])
 grouped_records = {group_keys: dataframe for group_keys, dataframe in grouped_records}
@@ -132,10 +132,10 @@ placeholders = numpy.full((len(group_level_stats_index_tuples), len(stats_column
 group_level_stats = pandas.DataFrame(placeholders, index=group_level_multi_index, columns=stats_column_names)
 
 for group_keys, dataframe in grouped_records.items():
-    # dataframe.loc[group_keys, stats_column_names] =
-    # print(dataframe.quantile([0.1, 0.9], axis=1).T)
-    pass
-
+    trunc_dataframe = dataframe.quantile([0.1, 0.5, 0.9], axis=1).T
+    group_level_stats.at[group_keys, 'trunc_min'] = trunc_dataframe[0.1].min()
+    group_level_stats.at[group_keys, 'med'] = trunc_dataframe[0.5].median()
+    group_level_stats.at[group_keys, 'trunc_max'] = trunc_dataframe[0.9].max()
 print('Group-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
 print(group_level_stats.round(3))
