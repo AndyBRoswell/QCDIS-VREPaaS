@@ -16,7 +16,7 @@ logging.info('Start statisticization')
 rows_of_cell_level_records: int = 0
 repetition_count: int = 10
 index_column_names: list[str] = ['pathname_prefix', 'platform', 'cell', 'action']
-cell_level_stats_column_names: list[str] = ['trunc_min', 'med', 'trunc_max']
+stats_column_names: list[str] = ['trunc_min', 'med', 'trunc_max']
 index_tuples: list[tuple[str, str, int | str, str]] = []
 
 _notebook_test_args = {}
@@ -32,10 +32,10 @@ for pathname_prefix, cell_level_args in notebook_test_args.items():
             for actual_action in args['actions']:
                 rows_of_cell_level_records += 1
                 index_tuples.append((pathname_prefix, platform, index, actual_action))
-multi_index = pandas.MultiIndex.from_tuples(index_tuples, names=index_column_names)
+cell_level_multi_index = pandas.MultiIndex.from_tuples(index_tuples, names=index_column_names)
 
 placeholders = numpy.full((rows_of_cell_level_records, repetition_count), numpy.nan, dtype=numpy.float64)
-cell_level_records = pandas.DataFrame(placeholders, index=multi_index, columns=[f't{i}' for i in range(0, repetition_count)])
+cell_level_records = pandas.DataFrame(placeholders, index=cell_level_multi_index, columns=[f't{i}' for i in range(0, repetition_count)])
 
 target_file_extension: str = '.con.log'
 RE_log_lab = re.compile(r'(\b.+\b)\s+done in (\d+(\.\d+)?)\s*ms$', common.RE_flags)
@@ -107,14 +107,14 @@ for log_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
         case _:
             logging.warning(f"Skipped log pathname with unsupported platform suffix: {log_pathname}")
 
-print('Original records:')
+# print('Original records:')
 # noinspection PyStringConversionWithoutDunderMethod
-print(cell_level_records.round(3))
+# print(cell_level_records.round(3))
 
-placeholders = numpy.full((rows_of_cell_level_records, len(cell_level_stats_column_names)), numpy.nan, dtype=numpy.float64)
-cell_level_stats = pandas.DataFrame(placeholders, index=multi_index, columns=cell_level_stats_column_names)
+placeholders = numpy.full((rows_of_cell_level_records, len(stats_column_names)), numpy.nan, dtype=numpy.float64)
+cell_level_stats = pandas.DataFrame(placeholders, index=cell_level_multi_index, columns=stats_column_names)
 
-cell_level_stats[['trunc_min', 'med', 'trunc_max']] = cell_level_records.quantile([0.1, 0.9], axis=1).T.agg(['min', 'median', 'max'], axis=1)
+cell_level_stats[stats_column_names] = cell_level_records.quantile([0.1, 0.5, 0.9], axis=1).T.agg(['min', 'median', 'max'], axis=1)
 
 print('Cell-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
@@ -125,5 +125,17 @@ grouped_records = {group_keys: dataframe for group_keys, dataframe in grouped_re
 # print('Group by platform and action')
 # print(grouped_records)
 
+group_level_stats_index_tuples: list[tuple[str, str]] = list(grouped_records.keys())
+group_level_multi_index = pandas.MultiIndex.from_tuples(group_level_stats_index_tuples, names=['platform', 'action'])
+
+placeholders = numpy.full((len(group_level_stats_index_tuples), len(stats_column_names)), numpy.nan, dtype=numpy.float64)
+group_level_stats = pandas.DataFrame(placeholders, index=group_level_multi_index, columns=stats_column_names)
+
 for group_keys, dataframe in grouped_records.items():
+    # dataframe.loc[group_keys, stats_column_names] =
+    # print(dataframe.quantile([0.1, 0.9], axis=1).T)
     pass
+
+print('Group-level statistics:')
+# noinspection PyStringConversionWithoutDunderMethod
+print(group_level_stats.round(3))
