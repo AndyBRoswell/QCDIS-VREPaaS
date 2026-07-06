@@ -4,7 +4,6 @@ import pathlib
 import logging
 import numpy
 import pandas
-
 import common
 
 export_dir = pathlib.Path('export/time')
@@ -18,6 +17,14 @@ repetition_count: int = 10
 index_column_names: list[str] = ['pathname_prefix', 'platform', 'cell', 'action']
 cell_level_stats_column_names: list[str] = ['min', 'med', 'max']
 index_tuples: list[tuple[str, str, int | str, str]] = []
+
+_notebook_test_args = {}
+for original_pathname_prefix, cell_level_args in notebook_test_args.items():  # normalize the pathsep
+    pathname_prefix = str(pathlib.Path(original_pathname_prefix))
+    _notebook_test_args[pathname_prefix] = cell_level_args
+notebook_test_args = _notebook_test_args
+_notebook_test_args = None
+
 for pathname_prefix, cell_level_args in notebook_test_args.items():
     for platform in common.supported_platforms:
         for index, args in enumerate(cell_level_args):
@@ -36,7 +43,7 @@ target_file_extension: str = '.con.log'
 RE_log_lab = re.compile(r'(\b.+\b)\s+done in (\d+(\.\d+)?)\s*ms$', common.RE_flags)
 RE_log_rstudio = re.compile(r'^Execution duration of function (\b.+\b)', common.RE_flags)
 RE_log_rstudio_time = re.compile(r'^\s*(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\s*$', common.RE_flags)
-for log_pathname in common.source_dir.glob(f'*{target_file_extension}'):
+for log_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
     pathname_prefix, platform = common.get_pathname_prefix_and_platform_suffix(log_pathname, target_file_extension)
     cell_level_args: list[dict[str, list[str] | dict[str, dict[str, str] | str]]] = notebook_test_args[pathname_prefix]
     cell_count = len(cell_level_args)
