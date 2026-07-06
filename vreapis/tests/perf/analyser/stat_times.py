@@ -37,9 +37,6 @@ multi_index = pandas.MultiIndex.from_tuples(index_tuples, names=index_column_nam
 placeholders = numpy.full((rows_of_cell_level_records, repetition_count), numpy.nan, dtype=numpy.float64)
 cell_level_records = pandas.DataFrame(placeholders, index=multi_index, columns=[f't{i}' for i in range(0, repetition_count)])
 
-placeholders = numpy.full((rows_of_cell_level_records, len(cell_level_stats_column_names)), numpy.nan, dtype=numpy.float64)
-cell_level_stats = pandas.DataFrame(placeholders, index=multi_index, columns=cell_level_stats_column_names)
-
 target_file_extension: str = '.con.log'
 RE_log_lab = re.compile(r'(\b.+\b)\s+done in (\d+(\.\d+)?)\s*ms$', common.RE_flags)
 RE_log_rstudio = re.compile(r'^Execution duration of function (\b.+\b)', common.RE_flags)
@@ -109,14 +106,24 @@ for log_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
                             l += 3
         case _:
             logging.warning(f"Skipped log pathname with unsupported platform suffix: {log_pathname}")
-            continue
 
 print('Original records:')
 # noinspection PyStringConversionWithoutDunderMethod
 print(cell_level_records.round(3))
+
+placeholders = numpy.full((rows_of_cell_level_records, len(cell_level_stats_column_names)), numpy.nan, dtype=numpy.float64)
+cell_level_stats = pandas.DataFrame(placeholders, index=multi_index, columns=cell_level_stats_column_names)
 
 cell_level_stats[['trunc_min', 'med', 'trunc_max']] = cell_level_records.quantile([0.1, 0.9], axis=1).T.agg(['min', 'median', 'max'], axis=1)
 
 print('Cell-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
 print(cell_level_stats.round(3))
+
+grouped_records = cell_level_records.groupby(level=[1, 3])
+grouped_records = {group_keys: dataframe for group_keys, dataframe in grouped_records}
+# print('Group by platform and action')
+# print(grouped_records)
+
+for group_keys, dataframe in grouped_records.items():
+    pass
