@@ -22,14 +22,6 @@ File_Info = namedtuple('File_Info', ['pathname_prefix', 'platform'])
 file_info: dict[str, File_Info] = {}
 target_file_extension: str = '.util.cooked.csv'
 for csv_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
-    # csv_pathname_str = str(csv_pathname)
-    # pathname_prefix_with_platform_suffix: str = csv_pathname_str[len(str(common.source_dir) + os.pathsep):len(csv_pathname_str) - len(target_file_extension)]
-    # platform_match: re.Match | None = common.RE_platform_suffix.search(pathname_prefix_with_platform_suffix)
-    # if not platform_match:
-    #     logging.warning(f"Skipped CSV pathname with unsupported platform suffix: {csv_pathname}")
-    #     continue
-    # platform: str = platform_match.group(0)
-    # pathname_prefix: str = pathname_prefix_with_platform_suffix[:platform_match.start() - len('.')]
     pathname_prefix, platform = common.get_pathname_prefix_and_platform_suffix(csv_pathname, target_file_extension)
     pathname_prefices.append(pathname_prefix)
     file_info[str(csv_pathname)] = File_Info(pathname_prefix, platform)
