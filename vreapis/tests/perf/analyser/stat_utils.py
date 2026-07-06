@@ -8,38 +8,37 @@ from collections import namedtuple
 import itertools
 import common
 
-supported_platforms: list[str] = ['lab.original', 'lab.vreapi', 'rstudio']
-RE_platform_suffix: re.Pattern[str] = re.compile('|'.join(re.escape(platform) for platform in supported_platforms) + '$', common.RE_flags)
-
 export_dir = pathlib.Path('export/util')
 
 pathname_prefices: list[str] = []
 ave_columns: list[str] = []
 
 for prefix in ['ave:CPU:', 'ave:mem:']:
-    for platform in supported_platforms:
+    for platform in common.supported_platforms:
         ave_columns.append(f'{prefix}{platform}')
 
 logging.info('Start statisticization')
 File_Info = namedtuple('File_Info', ['pathname_prefix', 'platform'])
 file_info: dict[str, File_Info] = {}
-for csv_pathname in common.source_dir.rglob('*.util.cooked.csv'):
-    csv_pathname_str = str(csv_pathname)
-    pathname_prefix_with_platform_suffix: str = csv_pathname_str[len(str(common.source_dir) + os.pathsep):len(csv_pathname_str) - len('.util.cooked.csv')]
-    platform_match: re.Match | None = RE_platform_suffix.search(pathname_prefix_with_platform_suffix)
-    if not platform_match:
-        logging.warning(f"Skipped CSV pathname with unsupported platform suffix: {csv_pathname}")
-        continue
-    platform: str = platform_match.group(0)
-    pathname_prefix: str = pathname_prefix_with_platform_suffix[:platform_match.start() - len('.')]
+target_file_extension: str = '.util.cooked.csv'
+for csv_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
+    # csv_pathname_str = str(csv_pathname)
+    # pathname_prefix_with_platform_suffix: str = csv_pathname_str[len(str(common.source_dir) + os.pathsep):len(csv_pathname_str) - len(target_file_extension)]
+    # platform_match: re.Match | None = common.RE_platform_suffix.search(pathname_prefix_with_platform_suffix)
+    # if not platform_match:
+    #     logging.warning(f"Skipped CSV pathname with unsupported platform suffix: {csv_pathname}")
+    #     continue
+    # platform: str = platform_match.group(0)
+    # pathname_prefix: str = pathname_prefix_with_platform_suffix[:platform_match.start() - len('.')]
+    pathname_prefix, platform = common.get_pathname_prefix_and_platform_suffix(csv_pathname, target_file_extension)
     pathname_prefices.append(pathname_prefix)
-    file_info[csv_pathname_str] = File_Info(pathname_prefix, platform)
+    file_info[str(csv_pathname)] = File_Info(pathname_prefix, platform)
 pathname_prefices = list(dict.fromkeys(pathname_prefices))  # keep insertion order
 
 placeholders = numpy.full((len(pathname_prefices), len(ave_columns)), numpy.nan, dtype=numpy.float64)
 ave = pandas.DataFrame(placeholders, index=pathname_prefices, columns=ave_columns)
 
-for csv_pathname in common.source_dir.rglob('*.util.cooked.csv'):
+for csv_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
     csv_pathname_str = str(csv_pathname)
     table: pandas.DataFrame = pandas.read_csv(csv_pathname)
     CPU_column_names: list[str] = []
@@ -62,7 +61,7 @@ print('Average CPU and memory usage by test cases: ')
 print(ave.round(1))
 
 diff_columns: list[str] = []
-for item in itertools.combinations(supported_platforms, 2):
+for item in itertools.combinations(common.supported_platforms, 2):
     for prefix in ['ave CPU: ', 'ave mem: ']:
         diff_columns.append(f'{prefix}{item[1]} v. {item[0]}')
 
@@ -70,7 +69,7 @@ placeholders = numpy.full((len(pathname_prefices), len(diff_columns)), numpy.nan
 diff = pandas.DataFrame(placeholders, index=pathname_prefices, columns=diff_columns)
 
 for pathname_prefix in pathname_prefices:
-    for item in itertools.combinations(enumerate(supported_platforms), 2):
+    for item in itertools.combinations(enumerate(common.supported_platforms), 2):
         first_platform: str = item[0][1]
         second_platform: str = item[1][1]
         target_column_name_CPU: str = f'ave CPU: {second_platform} v. {first_platform}'
