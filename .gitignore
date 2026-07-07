@@ -142,9 +142,9 @@ GitHub.sublime-settings
 .idea/
 
 # Logs
-logs
-*.log
-!vreapis/tests/perf/log/*.log
+#logs
+#*.log
+#!vreapis/tests/perf/log/*.log
 npm-debug.log*
 
 # Runtime data

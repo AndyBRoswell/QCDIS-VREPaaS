@@ -143,7 +143,7 @@ async def monitor(process_group: Process_Group, delay: float = default_sample_in
             raise
 
 
-log_root = '.log'
+log_root = 'log'
 raw_log_file = None
 cooked_log_file = None
 if args.console_output:

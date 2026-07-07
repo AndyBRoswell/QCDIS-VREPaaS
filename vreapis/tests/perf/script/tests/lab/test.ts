@@ -355,7 +355,7 @@ logger.setLevel('info')
 const test_root: Util.Pathname = 'tmp/rmd' // All the test files should be placed here
 const repetition_count = 10
 const default_performance_sample_interval = 0.5
-const result_root = '.log'
+const result_root = 'log'
 
 let file_browser_manipulator: File_Browser_Manipulator;
 let running_session_manipulator: Running_Session_Manipulator;

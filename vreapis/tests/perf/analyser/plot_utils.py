@@ -1,4 +1,3 @@
-import sys
 import logging
 import pathlib
 import pandas
@@ -6,23 +5,22 @@ import matplotlib.pyplot
 import matplotlib.dates
 import matplotlib.figure
 import matplotlib.axes
-
-logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(name)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')  # Default logger level: info
+import common
 
 matplotlib.pyplot.rcParams.update({'font.size': 24, 'lines.linewidth': 4})  # Make the fonts relatively larger and lines relatively thicker
 
-source_dir = pathlib.Path('.log')
 export_dir = pathlib.Path('export/util')
 line_colors: list[str] = ["magenta", "orangered", "limegreen", "royalblue"]
 
-for csv_file in source_dir.rglob('*.util.cooked.csv'):
-    relative_path: pathlib.Path = csv_file.relative_to(source_dir)
+logging.info(f"Start plotting")
+for csv_file in common.source_dir.rglob('*.util.cooked.csv'):
+    relative_path: pathlib.Path = csv_file.relative_to(common.source_dir)
     out_filename: str = relative_path.name.replace('.util.cooked.csv', '.png')
     out_pathname: pathlib.Path = export_dir / relative_path.parent / out_filename
     out_pathname.parent.mkdir(parents=True, exist_ok=True)  # Automatically create recursively if the folder doesn't exist
-    if out_pathname.is_file():
-        logging.info(f"Skipped existing PNG chart: {out_pathname}")
-        continue
+    # if out_pathname.is_file():
+    #     logging.info(f"Skipped existing PNG chart: {out_pathname}")
+    #     continue
 
     df: pandas.DataFrame = pandas.read_csv(csv_file)
     logging.info(f"CSV read: {csv_file}")
@@ -49,7 +47,9 @@ for csv_file in source_dir.rglob('*.util.cooked.csv'):
         ax.grid(which='major', color='dimgrey', linestyle='-', linewidth=0.75)
         ax.grid(which='minor', color='lightgrey', linestyle='-', linewidth=0.5)
     ax_CPU.set_title(f"{csv_file}: CPU Usage")
+    ax_CPU.set_ylim(top=200)
     ax_mem.set_title(f"{csv_file}: Memory Usage")
+    ax_mem.set_ylim(top=1600)
 
     matplotlib.pyplot.tight_layout()
 
