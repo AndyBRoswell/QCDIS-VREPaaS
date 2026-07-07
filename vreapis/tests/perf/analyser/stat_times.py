@@ -151,6 +151,15 @@ print('File-level records:')
 # noinspection PyStringConversionWithoutDunderMethod
 print(file_level_records.round(3))
 
+placeholders = numpy.full((rows_of_file_level_records, len(stats_column_names)), numpy.nan, dtype=numpy.float64)
+file_level_stats = pandas.DataFrame(placeholders, index=file_level_multi_index, columns=stats_column_names)
+
+file_level_stats[stats_column_names] = file_level_records.quantile([0.1, 0.5, 0.9], axis=1).T.agg(['min', 'median', 'max'], axis=1)
+
+print('File-level statistics:')
+# noinspection PyStringConversionWithoutDunderMethod
+print(file_level_stats.round(3))
+
 grouped_records = cell_level_records.groupby(level=[1, 3])
 grouped_records = {group_keys: dataframe for group_keys, dataframe in grouped_records}
 # print('Group by platform and action')
