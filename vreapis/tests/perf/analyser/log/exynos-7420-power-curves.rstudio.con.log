@@ -1,0 +1,420 @@
+Execution duration of function extract :
+   user  system elapsed 
+  0.045   0.000   0.045 
+Execution duration of function parse :
+   user  system elapsed 
+  0.008   0.000   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.028   0.001   1.523 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.003   6.783 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.281 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.658 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.001   1.209 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.000   6.354 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.200 
+Execution duration of function create :
+   user  system elapsed 
+  0.009   0.004   6.303 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.003   1.299 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.462 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.001   1.322 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.003   6.582 
+Execution duration of function extract :
+   user  system elapsed 
+  0.006   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.007   0.001   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.161 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.001   6.545 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.234 
+Execution duration of function create :
+   user  system elapsed 
+  0.010   0.003   6.611 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.313 
+Execution duration of function create :
+   user  system elapsed 
+  0.010   0.002   6.434 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.332 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.003   6.524 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.002   1.328 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.002   6.360 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.000   1.287 
+Execution duration of function create :
+   user  system elapsed 
+  0.014   0.000   6.605 
+Execution duration of function extract :
+   user  system elapsed 
+  0.005   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.007   0.001   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.002   1.173 
+Execution duration of function create :
+   user  system elapsed 
+  0.010   0.004   6.560 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.186 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.470 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.150 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.421 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.163 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.002   6.545 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.001   1.325 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.003   6.529 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.218 
+Execution duration of function create :
+   user  system elapsed 
+  0.014   0.000   6.376 
+Execution duration of function extract :
+   user  system elapsed 
+  0.007   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.008   0.000   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.001   1.228 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.261 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.274 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.605 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.154 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.290 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.003   1.217 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.510 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.003   1.180 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.003   6.292 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.228 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.003   6.538 
+Execution duration of function extract :
+   user  system elapsed 
+  0.006   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.007   0.001   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.002   1.292 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.516 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.271 
+Execution duration of function create :
+   user  system elapsed 
+  0.014   0.000   6.473 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.288 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.000   6.289 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.282 
+Execution duration of function create :
+   user  system elapsed 
+  0.009   0.004   6.461 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.003   1.301 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.002   6.605 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.003   1.214 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.003   6.628 
+Execution duration of function extract :
+   user  system elapsed 
+  0.007   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.008   0.000   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.262 
+Execution duration of function create :
+   user  system elapsed 
+  0.010   0.002   6.215 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.237 
+Execution duration of function create :
+   user  system elapsed 
+  0.010   0.003   6.328 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.234 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.186 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.232 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.422 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.001   1.238 
+Execution duration of function create :
+   user  system elapsed 
+  0.015   0.000   6.468 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.238 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.396 
+Execution duration of function extract :
+   user  system elapsed 
+  0.006   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.006   0.001   0.033 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.116 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.363 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.084 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.000   6.380 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.134 
+Execution duration of function create :
+   user  system elapsed 
+  0.009   0.004   6.095 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.149 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.174 
+Execution duration of function extract :
+   user  system elapsed 
+  0.035   0.000   1.200 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.103 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.210 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.339 
+Execution duration of function extract :
+   user  system elapsed 
+  0.005   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.006   0.001   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.019   0.001   1.192 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.449 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.194 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.392 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.218 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.548 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.190 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.550 
+Execution duration of function extract :
+   user  system elapsed 
+  0.025   0.000   1.110 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.404 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.002   1.137 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.003   6.408 
+Execution duration of function extract :
+   user  system elapsed 
+  0.006   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.006   0.001   0.032 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.000   1.195 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.454 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.204 
+Execution duration of function create :
+   user  system elapsed 
+  0.010   0.004   6.416 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.000   1.225 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.777 
+Execution duration of function extract :
+   user  system elapsed 
+  0.023   0.000   1.097 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.002   6.517 
+Execution duration of function extract :
+   user  system elapsed 
+  0.024   0.002   1.120 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.002   6.649 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.002   1.164 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.001   6.712 
+Execution duration of function extract :
+   user  system elapsed 
+  0.007   0.000   0.006 
+Execution duration of function parse :
+   user  system elapsed 
+  0.008   0.000   0.033 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.162 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.600 
+Execution duration of function extract :
+   user  system elapsed 
+  0.022   0.001   1.175 
+Execution duration of function create :
+   user  system elapsed 
+  0.011   0.002   6.444 
+Execution duration of function extract :
+   user  system elapsed 
+  0.021   0.001   1.144 
+Execution duration of function create :
+   user  system elapsed 
+  0.013   0.000   6.580 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.002   1.208 
+Execution duration of function create :
+   user  system elapsed 
+  0.012   0.001   6.347 
+Execution duration of function extract :
+   user  system elapsed 
+  0.026   0.000   1.205 
+Execution duration of function create :
+   user  system elapsed 
+  0.009   0.005   6.435 
+Execution duration of function extract :
+   user  system elapsed 
+  0.020   0.002   1.171 
+Execution duration of function create :
+   user  system elapsed 
+  0.010   0.003   6.375 
