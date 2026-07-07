@@ -14,8 +14,9 @@ notebook_test_args: dict[str, list[dict[str, list[str] | dict[str, dict[str, str
 
 logging.info('Start statisticization')
 
-rows_of_cell_level_records: int = 0
 repetition_count: int = 10
+
+rows_of_cell_level_records: int = 0
 index_column_names: list[str] = ['pathname_prefix', 'platform', 'cell', 'action']
 stats_column_names: list[str] = ['trunc_min', 'med', 'trunc_max']
 index_tuples: list[tuple[str, str, int | str, str]] = []
@@ -37,6 +38,18 @@ cell_level_multi_index = pandas.MultiIndex.from_tuples(index_tuples, names=index
 
 placeholders = numpy.full((rows_of_cell_level_records, repetition_count), numpy.nan, dtype=numpy.float64)
 cell_level_records = pandas.DataFrame(placeholders, index=cell_level_multi_index, columns=[f't{i}' for i in range(0, repetition_count)])
+
+rows_of_file_level_records: int = 0
+file_level_index_tuples: list[tuple[str, str, str]] = []
+for pathname_prefix, cell_level_args in notebook_test_args.items():
+    for platform in ['rstudio']:
+        for file_level_action in ['parse']:
+            rows_of_file_level_records += 1
+            file_level_index_tuples.append((pathname_prefix, platform, file_level_action))
+file_level_multi_index = pandas.MultiIndex.from_tuples(file_level_index_tuples, names=['pathname_prefix', 'platform', 'action'])
+
+placeholders = numpy.full((rows_of_file_level_records, repetition_count), numpy.nan, dtype=numpy.float64)
+file_level_records = pandas.DataFrame(placeholders, index=file_level_multi_index, columns=[f't{i}' for i in range(0, repetition_count)])
 
 target_file_extension: str = '.con.log'
 RE_log_lab = re.compile(r'(\b.+\b)\s+done in (\d+(\.\d+)?)\s*ms$', common.RE_flags)
@@ -85,7 +98,20 @@ for log_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
                 l = 0
                 for repetition in range(0, repetition_count):
                     l += 3
-                    # todo parse
+                    function_match: re.Match[str] | None = RE_log_rstudio.search(line[l])
+                    if not function_match:
+                        logging.critical(f"Log line with unsupported format at line {l}: {line[l]}")
+                        raise Exception(f"Terminated to prevent incorrect results.")
+                    actual_action: str = function_match.group(1)
+                    if actual_action != 'parse':
+                        logging.critical(f"Expected action: parse. Actual action at line {l}: {actual_action}")
+                        raise Exception(f"Terminated to prevent incorrect results.")
+                    time_match: re.Match[str] | None = RE_log_rstudio_time.search(line[l + 2])
+                    if not time_match:
+                        logging.critical(f"Log line with unsupported format at line {l + 2}: {line[l + 2]}")
+                        raise Exception(f"Terminated to prevent incorrect results.")
+                    time: float = float(time_match.group(5))
+                    file_level_records.at[(pathname_prefix, platform, 'parse'), f't{repetition}'] = time
                     l += 3
                     for cell_no in range(0, cell_count):
                         for expected_action in cell_level_args[cell_no]['actions']:
@@ -108,7 +134,7 @@ for log_pathname in common.source_dir.rglob(f'*{target_file_extension}'):
         case _:
             logging.warning(f"Skipped log pathname with unsupported platform suffix: {log_pathname}")
 
-# print('Original records:')
+# print('Cell-level records:')
 # noinspection PyStringConversionWithoutDunderMethod
 # print(cell_level_records.round(3))
 
@@ -121,13 +147,17 @@ cell_level_stats[stats_column_names] = cell_level_records.quantile([0.1, 0.5, 0.
 # noinspection PyStringConversionWithoutDunderMethod
 # print(cell_level_stats.round(3))
 
+print('File-level records:')
+# noinspection PyStringConversionWithoutDunderMethod
+print(file_level_records.round(3))
+
 grouped_records = cell_level_records.groupby(level=[1, 3])
 grouped_records = {group_keys: dataframe for group_keys, dataframe in grouped_records}
 # print('Group by platform and action')
 # print(grouped_records)
 
 # noinspection PyTypeChecker
-group_level_stats_index_tuples: list[tuple[str, str]] = list(grouped_records.keys())  # pyright: ignore[reportAssignmentType]
+group_level_stats_index_tuples: list[tuple[str, str]] = list(grouped_records.keys()) + [('rstudio', 'parse')]  # pyright: ignore[reportAssignmentType]
 group_level_multi_index = pandas.MultiIndex.from_tuples(group_level_stats_index_tuples, names=['platform', 'action'])
 
 placeholders = numpy.full((len(group_level_stats_index_tuples), len(stats_column_names)), numpy.nan, dtype=numpy.float64)
