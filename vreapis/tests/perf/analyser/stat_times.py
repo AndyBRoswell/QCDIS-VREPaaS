@@ -143,7 +143,7 @@ for group_keys, dataframe in grouped_records.items():
 
 print('Group-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
-print(group_level_stats.round(3))
+print(group_level_stats.sort_values(by='action').round(3))
 
 group_level_diffs_index_tuples: list[tuple[str, str]] = list(itertools.product(['lab.vreapi', 'rstudio'], ['extract', 'create']))
 group_level_diffs_multi_index = pandas.MultiIndex.from_tuples(group_level_diffs_index_tuples, names=['platform', 'action'])
