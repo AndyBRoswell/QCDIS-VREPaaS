@@ -12,7 +12,7 @@ RE_flags = re.IGNORECASE
 supported_platforms: list[str] = ['lab.original', 'lab.vreapi', 'rstudio']
 RE_platform_suffix: re.Pattern[str] = re.compile('|'.join(re.escape(platform) for platform in supported_platforms) + '$', RE_flags)
 
-source_dir = pathlib.Path('.log')
+source_dir = pathlib.Path('log')
 
 pandas.set_option('display.max_columns', None)
 pandas.set_option('display.max_rows', None)
