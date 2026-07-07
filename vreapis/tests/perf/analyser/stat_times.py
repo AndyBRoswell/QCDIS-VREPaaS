@@ -179,6 +179,10 @@ for group_keys, dataframe in grouped_records.items():
     group_level_stats.at[group_keys, 'med'] = trunc_dataframe[0.5].median()
     # noinspection PyTypeChecker
     group_level_stats.at[group_keys, 'trunc_max'] = trunc_dataframe[0.9].max()
+trunc_file_level_stats = file_level_stats.quantile([0.1, 0.5, 0.9], axis=1).T
+group_level_stats.at[('rstudio', 'parse'), 'trunc_min'] = trunc_file_level_stats[0.1].min()
+group_level_stats.at[('rstudio', 'parse'), 'med'] = trunc_file_level_stats[0.5].median()
+group_level_stats.at[('rstudio', 'parse'), 'trunc_max'] = trunc_file_level_stats[0.9].max()
 
 print('Group-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
