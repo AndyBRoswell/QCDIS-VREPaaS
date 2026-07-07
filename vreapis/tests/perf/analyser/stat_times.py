@@ -1,3 +1,4 @@
+import itertools
 import json
 import re
 import pathlib
@@ -126,7 +127,7 @@ grouped_records = {group_keys: dataframe for group_keys, dataframe in grouped_re
 # print(grouped_records)
 
 # noinspection PyTypeChecker
-group_level_stats_index_tuples: list[tuple[str, str]] = list(grouped_records.keys())
+group_level_stats_index_tuples: list[tuple[str, str]] = list(grouped_records.keys())  # pyright: ignore[reportAssignmentType]
 group_level_multi_index = pandas.MultiIndex.from_tuples(group_level_stats_index_tuples, names=['platform', 'action'])
 
 placeholders = numpy.full((len(group_level_stats_index_tuples), len(stats_column_names)), numpy.nan, dtype=numpy.float64)
@@ -143,3 +144,28 @@ for group_keys, dataframe in grouped_records.items():
 print('Group-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
 print(group_level_stats.round(3))
+
+group_level_diffs_index_tuples: list[tuple[str, str]] = list(itertools.product(['lab.vreapi', 'rstudio'], ['extract', 'create']))
+group_level_diffs_multi_index = pandas.MultiIndex.from_tuples(group_level_diffs_index_tuples, names=['platform', 'action'])
+group_level_diffs_column_names: list[str] = ['Med diff', 'Max diff', 'Med diff %', 'Max diff %']
+
+placeholders = numpy.full((len(group_level_diffs_index_tuples), len(group_level_diffs_column_names)), numpy.nan, dtype=numpy.float64)
+group_level_diffs = pandas.DataFrame(placeholders, index=group_level_diffs_multi_index, columns=group_level_diffs_column_names)
+
+for index_tuple in group_level_diffs_index_tuples:
+    # noinspection PyTypeChecker
+    Med: float = group_level_stats.at[index_tuple, 'med']  # pyright: ignore[reportAssignmentType]
+    # noinspection PyTypeChecker
+    ref_Med: float = group_level_stats.at[('lab.original', index_tuple[1]), 'med']  # pyright: ignore[reportAssignmentType]
+    group_level_diffs.at[index_tuple, 'Med diff'] = (Med - ref_Med)
+    group_level_diffs.at[index_tuple, 'Med diff %'] = group_level_diffs.at[index_tuple, 'Med diff'] / ref_Med * 100  # pyright: ignore[reportOperatorIssue]
+    # noinspection PyTypeChecker
+    Max: float = group_level_stats.at[index_tuple, 'trunc_max']  # pyright: ignore[reportAssignmentType]
+    # noinspection PyTypeChecker
+    ref_Max: float = group_level_stats.at[('lab.original', index_tuple[1]), 'trunc_max']  # pyright: ignore[reportAssignmentType]
+    group_level_diffs.at[index_tuple, 'Max diff'] = (Max - ref_Max)
+    group_level_diffs.at[index_tuple, 'Max diff %'] = group_level_diffs.at[index_tuple, 'Max diff'] / ref_Max * 100  # pyright: ignore[reportOperatorIssue]
+
+print('Group-level differences:')
+# noinspection PyStringConversionWithoutDunderMethod
+print(group_level_diffs.round(3))
