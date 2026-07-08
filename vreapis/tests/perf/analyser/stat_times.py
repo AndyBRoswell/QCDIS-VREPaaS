@@ -18,7 +18,7 @@ repetition_count: int = 10
 
 rows_of_cell_level_records: int = 0
 index_column_names: list[str] = ['pathname_prefix', 'platform', 'cell', 'action']
-stats_column_names: list[str] = ['trunc_min', 'med', 'trunc_max']
+stats_column_names: list[str] = ['Min of trunc min', 'med', 'Max of trunc max']
 index_tuples: list[tuple[str, str, int | str, str]] = []
 
 _notebook_test_args = {}
@@ -175,13 +175,13 @@ group_level_stats = pandas.DataFrame(placeholders, index=group_level_multi_index
 for group_keys, dataframe in grouped_records.items():
     trunc_dataframe = dataframe.quantile([0.1, 0.5, 0.9], axis=1).T
     # noinspection PyTypeChecker
-    group_level_stats.at[group_keys, 'trunc_min'] = trunc_dataframe[0.1].min()
+    group_level_stats.at[group_keys, 'Min of trunc min'] = trunc_dataframe[0.1].min()
     group_level_stats.at[group_keys, 'med'] = trunc_dataframe[0.5].median()
     # noinspection PyTypeChecker
-    group_level_stats.at[group_keys, 'trunc_max'] = trunc_dataframe[0.9].max()
-group_level_stats.at[('rstudio', 'parse'), 'trunc_min'] = file_level_stats['trunc_min'].min()
+    group_level_stats.at[group_keys, 'Max of trunc max'] = trunc_dataframe[0.9].max()
+group_level_stats.at[('rstudio', 'parse'), 'Min of trunc min'] = file_level_stats['Min of trunc min'].min()
 group_level_stats.at[('rstudio', 'parse'), 'med'] = file_level_stats['med'].median()
-group_level_stats.at[('rstudio', 'parse'), 'trunc_max'] = file_level_stats['trunc_max'].max()
+group_level_stats.at[('rstudio', 'parse'), 'Max of trunc max'] = file_level_stats['Max of trunc max'].max()
 
 print('Group-level statistics:')
 # noinspection PyStringConversionWithoutDunderMethod
@@ -202,9 +202,9 @@ for index_tuple in group_level_diffs_index_tuples:
     group_level_diffs.at[index_tuple, 'Med diff'] = (Med - ref_Med)
     group_level_diffs.at[index_tuple, 'Med diff %'] = group_level_diffs.at[index_tuple, 'Med diff'] / ref_Med * 100  # pyright: ignore[reportOperatorIssue]
     # noinspection PyTypeChecker
-    Trunc_Max: float = group_level_stats.at[index_tuple, 'trunc_max']  # pyright: ignore[reportAssignmentType]
+    Trunc_Max: float = group_level_stats.at[index_tuple, 'Max of trunc max']  # pyright: ignore[reportAssignmentType]
     # noinspection PyTypeChecker
-    ref_Trunc_Max: float = group_level_stats.at[('lab.original', index_tuple[1]), 'trunc_max']  # pyright: ignore[reportAssignmentType]
+    ref_Trunc_Max: float = group_level_stats.at[('lab.original', index_tuple[1]), 'Max of trunc max']  # pyright: ignore[reportAssignmentType]
     group_level_diffs.at[index_tuple, 'Trunc max diff'] = (Trunc_Max - ref_Trunc_Max)
     group_level_diffs.at[index_tuple, 'Trunc max diff %'] = group_level_diffs.at[index_tuple, 'Trunc max diff'] / ref_Trunc_Max * 100  # pyright: ignore[reportOperatorIssue]
 
